@@ -1,19 +1,25 @@
 import { useEffect, useState } from "react";
-import ApplicationModal from "../components/modal/ApplicationModal";
-import ApplicationStateCard from "../components/dashboard/ApplicationStateCard";
-import ApplicationTable from "../components/dashboard/ApplicationTable";
-import CalendarBox from "../components/dashboard/CalendarBox";
+import ApplicationStateCard from "../components/dashboard/main/ApplicationStateCard";
+import ApplicationTable from "../components/dashboard/main/ApplicationTable";
+import RightTab from "../components/dashboard/right/RightTab";
+import PostRegistration from "../components/modal/PostRegistration";
+import { useApplication } from "../context/ApplicationContext";
+import { Icon } from "@iconify/react";
 
 export default function MainScreen() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [googleEvents, setGoogleEvents] = useState<any[]>([]);
   const [user, setUser] = useState<any>(null);
+  const { addApplication } = useApplication();
 
   useEffect(() => {
     fetch("/api/user", {
       credentials: "include",
     })
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error();
+        return res.json();
+      })
       .then((data) => setUser(data))
       .catch(() => setUser(null));
   }, []);
@@ -22,42 +28,42 @@ export default function MainScreen() {
     <div className="bg-[#F8FAFC] min-h-screen">
       <div className="flex">
         <div className="flex-1 p-6">
-          <div className="flex justify-between items-start mb-6">
+          <div className="flex justify-between items-start mt-[173px] mb-6">
             <div>
-              <h1 className="text-2xl font-bold text-[#0F172A]">
-                {user ? `${user.name}님의 대시보드` : "대시보드"}
+              <h1 className="text-[40px] font-bold text-[#0F172A]">
+                {user ? `${user.nickname}님의 대시보드` : "대시보드"}
               </h1>
-              <p className="text-[14px] text-[#64748B]">
+              <p className="text-[20px] text-[#64748B] mt-1">
                 오늘도 한 걸음 더 가까이, 화이팅!
               </p>
             </div>
 
-            <div className="flex items-center gap-3">
-              {!user ? (
-                <button
-                  onClick={() => {
-                    window.location.href =
-                      "http://localhost:8080/oauth2/authorization/google";
-                  }}
-                  className="px-3 py-1 rounded-lg bg-red-500 text-white"
-                >
-                  구글 로그인
-                </button>
-              ) : (
-                <>
-                  <button className="px-3 py-1 rounded-lg bg-[#FFFFFF] border border-[#E2E8F0] text-[15px] text-[#334155]">
-                    이번 달 목표
-                  </button>
-                  <button className="px-3 py-1 rounded-lg bg-[#FFFFFF] border border-[#E2E8F0] text-[15px] text-[#334155]">
-                    지난 달 리포트
-                  </button>
-                  <img
-                    src={user.image || "/default-profile.png"}
-                    alt="profile"
-                    className="w-9 h-9 rounded-full object-cover"
+            <div className="flex flex-col items-end gap-3">
+              <div className="flex items-center gap-3">
+                <button>
+                  <Icon
+                    icon="mdi:bell-outline"
+                    className="text-[30px] text-[#94A3B8]"
                   />
-                </>
-              )}
+                </button>
+                <button>
+                  <Icon
+                    icon="fluent-emoji-flat:four-leaf-clover"
+                    className="text-[30px]"
+                  />
+                </button>
+              </div>
+              <div className="flex items-center gap-3">
+                <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white border border-[#E2E8F0] text-[16px] text-[#334155] hover:bg-gray-50 transition">
+                  <Icon icon="material-symbols:target" className="text-xl" />
+                  이번 달 목표
+                </button>
+
+                <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white border border-[#E2E8F0] text-[16px] text-[#334155] hover:bg-gray-50 transition">
+                  <Icon icon="uis:graph-bar" className="text-xl" />
+                  지난 달 리포트
+                </button>
+              </div>
             </div>
           </div>
           {user && (
@@ -72,7 +78,7 @@ export default function MainScreen() {
 
         {user && (
           <div className="w-[18.05%] min-w-[240px] border-l border-gray-200 pl-6">
-            <CalendarBox
+            <RightTab
               googleEvents={googleEvents}
               setGoogleEvents={setGoogleEvents}
             />
@@ -81,7 +87,17 @@ export default function MainScreen() {
       </div>
 
       {isModalOpen && (
-        <ApplicationModal onClose={() => setIsModalOpen(false)} />
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-2xl w-[600px]">
+            <PostRegistration
+              onClose={() => setIsModalOpen(false)}
+              onSubmit={(data: any) => {
+                addApplication(data);
+                setIsModalOpen(false);
+              }}
+            />
+          </div>
+        </div>
       )}
     </div>
   );

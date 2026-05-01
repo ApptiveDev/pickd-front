@@ -5,6 +5,7 @@ export type Application = {
   status: string;
   applyDate: string;
   interviewDate?: string;
+  deadlineDate?: string;
   memo?: string;
   file?: File | null;
 };

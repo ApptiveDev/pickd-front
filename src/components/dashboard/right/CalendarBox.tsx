@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
-import { useApplication } from "../../context/ApplicationContext";
-import CalendarModal from "../modal/CalendarModal";
-import { createEvent, deleteEvent } from "../../api/calendar";
+import { useApplication } from "../../../context/ApplicationContext";
+import CalendarModal from "../../modal/CalendarModal";
+import { createEvent, deleteEvent } from "../../../api/calendar";
 
 function getEventDate(e: any): Date | null {
   if (!e.start) return null;
@@ -20,6 +20,14 @@ function getEventDate(e: any): Date | null {
     return new Date(e.start.date);
   }
   return null;
+}
+
+type EventType = "interview" | "apply" | "deadline" | "default";
+function getType(summary: string): EventType {
+  if (summary.includes("면접")) return "interview";
+  if (summary.includes("제출")) return "apply";
+  if (summary.includes("마감")) return "deadline";
+  return "default";
 }
 
 function isSameDay(d1: Date, d2: Date) {
@@ -47,17 +55,17 @@ function getThisWeekEvents(events: any[]) {
 }
 
 export default function CalendarBox({
-  googleEvents,
-  setGoogleEvents,
+  defaultEvents,
+  setDefaultEvents,
 }: {
-  googleEvents: any[];
-  setGoogleEvents: (events: any[]) => void;
+  defaultEvents: any[];
+  setDefaultEvents: (events: any[]) => void;
 }) {
   const { applications } = useApplication();
   const [date, setDate] = useState(new Date());
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const weeklyEvents = getThisWeekEvents(googleEvents).sort((a, b) => {
+  const weeklyEvents = getThisWeekEvents(defaultEvents).sort((a, b) => {
     const da = getEventDate(a);
     const db = getEventDate(b);
 
@@ -66,22 +74,31 @@ export default function CalendarBox({
   });
 
   const mergedEvents = [
-    ...googleEvents
+    ...defaultEvents
       .map((e) => {
         const d = getEventDate(e);
         if (!d) return null;
-        return { date: d, type: "google" };
+
+        return {
+          date: d,
+          type: getType(e.summary || ""),
+        };
       })
-      .filter((e): e is { date: Date; type: string } => e !== null),
+      .filter((e): e is { date: Date; type: EventType } => e !== null),
 
     ...applications
       .flatMap((a) => [
         a.interviewDate
           ? { date: new Date(a.interviewDate), type: "interview" }
           : null,
+
         a.applyDate ? { date: new Date(a.applyDate), type: "apply" } : null,
+
+        a.deadlineDate
+          ? { date: new Date(a.deadlineDate), type: "deadline" }
+          : null,
       ])
-      .filter((e): e is { date: Date; type: string } => e !== null),
+      .filter((e): e is { date: Date; type: EventType } => e !== null),
   ];
 
   const loadEvents = () => {
@@ -100,7 +117,7 @@ export default function CalendarBox({
       })
       .then((data) => {
         console.log("calendar parsed data:", data);
-        setGoogleEvents(data);
+        setDefaultEvents(data);
       })
       .catch((err) => console.error("캘린더 가져오기 실패", err));
   };
@@ -110,7 +127,7 @@ export default function CalendarBox({
   }, []);
 
   return (
-    <div className="bg-[#F8FAFC] rounded-xl shadow-sm p-4">
+    <div className="bg-[#F8FAFC] rounded-xl p-4">
       <button
         onClick={() => setIsModalOpen(true)}
         className="bg-[#2563EB] text-white px-3 py-1 rounded mb-3"
@@ -130,6 +147,7 @@ export default function CalendarBox({
       )}
 
       <Calendar
+        className="!w-full rounded-xl"
         prev2Label={null}
         next2Label={null}
         calendarType="gregory"
@@ -138,66 +156,40 @@ export default function CalendarBox({
         onChange={(value) => setDate(value as Date)}
         value={date}
         tileContent={({ date }) => {
-          const hasGoogle = googleEvents.some((e) => {
-            const d = getEventDate(e);
-            return d && isSameDay(d, date);
-          });
           const hasInterview = mergedEvents.some(
             (e) => e.type === "interview" && isSameDay(e.date, date),
           );
+
           const hasApply = mergedEvents.some(
             (e) => e.type === "apply" && isSameDay(e.date, date),
           );
 
+          const hasDeadline = mergedEvents.some(
+            (e) => e.type === "deadline" && isSameDay(e.date, date),
+          );
+
+          const hasDefault = mergedEvents.some(
+            (e) => e.type === "default" && isSameDay(e.date, date),
+          );
+
           return (
-            <div className="flex justify-center gap-1 mt-1">
+            <div className="flex justify-center gap-0 mt-[0px]">
               {hasInterview && (
-                <div className="w-2 h-2 bg-yellow-400 rounded-full" />
+                <div className="w-1.5 h-1.5 bg-purple-400 rounded-full" />
               )}
               {hasApply && (
-                <div className="w-2 h-2 bg-green-400 rounded-full" />
+                <div className="w-1.5 h-1.5 bg-blue-400 rounded-full" />
               )}
-              {hasGoogle && (
-                <div className="w-2 h-2 bg-blue-400 rounded-full" />
+              {hasDeadline && (
+                <div className="w-1.5 h-1.5 bg-red-400 rounded-full" />
+              )}
+              {hasDefault && (
+                <div className="w-1.5 h-1.5 bg-gray-400 rounded-full" />
               )}
             </div>
           );
         }}
       />
-
-      <div className="mt-4 bg-white rounded-2xl p-4 shadow-sm">
-        <h4 className="font-semibold mb-2">일정</h4>
-
-        {weeklyEvents.length === 0 && (
-          <p className="text-sm text-gray-400">일정 없음</p>
-        )}
-
-        {weeklyEvents.map((e, idx) => {
-          const d = getEventDate(e);
-          if (!d) return null;
-
-          return (
-            <div key={idx} className="flex items-center gap-2 mb-2">
-              <div className="w-4 h-4 bg-gray-300 rounded-full" />
-
-              <div>
-                <p className="text-sm font-medium">
-                  {e.summary || "제목 없음"}
-                </p>
-
-                <p className="text-xs text-gray-500">
-                  {`${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`}
-                </p>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      <div className="mt-4 bg-white rounded-2xl p-4 shadow-sm">
-        <h4 className="font-semibold mb-2">할일</h4>
-        <p className="text-sm text-gray-400">아직 없음</p>
-      </div>
     </div>
   );
 }

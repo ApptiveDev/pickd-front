@@ -1,4 +1,4 @@
-import { useApplication } from "../../context/ApplicationContext";
+import { useApplication } from "../../../context/ApplicationContext";
 
 export default function ApplicationStateCard() {
   const { applications } = useApplication();

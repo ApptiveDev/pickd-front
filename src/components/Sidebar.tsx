@@ -1,5 +1,14 @@
-export default function Sidebar({ open, onClose, onNavigate }: any) {
+import { useNavigate } from "react-router-dom";
+
+export default function Sidebar({ open, onClose }: any) {
+  const navigate = useNavigate();
+
   if (!open) return null;
+
+  const handleMove = (path: string) => {
+    navigate(path);
+    onClose();
+  };
 
   return (
     <div className="fixed inset-0 bg-black/30">
@@ -8,19 +17,19 @@ export default function Sidebar({ open, onClose, onNavigate }: any) {
 
         <div className="mt-4 space-y-2">
           <button
-            onClick={() => onNavigate("main")}
+            onClick={() => handleMove("/main")}
             className="w-full text-left p-2 rounded hover:bg-gray-100"
           >
             지원 대시보드
           </button>
           <button
-            onClick={() => onNavigate("experience")}
+            onClick={() => handleMove("/experience")}
             className="w-full text-left p-2 rounded hover:bg-gray-100"
           >
             개인경험 정리
           </button>
           <button
-            onClick={() => onNavigate("ai")}
+            onClick={() => handleMove("/ai")}
             className="w-full text-left p-2 rounded hover:bg-gray-100"
           >
             AI 자소서

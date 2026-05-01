@@ -1,9 +1,4 @@
-interface Todo {
-  id: string;
-  summary: string;
-  isCompleted: boolean;
-}
-
+import type { Todo } from "../../types/todo";
 interface TodoListModalProps {
   todos: Todo[];
   onToggle: (id: string) => void; // 체크 상태 변경 함수
