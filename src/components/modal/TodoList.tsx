@@ -33,7 +33,7 @@ export default function TodoListModal({
               className={`w-5 h-5 rounded-full border-1.5 flex items-center justify-center transition-all ${
                 todo.isCompleted
                   ? "border-green-500 bg-transparent" // 완료 시
-                  : "border-gray-300 bg-transparent group-hover:border-gray-400" // 미완료 시
+                  : "border-[#D9D9D9] bg-[#D9D9D9] group-hover:border-gray-400" // 미완료 시
               }`}
             >
               {todo.isCompleted && (
