@@ -5,6 +5,7 @@ export type Application = {
   status: string;
   applyDate: string;
   interviewDate?: string;
+  deadlineDate?: string;
   memo?: string;
   file?: File | null;
 };
@@ -15,6 +16,7 @@ export type ApplicationFormData = {
   position: string;
   industry: string;
   deadline: string;
+  url?: string;
 }
 
 export type RegistrationTab = 'URL' | 'PDF' | 'IMAGE' | 'MANUAL';

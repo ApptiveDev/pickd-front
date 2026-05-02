@@ -30,6 +30,9 @@ export default function CalendarModal({
 }) {
   const [summary, setSummary] = useState("");
   const [time, setTime] = useState("");
+  const [category, setCategory] = useState<"면접" | "마감" | "제출" | "일반">(
+    "일반",
+  );
 
   useEffect(() => {
     setTime("09:00");
@@ -54,7 +57,28 @@ export default function CalendarModal({
           onChange={(e) => setTime(e.target.value)}
           className="border p-2 w-full mb-2"
         />
+        <div className="mt-3">
+          <p className="text-sm mb-1 text-gray-500">카테고리</p>
 
+          <div className="flex gap-2">
+            {["면접", "마감", "제출", "일반"].map((c) => (
+              <button
+                key={c}
+                onClick={() => setCategory(c as any)}
+                className={`
+          px-3 py-1 rounded text-xs
+          ${
+            category === c
+              ? "bg-blue-500 text-white"
+              : "bg-gray-100 text-gray-600"
+          }
+        `}
+              >
+                {c}
+              </button>
+            ))}
+          </div>
+        </div>
         <div className="flex justify-end gap-2">
           <button onClick={onClose}>취소</button>
 
@@ -72,6 +96,7 @@ export default function CalendarModal({
                 start: {
                   dateTime,
                 },
+                category,
               });
 
               onClose();

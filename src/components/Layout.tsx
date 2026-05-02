@@ -1,7 +1,8 @@
 import { useState } from "react";
+import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
 
-export default function Layout({ children, onNavigate }: any) {
+export default function Layout() {
   const [open, setOpen] = useState(false);
 
   return (
@@ -10,15 +11,13 @@ export default function Layout({ children, onNavigate }: any) {
       <Sidebar
         open={open}
         onClose={() => setOpen(false)}
-        onNavigate={(page: string) => {
-          onNavigate(page);
-          setOpen(false);
-        }}
       />
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
-        <main className="flex-1 p-6 overflow-auto">{children}</main>
+        <main className="flex-1 p-6 overflow-auto">
+          <Outlet />
+        </main>
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
-import { useApplication } from "../../context/ApplicationContext";
-import { getStatusStyle } from "../../utils/status";
+import { useApplication } from "../../../context/ApplicationContext";
+import { getStatusStyle } from "../../../utils/status";
 
 export default function ApplicationTable({ onAdd, onEdit }: any) {
   const { applications } = useApplication();
