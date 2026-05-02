@@ -12,9 +12,6 @@ export default function TodoListModal({
 }: TodoListModalProps) {
   return (
     <div className="py-2">
-      <div className="mb-6">
-        <h2 className="text-xl font-bold text-gray-900">할 일</h2>
-      </div>
 
       {/* 할 일 리스트 영역 */}
       <div className="space-y-5 max-h-[450px] overflow-y-auto pr-2 custom-scrollbar">

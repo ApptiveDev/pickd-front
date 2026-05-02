@@ -1,5 +1,7 @@
+import * as React from "react";
 import { useApplicationForm } from "../../hooks/useApplicationForm";
 import type { RegistrationTab } from "../../types/application";
+import { LinkIcon, PdfIcon, ImageIcon, ManualIcon } from "../../assets";
 
 export default function PostRegistration({ onClose, onSubmit }: any) {
   const {
@@ -13,146 +15,215 @@ export default function PostRegistration({ onClose, onSubmit }: any) {
     handleFileChange,
   } = useApplicationForm();
 
-  const tabs: { id: RegistrationTab; label: string }[] = [
-    { id: "URL", label: "URL 입력" },
-    { id: "PDF", label: "PDF 업로드" },
-    { id: "IMAGE", label: "이미지 업로드" },
-    { id: "MANUAL", label: "직접 입력" },
-  ];
+  const tabs: { id: RegistrationTab; label: string; icon: React.ReactNode }[] =
+    [
+      {
+        id: "URL",
+        label: "URL 입력",
+        icon: <LinkIcon size={14} color="currentColor" />,
+      },
+      {
+        id: "PDF",
+        label: "PDF 업로드",
+        icon: <PdfIcon size={14} color="currentColor" />,
+      },
+      {
+        id: "IMAGE",
+        label: "이미지 업로드",
+        icon: <ImageIcon size={14} color="currentColor" />,
+      },
+      {
+        id: "MANUAL",
+        label: "직접 입력",
+        icon: <ManualIcon size={14} color="currentColor" />,
+      },
+    ];
 
   return (
-    <div className="w-full">
-      {/* 탭 메뉴 */}
-      <div className="flex bg-gray-100 p-1 rounded-xl mb-8">
-        {tabs.map((tab) => (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-[2px]">
+      <div className="w-full max-w-[500px] bg-white rounded-[24px] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200">
+        {/* 헤더 */}
+        <div className="flex items-center justify-between px-7 pt-6 pb-4">
+          <h2 className="text-[20px] font-extrabold text-[#0F172A] tracking-tight">
+            공고등록
+          </h2>
           <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
-              activeTab === tab.id
-                ? "bg-white shadow-sm text-blue-600"
-                : "text-gray-500 hover:text-gray-700"
-            }`}
+            onClick={onClose}
+            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
           >
-            {tab.label}
+            <span className="text-[18px] text-[#94A3B8] font-light">✕</span>
           </button>
-        ))}
-      </div>
+        </div>
 
-      {/* 숨겨진 파일 인풋 */}
-      <input
-        type="file"
-        ref={pdfInputRef}
-        onChange={(e) => handleFileChange(e, "PDF")}
-        accept=".pdf"
-        className="hidden"
-      />
-      <input
-        type="file"
-        ref={imageInputRef}
-        onChange={(e) => handleFileChange(e, "IMAGE")}
-        accept="image/*"
-        className="hidden"
-      />
+        <div className="px-7">
+          <div className="h-[1px] bg-[#E2E8F0] w-full" />
+        </div>
 
-      {/* 컨텐츠 영역 */}
-      <div className="min-h-[300px]">
-        {activeTab === "URL" && (
-          <div className="space-y-3">
-            <p className="text-sm text-gray-500 font-medium">
-              채용 공고의 URL을 붙여넣으세요.
-            </p>
-            <input
-              type="text"
-              placeholder="https://example.com/jobs/..."
-              className="w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
-            />
+        <div className="p-7">
+          {/* 탭 메뉴 */}
+          <div className="flex bg-[#F8F9FB] p-1 rounded-xl mb-6">
+            {tabs.map((tab) => {
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-[13px] font-bold transition-all ${
+                    isActive
+                      ? "bg-white shadow-sm text-[#0F172A]"
+                      : "text-[#94A3B8] hover:text-gray-500"
+                  }`}
+                >
+                  {tab.icon}
+                  <span className="whitespace-nowrap leading-none">
+                    {tab.label}
+                  </span>
+                </button>
+              );
+            })}
           </div>
-        )}
 
-        {(activeTab === "PDF" || activeTab === "IMAGE") && (
-          <div
-            onClick={handleUploadClick}
-            className="border-2 border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center p-14 hover:border-blue-400 hover:bg-blue-50/30 transition-all cursor-pointer group"
+          <input
+            type="file"
+            ref={pdfInputRef}
+            onChange={(e) => handleFileChange(e, "PDF")}
+            accept=".pdf"
+            className="hidden"
+          />
+          <input
+            type="file"
+            ref={imageInputRef}
+            onChange={(e) => handleFileChange(e, "IMAGE")}
+            accept="image/*"
+            className="hidden"
+          />
+
+          {/* 컨텐츠 영역: 내부 스크롤 적용 */}
+          <div className="max-h-[360px] overflow-y-auto mb-8 pr-1 custom-scrollbar">
+            {activeTab === "URL" && (
+              <div className="space-y-4 animate-in fade-in duration-300 py-1">
+                <div className="flex items-center gap-2 px-1 text-[#64748B]">
+                  <LinkIcon size={14} />
+                  <p className="text-[14px] font-semibold tracking-tight">
+                    채용 공고 URL을 입력하세요.
+                  </p>
+                </div>
+                <div className="relative group">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-blue-500 transition-colors">
+                    <LinkIcon size={18} />
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="공고 상세 페이지의 URL을 붙여넣어 주세요"
+                    className="w-full py-3.5 pl-11 pr-4 border border-[#E2E8F0] rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder:text-gray-300 text-[14px]"
+                    value={(formData as any).url || ""}
+                    onChange={(e) => updateField("url" as any, e.target.value)}
+                  />
+                </div>
+                <p className="text-[12px] text-[#94A3B8] font-medium leading-relaxed px-1">
+                  * AI가 공고 내용을 자동으로 분석하여 가져옵니다.
+                </p>
+              </div>
+            )}
+
+            {(activeTab === "PDF" || activeTab === "IMAGE") && (
+              <div
+                onClick={handleUploadClick}
+                className="border-2 border-dashed border-[#E2E8F0] rounded-[16px] flex flex-col items-center justify-center py-12 px-6 hover:border-[#0F172A] hover:bg-blue-50/10 transition-all cursor-pointer group"
+              >
+                <div className="mb-3 text-[#94A3B8] group-hover:text-blue-500 transition-all group-hover:scale-105">
+                  {activeTab === "PDF" ? (
+                    <PdfIcon size={36} color="#64748B" />
+                  ) : (
+                    <ImageIcon size={34} />
+                  )}
+                </div>
+                <div className="text-center">
+                  <p className="text-[#475569] text-[15px] font-bold">
+                    {activeTab === "PDF"
+                      ? "PDF 파일을 드래그 하거나 클릭"
+                      : "이미지 파일을 드래그 하거나 클릭"}
+                  </p>
+                  <p className="text-[#94A3B8] text-[12px] mt-1 font-medium">
+                    최대 {activeTab === "PDF" ? "10MB" : "5MB"} 지원
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {activeTab === "MANUAL" && (
+              <div className="flex flex-col gap-3 animate-in fade-in duration-300 py-1">
+                <input
+                  type="text"
+                  placeholder="회사명"
+                  className="w-full py-3 px-4 border border-[#E2E8F0] rounded-xl text-[14px] outline-none"
+                  value={formData.company}
+                  onChange={(e) => updateField("company", e.target.value)}
+                />
+
+                <input
+                  type="text"
+                  placeholder="직무 (예: 서비스 기획자)"
+                  className="w-full py-3 px-4 border border-[#E2E8F0] rounded-xl text-[14px] outline-none"
+                  value={formData.position}
+                  onChange={(e) => updateField("position", e.target.value)}
+                />
+
+                <select
+                  className="w-full py-3 px-4 border border-[#E2E8F0] rounded-xl text-[14px] outline-none bg-white text-[#0F172A]"
+                  value={formData.status}
+                  onChange={(e) => updateField("status", e.target.value)}
+                >
+                  <option value="">지원 상태 선택</option>
+                  <option value="preparing">준비중</option>
+                  <option value="applied">지원완료</option>
+                  <option value="interview">면접진행</option>
+                  <option value="accepted">최종합격</option>
+                </select>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[11px] font-bold text-[#94A3B8] ml-1">
+                      지원일
+                    </label>
+                    <input
+                      type="date"
+                      className="w-full py-2.5 px-4 border border-[#E2E8F0] rounded-xl text-[14px] outline-none text-[#475569]"
+                      value={formData.applyDate}
+                      onChange={(e) => updateField("applyDate", e.target.value)}
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[11px] font-bold text-[#94A3B8] ml-1">
+                      면접일
+                    </label>
+                    <input
+                      type="date"
+                      className="w-full py-2.5 px-4 border border-[#E2E8F0] rounded-xl text-[14px] outline-none text-[#475569]"
+                      value={formData.dueDate}
+                      onChange={(e) => updateField("dueDate", e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <textarea
+                  placeholder="메모를 입력하세요 (전형 특징 등)"
+                  rows={3}
+                  className="w-full py-3 px-4 border border-[#E2E8F0] rounded-xl text-[14px] outline-none resize-none"
+                  value={formData.memo}
+                  onChange={(e) => updateField("memo", e.target.value)}
+                />
+              </div>
+            )}
+          </div>
+
+          <button
+            onClick={() => onSubmit(formData)}
+            className="w-full py-4 rounded-[16px] font-bold bg-[#0F172A] text-white text-[16px] hover:bg-[#1e293b] shadow-lg shadow-gray-200 transition-all active:scale-[0.98]"
           >
-            <div className="bg-blue-50 p-4 rounded-full mb-4 group-hover:scale-110 transition-transform text-blue-500 text-3xl">
-              📤
-            </div>
-            <p className="text-gray-600 font-semibold text-center">
-              {activeTab === "PDF" ? "PDF 파일" : "공고 이미지"}를 클릭하여
-              업로드
-              <br />
-              <span className="text-gray-400 text-sm font-normal mt-2 block">
-                최대 {activeTab === "PDF" ? "10MB" : "5MB"}
-              </span>
-            </p>
-          </div>
-        )}
-
-        {activeTab === "MANUAL" && (
-          <div className="flex flex-col gap-4">
-            <input
-              type="text"
-              placeholder="기업명"
-              className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-              value={formData.company}
-              onChange={(e) => updateField("company", e.target.value)}
-            />
-            <div className="grid grid-cols-2 gap-4">
-              <input
-                type="text"
-                placeholder="공고명"
-                className="p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                value={formData.jobTitle}
-                onChange={(e) => updateField("jobTitle", e.target.value)}
-              />
-              <input
-                type="text"
-                placeholder="직무"
-                className="p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                value={formData.position}
-                onChange={(e) => updateField("position", e.target.value)}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <input
-                type="text"
-                placeholder="산업"
-                className="p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                value={formData.industry}
-                onChange={(e) => updateField("industry", e.target.value)}
-              />
-              <input
-                type="date"
-                className="p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                value={formData.deadline}
-                onChange={(e) => updateField("deadline", e.target.value)}
-              />
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* 푸터 버튼 */}
-      <div className="flex justify-end gap-3 mt-10">
-        <button
-          onClick={onClose}
-          className="px-6 py-2.5 rounded-xl font-bold bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors"
-        >
-          취소
-        </button>
-        <button
-          onClick={() => {
-            if (!formData.company && activeTab === "MANUAL") {
-              alert("기업명을 입력해주세요");
-              return;
-            }
-            onSubmit(formData);
-          }}
-          className="px-8 py-2.5 rounded-xl font-bold bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all active:scale-95"
-        >
-          등록하기
-        </button>
+            등록하기
+          </button>
+        </div>
       </div>
     </div>
   );

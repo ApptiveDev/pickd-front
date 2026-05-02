@@ -35,9 +35,6 @@ export default function ScheduleListModal({ schedules, onClose }: ScheduleListMo
 
   return (
     <div className="py-2">
-      <div className="mb-6">
-        <h2 className="text-xl font-bold text-gray-900">오늘의 일정</h2>
-      </div>
 
       {/* 일정 리스트 영역 */}
       <div className="space-y-6 max-h-[450px] overflow-y-auto pr-2 custom-scrollbar">

@@ -87,17 +87,13 @@ export default function MainScreen() {
       </div>
 
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-2xl w-[600px]">
-            <PostRegistration
-              onClose={() => setIsModalOpen(false)}
-              onSubmit={(data: any) => {
-                addApplication(data);
-                setIsModalOpen(false);
-              }}
-            />
-          </div>
-        </div>
+        <PostRegistration
+          onClose={() => setIsModalOpen(false)}
+          onSubmit={(data: any) => {
+            addApplication(data);
+            setIsModalOpen(false);
+          }}
+        />
       )}
     </div>
   );

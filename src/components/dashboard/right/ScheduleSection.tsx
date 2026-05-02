@@ -44,7 +44,7 @@ export default function ScheduleSection({
       onClick={onClick}
       className="mt-4 bg-white rounded-2xl p-4 shadow-sm cursor-pointer max-h-[230px] overflow-y-auto"
     >
-      <h4 className="font-semibold mb-3">일정</h4>
+      <h4 className="font-semibold mb-3">오늘의 일정</h4>
 
       {events.length === 0 && (
         <p className="text-sm text-gray-400">일정 없음</p>
