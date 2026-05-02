@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useApplicationForm } from "../../hooks/useApplicationForm";
 import type { RegistrationTab } from "../../types/application";
-import { LinkIcon, PdfIcon, ImageIcon, ManualIcon } from "../../assets"; 
+import { LinkIcon, PdfIcon, ImageIcon, ManualIcon } from "../../assets";
 
 export default function PostRegistration({ onClose, onSubmit }: any) {
   const {
@@ -15,21 +15,39 @@ export default function PostRegistration({ onClose, onSubmit }: any) {
     handleFileChange,
   } = useApplicationForm();
 
-  const tabs: { id: RegistrationTab; label: string; icon: React.ReactNode }[] = [
-    { id: "URL", label: "URL 입력", icon: <LinkIcon size={14} color="currentColor" /> },
-    { id: "PDF", label: "PDF 업로드", icon: <PdfIcon size={14} color="currentColor" /> },
-    { id: "IMAGE", label: "이미지 업로드", icon: <ImageIcon size={14} color="currentColor" /> },
-    { id: "MANUAL", label: "직접 입력", icon: <ManualIcon size={14} color="currentColor" /> },
-  ];
+  const tabs: { id: RegistrationTab; label: string; icon: React.ReactNode }[] =
+    [
+      {
+        id: "URL",
+        label: "URL 입력",
+        icon: <LinkIcon size={14} color="currentColor" />,
+      },
+      {
+        id: "PDF",
+        label: "PDF 업로드",
+        icon: <PdfIcon size={14} color="currentColor" />,
+      },
+      {
+        id: "IMAGE",
+        label: "이미지 업로드",
+        icon: <ImageIcon size={14} color="currentColor" />,
+      },
+      {
+        id: "MANUAL",
+        label: "직접 입력",
+        icon: <ManualIcon size={14} color="currentColor" />,
+      },
+    ];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-[2px]">
       <div className="w-full max-w-[500px] bg-white rounded-[24px] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200">
+        {/* 헤더 */}
         <div className="flex items-center justify-between px-7 pt-6 pb-4">
           <h2 className="text-[20px] font-extrabold text-[#0F172A] tracking-tight">
             공고등록
           </h2>
-          <button 
+          <button
             onClick={onClose}
             className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
           >
@@ -42,6 +60,7 @@ export default function PostRegistration({ onClose, onSubmit }: any) {
         </div>
 
         <div className="p-7">
+          {/* 탭 메뉴 */}
           <div className="flex bg-[#F8F9FB] p-1 rounded-xl mb-6">
             {tabs.map((tab) => {
               const isActive = activeTab === tab.id;
@@ -56,25 +75,39 @@ export default function PostRegistration({ onClose, onSubmit }: any) {
                   }`}
                 >
                   {tab.icon}
-                  <span className="whitespace-nowrap leading-none">{tab.label}</span>
+                  <span className="whitespace-nowrap leading-none">
+                    {tab.label}
+                  </span>
                 </button>
               );
             })}
           </div>
 
-          <input type="file" ref={pdfInputRef} onChange={(e) => handleFileChange(e, "PDF")} accept=".pdf" className="hidden" />
-          <input type="file" ref={imageInputRef} onChange={(e) => handleFileChange(e, "IMAGE")} accept="image/*" className="hidden" />
+          <input
+            type="file"
+            ref={pdfInputRef}
+            onChange={(e) => handleFileChange(e, "PDF")}
+            accept=".pdf"
+            className="hidden"
+          />
+          <input
+            type="file"
+            ref={imageInputRef}
+            onChange={(e) => handleFileChange(e, "IMAGE")}
+            accept="image/*"
+            className="hidden"
+          />
 
-          <div className="min-h-[180px] mb-8 flex flex-col justify-center">
+          {/* 컨텐츠 영역: 내부 스크롤 적용 */}
+          <div className="max-h-[360px] overflow-y-auto mb-8 pr-1 custom-scrollbar">
             {activeTab === "URL" && (
-              <div className="space-y-4 animate-in fade-in duration-300">
+              <div className="space-y-4 animate-in fade-in duration-300 py-1">
                 <div className="flex items-center gap-2 px-1 text-[#64748B]">
                   <LinkIcon size={14} />
                   <p className="text-[14px] font-semibold tracking-tight">
                     채용 공고 URL을 입력하세요.
                   </p>
                 </div>
-
                 <div className="relative group">
                   <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-blue-500 transition-colors">
                     <LinkIcon size={18} />
@@ -96,14 +129,20 @@ export default function PostRegistration({ onClose, onSubmit }: any) {
             {(activeTab === "PDF" || activeTab === "IMAGE") && (
               <div
                 onClick={handleUploadClick}
-                className="border-2 border-dashed border-[#E2E8F0] rounded-[5px] flex flex-col items-center justify-center py-10 px-6 hover:border-[#0F172A] hover:bg-blue-50/10 transition-all cursor-pointer group"
+                className="border-2 border-dashed border-[#E2E8F0] rounded-[16px] flex flex-col items-center justify-center py-12 px-6 hover:border-[#0F172A] hover:bg-blue-50/10 transition-all cursor-pointer group"
               >
                 <div className="mb-3 text-[#94A3B8] group-hover:text-blue-500 transition-all group-hover:scale-105">
-                  {activeTab === "PDF" ? <PdfIcon size={36} color="#64748B" /> : <ImageIcon size={34} />}
+                  {activeTab === "PDF" ? (
+                    <PdfIcon size={36} color="#64748B" />
+                  ) : (
+                    <ImageIcon size={34} />
+                  )}
                 </div>
                 <div className="text-center">
                   <p className="text-[#475569] text-[15px] font-bold">
-                    {activeTab === "PDF" ? "PDF 파일을 드래그 하거나 클릭하여 업로드" : "이미지 파일을 드래그 하거나 클릭하여 업로드"} 
+                    {activeTab === "PDF"
+                      ? "PDF 파일을 드래그 하거나 클릭"
+                      : "이미지 파일을 드래그 하거나 클릭"}
                   </p>
                   <p className="text-[#94A3B8] text-[12px] mt-1 font-medium">
                     최대 {activeTab === "PDF" ? "10MB" : "5MB"} 지원
@@ -113,17 +152,67 @@ export default function PostRegistration({ onClose, onSubmit }: any) {
             )}
 
             {activeTab === "MANUAL" && (
-              <div className="flex flex-col gap-3 animate-in fade-in duration-300">
-                {["company", "jobTitle", "position"].map((field) => (
-                  <input
-                    key={field}
-                    type="text"
-                    placeholder={field === "company" ? "기업명" : field === "jobTitle" ? "공고명" : "직무명"}
-                    className="w-full py-3.5 px-4 border border-[#E2E8F0] rounded-xl text-[14px] outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all placeholder:text-gray-300"
-                    value={(formData as any)[field]}
-                    onChange={(e) => updateField(field as any, e.target.value)}
-                  />
-                ))}
+              <div className="flex flex-col gap-3 animate-in fade-in duration-300 py-1">
+                <input
+                  type="text"
+                  placeholder="회사명"
+                  className="w-full py-3 px-4 border border-[#E2E8F0] rounded-xl text-[14px] outline-none"
+                  value={formData.company}
+                  onChange={(e) => updateField("company", e.target.value)}
+                />
+
+                <input
+                  type="text"
+                  placeholder="직무 (예: 서비스 기획자)"
+                  className="w-full py-3 px-4 border border-[#E2E8F0] rounded-xl text-[14px] outline-none"
+                  value={formData.position}
+                  onChange={(e) => updateField("position", e.target.value)}
+                />
+
+                <select
+                  className="w-full py-3 px-4 border border-[#E2E8F0] rounded-xl text-[14px] outline-none bg-white text-[#0F172A]"
+                  value={formData.status}
+                  onChange={(e) => updateField("status", e.target.value)}
+                >
+                  <option value="">지원 상태 선택</option>
+                  <option value="preparing">준비중</option>
+                  <option value="applied">지원완료</option>
+                  <option value="interview">면접진행</option>
+                  <option value="accepted">최종합격</option>
+                </select>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[11px] font-bold text-[#94A3B8] ml-1">
+                      지원일
+                    </label>
+                    <input
+                      type="date"
+                      className="w-full py-2.5 px-4 border border-[#E2E8F0] rounded-xl text-[14px] outline-none text-[#475569]"
+                      value={formData.applyDate}
+                      onChange={(e) => updateField("applyDate", e.target.value)}
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[11px] font-bold text-[#94A3B8] ml-1">
+                      면접일
+                    </label>
+                    <input
+                      type="date"
+                      className="w-full py-2.5 px-4 border border-[#E2E8F0] rounded-xl text-[14px] outline-none text-[#475569]"
+                      value={formData.dueDate}
+                      onChange={(e) => updateField("dueDate", e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <textarea
+                  placeholder="메모를 입력하세요 (전형 특징 등)"
+                  rows={3}
+                  className="w-full py-3 px-4 border border-[#E2E8F0] rounded-xl text-[14px] outline-none resize-none"
+                  value={formData.memo}
+                  onChange={(e) => updateField("memo", e.target.value)}
+                />
               </div>
             )}
           </div>
