@@ -1,12 +1,11 @@
 import { useApplication } from "../../../context/ApplicationContext";
 import { getStatusStyle } from "../../../utils/status";
 
-export default function ApplicationTable({ onAdd, onEdit }: any) {
+export default function ApplicationTable({ onAdd, onEdit, onCompanyClick }: any) {
   const { applications } = useApplication();
 
   return (
     <div className="bg-white rounded-xl shadow-sm p-4">
-      {/* 제목 */}
       <div className="flex justify-between items-center mb-4">
         <div>
           <h2 className="font-bold text-lg">지원 현황</h2>
@@ -17,13 +16,12 @@ export default function ApplicationTable({ onAdd, onEdit }: any) {
 
         <button
           onClick={onAdd}
-          className="bg-green-500 text-white px-4 py-2 rounded-lg"
+          className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors"
         >
           + 추가
         </button>
       </div>
 
-      {/* 테이블 */}
       <table className="w-full text-sm">
         <thead className="text-gray-400 text-left border-b">
           <tr>
@@ -40,7 +38,13 @@ export default function ApplicationTable({ onAdd, onEdit }: any) {
         <tbody>
           {applications.map((a) => (
             <tr key={a.id} className="border-b hover:bg-gray-50">
-              <td className="py-3 font-medium">{a.company}</td>
+              <td 
+                className="py-3 font-medium cursor-pointer hover:text-green-600 transition-colors"
+                onClick={() => onCompanyClick(a)} 
+              >
+                {a.company}
+              </td>
+              
               <td>{a.position}</td>
 
               <td>
@@ -55,11 +59,24 @@ export default function ApplicationTable({ onAdd, onEdit }: any) {
 
               <td>{a.applyDate}</td>
               <td>{a.interviewDate || "-"}</td>
-              <td className="text-gray-500">{a.memo || "-"}</td>
+              <td className="text-gray-500 max-w-[150px] truncate">
+                {a.memo || "-"}
+              </td>
 
-              <td className="flex gap-2">
-                <button onClick={() => onEdit(a)}>✏️</button>
-                <button>🗑️</button>
+              <td className="flex gap-3 py-3">
+                <button 
+                  onClick={() => onEdit(a)} 
+                  className="hover:scale-110 transition-transform"
+                  title="수정"
+                >
+                  ✏️
+                </button>
+                <button 
+                  className="hover:scale-110 transition-transform"
+                  title="삭제"
+                >
+                  🗑️
+                </button>
               </td>
             </tr>
           ))}
