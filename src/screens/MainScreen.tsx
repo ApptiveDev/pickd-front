@@ -5,6 +5,7 @@ import RightTab from "../components/dashboard/right/RightTab";
 import PostRegistration from "../components/modal/PostRegistration";
 import { useApplication } from "../context/ApplicationContext";
 import { Icon } from "@iconify/react";
+import { QuotePopup } from "../components/dashboard/QuotePopup";
 
 export default function MainScreen() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -46,12 +47,7 @@ export default function MainScreen() {
                     className="text-[30px] text-[#94A3B8]"
                   />
                 </button>
-                <button>
-                  <Icon
-                    icon="fluent-emoji-flat:four-leaf-clover"
-                    className="text-[30px]"
-                  />
-                </button>
+                <QuotePopup />
               </div>
               <div className="flex items-center gap-3">
                 <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white border border-[#E2E8F0] text-[16px] text-[#334155] hover:bg-gray-50 transition">
