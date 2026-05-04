@@ -189,3 +189,26 @@ export const DocumentIcon = React.memo(
     );
   }
 );
+
+export const LogoIcon = React.memo(
+  ({ color, size = 32, className = "", ...props }: IconProps) => {
+    return (
+      <svg
+        width={size}
+        height={size}
+        viewBox="0 0 32 32"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className={className}
+        {...props}
+      >
+        <circle cx="16" cy="16" r="16" fill={color || "#2563EB"} />
+        
+        <path
+          d="M11.0996 24V9.85938H17.1152C20.2793 9.85938 22.3496 11.8516 22.3496 14.8203C22.3496 17.8477 20.2207 19.7422 16.998 19.7422H14.8105V24H11.0996ZM14.8105 16.8516H16.2559C17.6621 16.8516 18.4629 16.0703 18.4629 14.8203C18.4629 13.5898 17.6621 12.8281 16.2559 12.8281H14.8105V16.8516Z"
+          fill="#FFFFFC" 
+        />
+      </svg>
+    );
+  }
+);
