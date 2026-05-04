@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import {LogoIcon, DashboardIcon, PortfolioIcon, DocumentIcon, SettingsIcon, HelpIcon } from "../assets";
+import {LogoIcon, DashboardIcon, PortfolioIcon, DocumentIcon, SettingsIcon, HelpIcon, CalendarIcon } from "../assets";
 
 export default function Sidebar() {
   const navigate = useNavigate();
@@ -11,6 +11,7 @@ export default function Sidebar() {
     { name: "지원 대시보드", path: "/main", Icon: DashboardIcon, size: 21 },
     { name: "개인경험 정리", path: "/experience", Icon: PortfolioIcon, size: 24 },
     { name: "AI 자소서", path: "/ai", Icon: DocumentIcon, size: 22 },
+    { name: "캘린더", path: "/calendar", Icon: CalendarIcon, size: 21 },
   ];
 
   return (
@@ -19,7 +20,7 @@ export default function Sidebar() {
         <LogoIcon size={32} />
       </div>
 
-      <div className="flex-1 flex flex-col gap-4">
+      <div className="flex-1 flex flex-col gap-3">
         {menuItems.map((item) => {
           const isActive = location.pathname === item.path;
           return (
