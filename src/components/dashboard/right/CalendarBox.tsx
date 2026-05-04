@@ -58,11 +58,13 @@ export default function CalendarBox({
   setDefaultEvents,
   setWeeklyEvents,
   setSelectedDate,
+  setSelectedEvents,
 }: {
   defaultEvents: any[];
   setDefaultEvents: (events: any[]) => void;
   setWeeklyEvents: (events: any[]) => void;
   setSelectedDate: (date: Date | null) => void;
+  setSelectedEvents: (events: any[]) => void;
 }) {
   const { applications } = useApplication();
   const [date, setDate] = useState(new Date());
@@ -137,6 +139,15 @@ export default function CalendarBox({
   useEffect(() => {
     loadEvents();
   }, []);
+
+  useEffect(() => {
+    const selectedDayEvents = allEvents.filter((e) => {
+      const d = getEventDate(e);
+      return d && isSameDay(d, date);
+    });
+
+    setSelectedEvents(selectedDayEvents);
+  }, [date, defaultEvents, applications]);
 
   return (
     <div className="bg-white rounded-2xl p-2 border border-[#E2E8F0] shadow-[0px_1px_3px_0px_#00000040]">

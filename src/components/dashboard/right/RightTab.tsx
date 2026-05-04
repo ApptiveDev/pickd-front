@@ -9,6 +9,7 @@ import ScheduleList from "../../modal/ScheduleList";
 
 export default function RightTab({ googleEvents, setGoogleEvents }: any) {
   const [modalType, setModalType] = useState<"schedule" | "todo" | null>(null);
+  const [selectedEvents, setSelectedEvents] = useState<any[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [weeklyEvents, setWeeklyEvents] = useState<any[]>([]);
   const timeouts = useRef<{ [key: string]: ReturnType<typeof setTimeout> }>({});
@@ -30,7 +31,7 @@ export default function RightTab({ googleEvents, setGoogleEvents }: any) {
       const timeout = setTimeout(() => {
         setTodoData((prev) => prev.filter((t) => t.id !== id));
         delete timeouts.current[id];
-      }, 10000);
+      }, 10000); // 일단 임시로 10초 뒤에 삭제되도록 이후 86400000 로 변경
 
       timeouts.current[id] = timeout;
     } else {
@@ -58,10 +59,11 @@ export default function RightTab({ googleEvents, setGoogleEvents }: any) {
         setDefaultEvents={setGoogleEvents}
         setWeeklyEvents={setWeeklyEvents}
         setSelectedDate={setSelectedDate}
+        setSelectedEvents={setSelectedEvents}
       />
 
       <ScheduleSection
-        events={weeklyEvents}
+        events={[...weeklyEvents, ...selectedEvents]}
         selectedDate={selectedDate}
         onClick={() => setModalType("schedule")}
       />

@@ -1,8 +1,9 @@
-import * as React from "react";
-import { useApplicationForm } from "../../hooks/useApplicationForm";
+import { useEffect } from "react";
 import type { RegistrationTab } from "../../types/application";
+import { useApplication } from "../../context/ApplicationContext";
+import { useApplicationForm } from "../../hooks/useApplicationForm";
 import { LinkIcon, PdfIcon, ImageIcon, ManualIcon } from "../../assets";
-
+import { createApplication, updateApplication } from "../../api/application";
 interface PostRegistrationProps {
   initialData?: any;
   onClose: () => void;
@@ -15,6 +16,8 @@ export default function PostRegistration({
   onSubmit,
   editData,
 }: PostRegistrationProps) {
+  const { handleSubmit } = useApplication();
+
   const {
     activeTab,
     setActiveTab,
@@ -49,6 +52,18 @@ export default function PostRegistration({
         icon: <ManualIcon size={14} color="currentColor" />,
       },
     ];
+  useEffect(() => {
+    if (editData) {
+      Object.entries(editData).forEach(([key, value]) => {
+        if (key === "applyDate" || key === "deadline") {
+          const date = value ? String(value).split("T")[0] : "";
+          updateField(key as any, date);
+        } else {
+          updateField(key as any, value as string);
+        }
+      });
+    }
+  }, [editData]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-[2px]">
@@ -219,7 +234,7 @@ export default function PostRegistration({
                   </div>
                   <div className="flex flex-col gap-1">
                     <label className="text-[11px] font-bold text-[#94A3B8] ml-1">
-                      면접일
+                      마감일
                     </label>
                     <input
                       type="date"
@@ -243,7 +258,36 @@ export default function PostRegistration({
             )}
           </div>
           <button
-            onClick={() => onSubmit && onSubmit(formData)}
+            onClick={async () => {
+              const data = {
+                company: formData.company,
+                jobTitle: formData.jobTitle,
+                position: formData.position,
+                industry: formData.industry,
+                status: formData.status,
+                memo: formData.memo,
+
+                applyDate: formData.applyDate
+                  ? formData.applyDate + "T00:00:00"
+                  : null,
+                deadlineDate: formData.deadlineDate
+                  ? formData.deadlineDate + "T00:00:00"
+                  : null,
+              };
+
+              if (editData) {
+                await updateApplication(editData.id, data); // 수정
+              } else {
+                await createApplication(data); // 생성
+              }
+              handleSubmit({
+                ...formData,
+                id: editData?.id,
+              });
+
+              onSubmit?.(data);
+              onClose();
+            }}
             className="w-full bg-black text-white py-3 rounded-xl"
           >
             {editData ? "수정하기" : "등록하기"}

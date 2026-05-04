@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import type { Application } from "../types/application";
 import Header from "../components/dashboard/main/Header";
 import CompanyInfo from "../components/modal/CompanyInfo";
 import RightTab from "../components/dashboard/right/RightTab";
@@ -11,10 +12,11 @@ export default function MainScreen() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState<any>(null);
+  const [editData, setEditData] = useState<any>(null);
 
   const [googleEvents, setGoogleEvents] = useState<any[]>([]);
   const [user, setUser] = useState<any>(null);
-  const { addApplication, updateApplication } = useApplication();
+  const { handleSubmit } = useApplication();
 
   useEffect(() => {
     fetch("/api/user", {
@@ -33,11 +35,6 @@ export default function MainScreen() {
     setIsCompanyModalOpen(true);
   };
 
-  const handleEdit = (application: any) => {
-    setSelectedApplication(application);
-    setIsModalOpen(true);
-  };
-
   return (
     <div className="flex w-full min-h-full">
       <div className="flex-1 p-6">
@@ -53,7 +50,10 @@ export default function MainScreen() {
                   setSelectedApplication(null);
                   setIsModalOpen(true);
                 }}
-                onEdit={handleEdit}
+                onEdit={(row: Application) => {
+                  setEditData(row);
+                  setIsModalOpen(true);
+                }}
                 onCompanyClick={handleCompanyClick}
               />
             </div>
@@ -78,12 +78,16 @@ export default function MainScreen() {
               onClose={() => {
                 setIsModalOpen(false);
                 setSelectedApplication(null);
+                setEditData(null);
               }}
               onSubmit={(data: any) => {
-                if (selectedApplication) {
-                  updateApplication(selectedApplication.id, data);
+                if (editData) {
+                  handleSubmit({
+                    ...data,
+                    id: editData.id,
+                  });
                 } else {
-                  addApplication({
+                  handleSubmit({
                     id: Date.now(),
                     company: data.company || "",
                     jobTitle: data.jobTitle || "",
@@ -99,7 +103,9 @@ export default function MainScreen() {
                 }
                 setIsModalOpen(false);
                 setSelectedApplication(null);
+                setEditData(null);
               }}
+              editData={editData}
             />
           </div>
         </div>

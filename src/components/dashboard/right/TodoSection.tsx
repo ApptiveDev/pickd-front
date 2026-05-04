@@ -32,19 +32,22 @@ export default function TodoSection({
           + 추가
         </button>
       </div>
-      <div className="h-[220px] overflow-y-auto pr-1">
-        {todos.length === 0 && (
-          <p className="text-base text-gray-400">아직 없음</p>
-        )}
-
-        {todos.map((t) => (
-          <div key={t.id} className="flex items-center gap-4">
-            <div
-              onClick={(e) => {
-                e.stopPropagation();
-                onToggle(t.id);
-              }}
-              className={`
+      <div
+        className={`h-[220px] overflow-y-auto pr-1 ${
+          todos.length === 0 ? "flex items-center justify-center" : ""
+        }`}
+      >
+        {todos.length === 0 ? (
+          <p className="text-base text-gray-400">할 일 없음</p>
+        ) : (
+          todos.map((t) => (
+            <div key={t.id} className="flex items-center gap-4 mb-3">
+              <div
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onToggle(t.id);
+                }}
+                className={`
               w-[15px] h-[15px] rounded-full flex items-center justify-center
                       ${
                         t.isCompleted
@@ -52,35 +55,36 @@ export default function TodoSection({
                           : "bg-[#D9D9D9]"
                       }
             `}
-            >
-              {t.isCompleted && (
-                <svg
-                  className="w-[15px] h-[15px] text-green-500"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="3.5"
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-              )}
-            </div>
+              >
+                {t.isCompleted && (
+                  <svg
+                    className="w-[15px] h-[15px] text-green-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="3.5"
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                )}
+              </div>
 
-            <p
-              className={`
+              <p
+                className={`
               text-base
               font-regular
               ${t.isCompleted ? "line-through text-gray-400" : ""}
             `}
-            >
-              {t.summary}
-            </p>
-          </div>
-        ))}
+              >
+                {t.summary}
+              </p>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );

@@ -1,11 +1,16 @@
-import { createContext, useContext, useState } from "react";
 import { type Application } from "../types/application";
+import { createContext, useContext, useState, useEffect } from "react";
+import {
+  createApplication,
+  updateApplication,
+  deleteApplication,
+} from "../api/application";
 
 type ContextType = {
   applications: Application[];
-  addApplication: (app: Application) => void;
-  updateApplication: (id: number, updatedData: any) => void;
-  deleteApplications: (ids: number[]) => void;
+  handleSubmit: (data: Partial<Application>) => Promise<void>;
+  deleteApplications: (ids: number[]) => Promise<void>;
+  loadData: () => Promise<void>;
 
   getCounts: () => {
     total: number;
@@ -22,18 +27,30 @@ const AppContext = createContext<ContextType | null>(null);
 export function ApplicationProvider({ children }: any) {
   const [applications, setApplications] = useState<Application[]>([]);
 
-  const addApplication = (app: Application) => {
-    setApplications((prev) => [...prev, app]);
+  const loadData = async () => {
+    const res = await fetch("/api/application", {
+      credentials: "include",
+    });
+    const data = await res.json();
+    setApplications(data);
+  };
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  // 추가, 수정 통합
+  const handleSubmit = async (data: Partial<Application>) => {
+    if (data.id) {
+      await updateApplication(data.id, data);
+    } else {
+      await createApplication(data);
+    }
+    await loadData();
   };
 
-  const deleteApplications = (ids: number[]) => {
-    setApplications((prev) => prev.filter((app) => !ids.includes(app.id)));
-  };
-
-  const updateApplication = (id: number, updatedData: any) => {
-    setApplications((prev) =>
-      prev.map((app) => (app.id === id ? { ...app, ...updatedData } : app)),
-    );
+  const deleteApplicationsHandler = async (ids: number[]) => {
+    await Promise.all(ids.map((id) => deleteApplication(id)));
+    await loadData();
   };
 
   const getCounts = () => {
@@ -58,10 +75,10 @@ export function ApplicationProvider({ children }: any) {
     <AppContext.Provider
       value={{
         applications,
-        addApplication,
-        deleteApplications,
-        updateApplication,
+        handleSubmit,
+        deleteApplications: deleteApplicationsHandler,
         getCounts,
+        loadData,
       }}
     >
       {children}
