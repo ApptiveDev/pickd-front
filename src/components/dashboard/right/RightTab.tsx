@@ -42,7 +42,7 @@ export default function RightTab({ googleEvents, setGoogleEvents }: any) {
         <ModalLayout
           isOpen={modalType !== null}
           onClose={() => setModalType(null)}
-          title={modalType === "schedule" ? "오늘의 일정" : "할 일"}
+          title={modalType === "schedule" ? "이번주 일정" : "할 일"}
         >
           {modalType === "schedule" && (
             <ScheduleList

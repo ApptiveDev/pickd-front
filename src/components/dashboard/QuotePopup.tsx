@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
-import QUOTES from "../../constants/quotes.json";
 import { CloverIcon } from "../../assets";
+import QUOTES from "../../constants/quotes.json";
 
 export const QuotePopup = () => {
   const [isOpen, setIsOpen] = useState(false);

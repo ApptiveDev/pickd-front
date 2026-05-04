@@ -10,15 +10,25 @@ export default function ApplicationState() {
   const checklist = applications.filter((a) => a.checklistInComplete).length;
 
   return (
-    <div className="flex items-center gap-6 text-sm">
-      <span className="px-3 py-1 rounded-full bg-blue-100 text-blue-600 font-medium">
+    <div className="flex items-center gap-10">
+      <span className="rounded-xl rounded-bl-none px-4 py-2 flex gap-2 bg-[#EFF6FF] text-[#2563EB] text-[13px] font-[600]">
         전체 {total}
       </span>
-      <span className="text-gray-500">진행중 {ongoing}</span>
-      <span className="text-gray-500">마감임박 {urgent}</span>
-      <span className="text-gray-500">마감완료 {done}</span>
-      <span className="text-gray-500">제출완료 {submitted}</span>
-      <span className="text-gray-500">체크리스트 미완료 {checklist}</span>
+      <span className="text-[#64748B] text-[13px] font-[600]">
+        진행중 {ongoing}
+      </span>
+      <span className="text-[#64748B] text-[13px] font-[600]">
+        마감임박 {urgent}
+      </span>
+      <span className="text-[#64748B] text-[13px] font-[600]">
+        마감완료 {done}
+      </span>
+      <span className="text-[#64748B] text-[13px] font-[600]">
+        제출완료 {submitted}
+      </span>
+      <span className="text-[#64748B] text-[13px] font-[600]">
+        체크리스트 미완료 {checklist}
+      </span>
     </div>
   );
 }
