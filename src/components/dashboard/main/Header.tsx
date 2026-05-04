@@ -25,13 +25,23 @@ export default function Header({ user }: { user: any }) {
         </div>
 
         <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white border border-[#E2E8F0] text-[16px] text-[#334155] hover:bg-gray-50">
-            <Icon icon="material-symbols:target" className="text-xl" />
+          <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white border border-[#E2E8F0] text-[15px] text-[#334155] font-medium hover:bg-gray-50">
+            <Icon
+              icon="material-symbols:target"
+              className="text-xl text-[#94A3B8]"
+              width={20}
+              height={20}
+            />
             이번 달 목표
           </button>
 
-          <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white border border-[#E2E8F0] text-[16px] text-[#334155] hover:bg-gray-50">
-            <Icon icon="uis:graph-bar" className="text-xl" />
+          <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white border border-[#E2E8F0] text-[15px] text-[#334155] font-medium hover:bg-gray-50">
+            <Icon
+              icon="uis:graph-bar"
+              className="text-xl text-[#94A3B8]"
+              width={20}
+              height={20}
+            />
             지난 달 리포트
           </button>
         </div>

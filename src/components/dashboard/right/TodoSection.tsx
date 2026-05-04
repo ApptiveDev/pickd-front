@@ -9,9 +9,9 @@ export default function TodoSection({ todos, onClick }: TodoSectionProps) {
   return (
     <div
       onClick={onClick}
-      className="mt-4 bg-white rounded-2xl p-4 shadow-sm cursor-pointer"
+      className="mt-4 bg-white rounded-2xl p-4 border border-[#E2E8F0] shadow-[0px_1px_3px_0px_#00000040] cursor-pointer"
     >
-      <h4 className="font-semibold mb-3">할 일</h4>
+      <h4 className="text-[15px] text-[#0F172A] font-bold mb-3">할 일</h4>
       <div className="max-h-[180px] overflow-y-auto pr-1">
         {todos.length === 0 && (
           <p className="text-sm text-gray-400">아직 없음</p>

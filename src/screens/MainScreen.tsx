@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import Header from "../components/dashboard/main/Header";
-import ApplyInput from "../components/dashboard/main/ApplyInput";
-import ApplicationTable from "../components/dashboard/main/ApplicationTable";
-import RightTab from "../components/dashboard/right/RightTab";
-import PostRegistration from "../components/modal/PostRegistration";
 import CompanyInfo from "../components/modal/CompanyInfo";
+import RightTab from "../components/dashboard/right/RightTab";
 import { useApplication } from "../context/ApplicationContext";
+import ApplyInput from "../components/dashboard/main/ApplyInput";
+import PostRegistration from "../components/modal/PostRegistration";
+import ApplicationTable from "../components/dashboard/main/ApplicationTable";
 
 export default function MainScreen() {
   const [isModalOpen, setIsModalOpen] = useState(false);
