@@ -1,7 +1,8 @@
-import ApplicationState from "./ApplicationState";
-import { useApplication } from "../../../context/ApplicationContext";
-import { getStatusStyle } from "../../../utils/status";
 import { useState } from "react";
+import { Icon } from "@iconify/react";
+import ApplicationState from "./ApplicationState";
+import { getStatusStyle } from "../../../utils/status";
+import { useApplication } from "../../../context/ApplicationContext";
 
 const getDDay = (deadline?: string) => {
   if (!deadline) return "-";
@@ -19,11 +20,7 @@ const getDDay = (deadline?: string) => {
   return `D-${diff}`;
 };
 
-export default function ApplicationTable({
-  onAdd,
-  onEdit,
-  onCompanyClick,
-}: any) {
+export default function ApplicationTable({ onEdit, onCompanyClick }: any) {
   const { applications, deleteApplications } = useApplication();
 
   const [checkedIds, setCheckedIds] = useState<number[]>([]);
@@ -168,11 +165,10 @@ export default function ApplicationTable({
   const EMPTY_COUNT = Math.max(0, 8 - filteredRows.length);
 
   return (
-    <div className="bg-white border border-[#E2E8F0] rounded-xl">
-      <div className="px-4 pt-4">
+    <div className="bg-white rounded-xl">
+      <div className="px-4 pt-[6px] pb-[6px]">
         <ApplicationState />
       </div>
-
       {checkedIds.length > 0 && (
         <div className="mx-4 mt-4 flex items-center gap-2 rounded-xl bg-white px-4 py-3 shadow-sm border">
           <span className="text-sm text-gray-600">
@@ -188,8 +184,7 @@ export default function ApplicationTable({
         </div>
       )}
 
-      {/* 헤더 */}
-      <div className="grid grid-cols-[48px_1fr_1.4fr_1fr_1fr_1fr_0.8fr_1fr_0.8fr_1fr_0.8fr_1fr] bg-[#F1F5F9] text-xs text-gray-500 px-4 py-3 mt-4 border-t border-b">
+      <div className="grid grid-cols-[48px_1fr_1.4fr_1fr_1fr_1fr_0.8fr_1fr_0.8fr_1fr_0.8fr_1fr] bg-[#F1F5F9] text-[13px] text-black font-[500] px-4 py-3">
         <span></span>
 
         {[
@@ -208,7 +203,9 @@ export default function ApplicationTable({
           <span key={key + idx} className="relative">
             <div className="flex items-center gap-1 cursor-pointer">
               {label}
-              <button onClick={() => toggleFilter(key)}>▼</button>
+              <button onClick={() => toggleFilter(key)}>
+                <Icon icon="mdi:chevron-down" width={20} />
+              </button>
             </div>
 
             {isOpen === key && (
@@ -248,7 +245,7 @@ export default function ApplicationTable({
           return (
             <div
               key={row.id}
-              className="grid grid-cols-[48px_1fr_1.4fr_1fr_1fr_1fr_0.8fr_1fr_0.8fr_1fr_0.8fr_1fr] items-center px-4 py-3 text-sm border-b hover:bg-gray-50"
+              className="grid grid-cols-[48px_1fr_1.4fr_1fr_1fr_1fr_0.8fr_1fr_0.8fr_1fr_0.8fr_1fr] items-center px-4 py-3 text-[13px] border-b hover:bg-gray-50"
             >
               <label className="flex items-center justify-center cursor-pointer">
                 <input
@@ -257,33 +254,69 @@ export default function ApplicationTable({
                   checked={isChecked}
                   onChange={() => toggleCheck(row.id)}
                 />
-                <div
-                  className={`w-5 h-5 border-2 rounded flex items-center justify-center ${
-                    isChecked ? "border-blue-500" : "border-gray-400"
-                  }`}
-                >
-                  {isChecked && "✔"}
+                <div className="w-[15px] h-[15px] opacity-100 rounded-[4px] border-[1.5px] border-[#2563EB] flex items-center justify-center">
+                  {isChecked && (
+                    <svg
+                      className="w-3 h-3 text-[#2563EB]"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                      viewBox="0 0 24 24"
+                    >
+                      <path d="M5 13l4 4L19 7" />
+                    </svg>
+                  )}
                 </div>
               </label>
 
               <span
-                className="cursor-pointer hover:text-green-600"
+                className="cursor-pointer text-black font-medium text-[13px] hover:text-green-600"
                 onClick={() => onCompanyClick(row)}
               >
                 {row.company}
               </span>
-              <span>{row.jobTitle}</span>
-              <span>{row.position}</span>
-              <span>{row.industry}</span>
-              <span>{row.deadlineDate}</span>
-              <span className="text-red-500">{getDDay(row.deadlineDate)}</span>
+              <span className="text-[13px] text-black font-regular">
+                {row.jobTitle}
+              </span>
+              <span className="text-[13px] text-black font-medium">
+                {row.position}
+              </span>
+              <span className="text-[13px] text-[#334155] font-regular">
+                {row.industry}
+              </span>
+              <span className="text-[13px] text-[#334155] font-regular">
+                {row.deadlineDate}
+              </span>
+              <span
+                className={`text-[13px] font-semibold ${
+                  getDDay(row.deadlineDate) !== "-" &&
+                  getDDay(row.deadlineDate) !== "마감" &&
+                  parseInt(getDDay(row.deadlineDate).replace("D-", "")) <= 7
+                    ? "text-[#EF4444]"
+                    : "text-[#64748B]"
+                }`}
+              >
+                {getDDay(row.deadlineDate)}
+              </span>
 
-              <span className={getStatusStyle(row.status)}>{row.status}</span>
+              <span
+                className={`inline-flex w-fit px-2 py-[2px] text-[11px] rounded ${getStatusStyle(row.status)}`}
+              >
+                {row.status}
+              </span>
 
-              <span>{row.submitted ? "제출" : "미제출"}</span>
-              <span>{row.checklistInComplete ? "미완료" : "완료"}</span>
-              <span>{row.file ? "제출됨" : "없음"}</span>
-              <span className="truncate">{row.memo || "-"}</span>
+              <span className="text-[13px] text-[#64748B] font-regular">
+                {row.submitted ? "제출" : "미제출"}
+              </span>
+              <span className="text-[12px] text-[#64748B] font-regular">
+                {row.checklistInComplete ? "미완료" : "완료"}
+              </span>
+              <span className="text-[13px] text-[#64748B] font-regular">
+                {row.file ? "제출됨" : "없음"}
+              </span>
+              <span className="truncate text-[13px] text-[#64748B] font-regular">
+                {row.memo || "-"}
+              </span>
 
               <div className="flex gap-2">
                 <button onClick={() => onEdit && onEdit(row)}>✏️</button>

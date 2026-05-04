@@ -1,10 +1,9 @@
-import { useEffect, useState } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
-import { useApplication } from "../../../context/ApplicationContext";
+import { useEffect, useState } from "react";
+import { createEvent } from "../../../api/calendar";
 import CalendarModal from "../../modal/CalendarModal";
-import { createEvent, deleteEvent } from "../../../api/calendar";
-import ScheduleSection from "./ScheduleSection";
+import { useApplication } from "../../../context/ApplicationContext";
 
 function getEventDate(e: any): Date | null {
   if (!e.start) return null;
@@ -195,13 +194,13 @@ export default function CalendarBox({
           return (
             <div className="flex justify-center gap-0 mt-[0px]">
               {hasInterview && (
-                <div className="w-1.5 h-1.5 bg-purple-400 rounded-full" />
+                <div className="w-1.5 h-1.5 bg-[#C082F6] rounded-full" />
               )}
               {hasApply && (
-                <div className="w-1.5 h-1.5 bg-blue-400 rounded-full" />
+                <div className="w-1.5 h-1.5 bg-[#79AF86] rounded-full" />
               )}
               {hasDeadline && (
-                <div className="w-1.5 h-1.5 bg-red-400 rounded-full" />
+                <div className="w-1.5 h-1.5 bg-[#E77975] rounded-full" />
               )}
               {hasDefault && (
                 <div className="w-1.5 h-1.5 bg-gray-400 rounded-full" />
