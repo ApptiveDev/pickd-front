@@ -4,6 +4,8 @@ import LoginScreen from "./screens/LoginScreen";
 import MainScreen from "./screens/MainScreen";
 import ExperienceScreen from "./screens/ExperienceScreen";
 import AiScreen from "./screens/AiScreen";
+import SettingScreen from "./screens/SettingScreen";
+import HelpScreen from "./screens/HelpScrenn.tsx";
 
 import OnboardingEntry from "./screens/onboarding/OnboardingEntry.tsx";
 import Step1Terms from "./screens/onboarding/Step1Terms.tsx";
@@ -39,6 +41,8 @@ function App() {
             <Route path="/main" element={<MainScreen />} />
             <Route path="/experience" element={<ExperienceScreen />} />
             <Route path="/ai" element={<AiScreen />} />
+            <Route path="/settings" element={<SettingScreen />} />
+            <Route path="/help" element={<HelpScreen />} />
           </Route>
         </Routes>
       </BrowserRouter>

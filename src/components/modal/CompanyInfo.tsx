@@ -1,6 +1,7 @@
 import ModalLayout from "./ModalLayout";
 
 // MainScreen의 데이터 구조에 맞춘 인터페이스 정의
+// '개인화 맞춤 정보' 가 직접입력이 아닌 URL/PDF/이미지 등으로 확장될 수 있도록 tier2Content로 통합
 interface CompanyData {
   company: string;
   deadlineDate?: string;
