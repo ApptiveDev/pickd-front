@@ -1,70 +1,136 @@
-import React, { useState } from 'react';
+import Calendar from "react-calendar";
+import "react-calendar/dist/Calendar.css";
+import { useEffect, useState } from "react";
+import { useApplication } from "../../../context/ApplicationContext";
 
-// UI를 고려하여, 직접 달력 그리드를 구현하는 컴포넌트
-const CalendarGrid = () => {
-  const [currentDate, setCurrentDate] = useState(new Date(2026, 3)); // 2026년 4월 (월은 0부터 시작)
+function getEventDate(e: any): Date | null {
+  if (!e.start) return null;
+  if (e.start.dateTime?.value) return new Date(Number(e.start.dateTime.value));
+  if (typeof e.start.dateTime === "string") return new Date(e.start.dateTime);
+  if (e.start.date) return new Date(e.start.date);
+  return null;
+}
 
-  const year = currentDate.getFullYear();
-  const month = currentDate.getMonth();
+function isSameDay(d1: Date, d2: Date) {
+  return (
+    d1.getFullYear() === d2.getFullYear() &&
+    d1.getMonth() === d2.getMonth() &&
+    d1.getDate() === d2.getDate()
+  );
+}
 
-  // 해당 월의 첫 번째 날과 마지막 날 계산
-  const firstDayOfMonth = new Date(year, month, 1).getDay(); // 0(일) ~ 6(토)
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
+const MainCalendar = () => {
+  const { applications } = useApplication();
+  const [googleEvents, setGoogleEvents] = useState<any[]>([]);
+  const [date, setDate] = useState(new Date());
 
-  // 그리드에 표시할 날짜 배열 생성 (이전 달 빈칸 포함)
-  const calendarDays = [];
-  for (let i = 0; i < firstDayOfMonth; i++) {
-    calendarDays.push(null);
-  }
-  for (let i = 1; i <= daysInMonth; i++) {
-    calendarDays.push(i);
-  }
+  // 1. 구글 캘린더 데이터 로드 (CalendarBox와 동일한 로직)
+  const loadEvents = () => {
+    fetch("/api/calendar/events", { credentials: "include" })
+      .then(async (res) => {
+        const text = await res.text();
+        if (!res.ok) throw new Error(text);
+        return text ? JSON.parse(text) : [];
+      })
+      .then((data) => setGoogleEvents(data))
+      .catch((err) => console.error("캘린더 가져오기 실패", err));
+  };
 
-  const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+  useEffect(() => { loadEvents(); }, []);
+
+  const mergedEvents = [
+    ...googleEvents.map((e) => ({
+      date: getEventDate(e),
+      title: e.summary || "일정",
+      type: (e.summary || "").includes("면접") ? "interview" : (e.summary || "").includes("마감") ? "deadline" : "default"
+    })),
+    ...applications.flatMap((a: any) => [
+      a.interviewDate ? { date: new Date(a.interviewDate), title: `면접: ${a.companyName || '지원기업'}`, type: "interview" } : null,
+      a.applyDate ? { date: new Date(a.applyDate), title: `과제: ${a.companyName || '지원기업'}`, type: "apply" } : null,
+      a.deadlineDate ? { date: new Date(a.deadlineDate), title: `마감: ${a.companyName || '지원기업'}`, type: "deadline" } : null,
+    ]),
+  ].filter((e): e is { date: Date; title: string; type: string } => e !== null && e.date !== null);
 
   return (
-    <div className="flex flex-col w-full h-full bg-white border-l border-t border-gray-200">
-      {/* 요일 헤더 */}
-      <div className="grid grid-cols-7 border-b border-gray-200">
-        {dayNames.map((day) => (
-          <div key={day} className="py-2 text-center text-sm font-medium text-gray-500 border-r border-gray-200">
-            {day}
-          </div>
-        ))}
-      </div>
+    <div className="w-full h-full main-calendar-container">
+      <Calendar
+        className="w-full border-none"
+        calendarType="gregory"
+        prev2Label={null}
+        next2Label={null}
+        showNeighboringMonth={true}
+        formatDay={(_, date) => date.getDate().toString()}
+        value={date}
+        onChange={(val) => setDate(val as Date)}
+        tileContent={({ date, view }) => {
+          if (view !== 'month') return null;
+          
+          // 해당 날짜의 모든 일정을 필터링
+          const dayEvents = mergedEvents.filter(ev => isSameDay(ev.date, date));
 
-      {/* 날짜 그리드 */}
-      <div className="grid grid-cols-7 flex-grow">
-        {calendarDays.map((day, index) => (
-          <div
-            key={index}
-            className="min-h-[120px] p-2 border-r border-b border-gray-200 flex flex-col gap-1 transition-colors hover:bg-gray-50"
-          >
-            {day && (
-              <>
-                <span className={`text-sm font-semibold ${day === 9 ? 'bg-black text-white w-6 h-6 rounded-full flex items-center justify-center' : 'text-gray-700'}`}>
-                  {day}
-                </span>
-                
-                {/* 일정 예시 (데이터에 따라 렌더링) */}
-                {day === 8 && (
-                  <div className="text-[10px] p-1 bg-purple-50 text-purple-600 rounded border border-purple-100">
-                    👤 AI 자소서 초안 작성
+          return (
+            <div className="flex flex-col gap-1 mt-1 w-full overflow-hidden px-1">
+              {dayEvents.map((ev, i) => {
+                // 타입별 색상 지정
+                let colorClass = "bg-blue-50 text-blue-600 border-blue-100";
+                if (ev.type === "interview") colorClass = "bg-purple-50 text-purple-600 border-purple-100";
+                if (ev.type === "deadline") colorClass = "bg-red-50 text-red-600 border-red-100";
+                if (ev.type === "apply") colorClass = "bg-green-50 text-green-600 border-green-100";
+
+                return (
+                  <div 
+                    key={i} 
+                    className={`text-[10px] px-1.5 py-0.5 rounded border truncate shadow-sm font-medium ${colorClass}`}
+                  >
+                    {ev.title}
                   </div>
-                )}
-                {day === 10 && (
-                  <div className="text-[10px] p-1 bg-blue-50 text-blue-600 rounded border border-blue-100 flex justify-between">
-                    <span>🏢 삼성전자 서류 마감</span>
-                    <span className="font-bold text-red-500">D-1</span>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-        ))}
-      </div>
+                );
+              })}
+            </div>
+          );
+        }}
+      />
+
+      {/* 3. 캘린더 높이를 키우기 위한 스타일 주입 */}
+      <style>{`
+        .main-calendar-container .react-calendar {
+          width: 100%;
+          border: none;
+          font-family: inherit;
+        }
+        .main-calendar-container .react-calendar__tile {
+          min-height: 120px; /* 칸 높이 고정 */
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          justify-content: flex-start;
+          padding: 8px !important;
+          border-right: 1px solid #f3f4f6;
+          border-bottom: 1px solid #f3f4f6;
+        }
+        .main-calendar-container .react-calendar__tile--now {
+          background: #f8faff !important;
+        }
+        .main-calendar-container .react-calendar__tile--now abbr {
+          background: #3b82f6;
+          color: white;
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .main-calendar-container .react-calendar__month-view__weekdays__weekday {
+          padding: 12px 0;
+          font-size: 0.75rem;
+          color: #9ca3af;
+          text-decoration: none;
+          border-right: 1px solid #f3f4f6;
+        }
+      `}</style>
     </div>
   );
 };
 
-export default CalendarGrid;
+export default MainCalendar;
