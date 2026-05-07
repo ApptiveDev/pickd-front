@@ -1,7 +1,6 @@
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import { useEffect, useState } from "react";
-import { useApplication } from "../../../context/ApplicationContext";
 
 function getEventDate(e: any): Date | null {
   if (!e.start) return null;
@@ -20,11 +19,9 @@ function isSameDay(d1: Date, d2: Date) {
 }
 
 const MainCalendar = () => {
-  const { applications } = useApplication();
   const [googleEvents, setGoogleEvents] = useState<any[]>([]);
   const [date, setDate] = useState(new Date());
 
-  // 1. 구글 캘린더 데이터 로드 (CalendarBox와 동일한 로직)
   const loadEvents = () => {
     fetch("/api/calendar/events", { credentials: "include" })
       .then(async (res) => {
@@ -60,13 +57,11 @@ const MainCalendar = () => {
         tileContent={({ date, view }) => {
           if (view !== 'month') return null;
           
-          // 해당 날짜의 모든 일정을 필터링
           const dayEvents = mergedEvents.filter(ev => isSameDay(ev.date, date));
 
           return (
             <div className="flex flex-col gap-1 mt-1 w-full overflow-hidden px-1">
               {dayEvents.map((ev, i) => {
-                // 타입별 색상 지정
                 let colorClass = "bg-blue-50 text-blue-600 border-blue-100";
                 if (ev.type === "interview") colorClass = "bg-purple-50 text-purple-600 border-purple-100";
                 if (ev.type === "deadline") colorClass = "bg-red-50 text-red-600 border-red-100";
