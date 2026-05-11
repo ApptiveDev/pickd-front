@@ -1,7 +1,9 @@
 import React, { useState } from "react";
+import { type Application } from "../../types/application"
 
 interface PostTodoProps {
   onClose: () => void;
+  applications: Application[];
   onConfirm: (data: {
     summary: string;
     dueDate: string;
@@ -11,7 +13,7 @@ interface PostTodoProps {
   }) => void;
 }
 
-export default function PostTodo({ onClose, onConfirm }: PostTodoProps) {
+export default function PostTodo({ onClose, onConfirm, applications }: PostTodoProps) {
   const [formData, setFormData] = useState({
     summary: "",
     dueDate: "",
@@ -21,14 +23,14 @@ export default function PostTodo({ onClose, onConfirm }: PostTodoProps) {
   });
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+  e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+) => {
+  const { name, value } = e.target;
+  setFormData((prev) => ({
+    ...prev,
+    [name]: value,
+  }));
+};
 
   const handleConfirm = () => {
     if (!formData.summary.trim()) {
@@ -80,14 +82,19 @@ export default function PostTodo({ onClose, onConfirm }: PostTodoProps) {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">연결 공고</label>
-          <input
+          <select
             name="relatedJob"
-            type="text"
-            placeholder="연결 공고명"
             value={formData.relatedJob}
             onChange={handleChange}
-            className="w-full border p-2 rounded outline-none focus:border-blue-500"
-          />
+            className="w-full border p-2 rounded outline-none focus:border-blue-500 bg-white cursor-pointer"
+          >
+            <option value="">연결할 공고를 선택하세요 (선택)</option>
+            {applications.map((app) => (
+              <option key={app.id} value={app.company}>
+                {app.company}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div>

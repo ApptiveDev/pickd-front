@@ -7,6 +7,8 @@ import ScheduleSection from "./ScheduleSection";
 import ModalLayout from "../../modal/ModalLayout";
 import ScheduleList from "../../modal/ScheduleList";
 import PostTodo from "../../modal/PostTodo";
+import { useApplication } from "../../../context/ApplicationContext";
+
 
 export default function RightTab({ googleEvents, setGoogleEvents }: any) {
   const [modalType, setModalType] = useState<
@@ -16,6 +18,7 @@ export default function RightTab({ googleEvents, setGoogleEvents }: any) {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [weeklyEvents, setWeeklyEvents] = useState<any[]>([]);
   const timeouts = useRef<{ [key: string]: ReturnType<typeof setTimeout> }>({});
+  const { applications } = useApplication();
 
   const [todoData, setTodoData] = useState<Todo[]>([
     { id: "1", summary: "포트폴리오 수정", isCompleted: false, relatedJob: "네이버" },
@@ -105,6 +108,7 @@ export default function RightTab({ googleEvents, setGoogleEvents }: any) {
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50">
           <PostTodo
             onClose={() => setModalType(null)}
+            applications={applications}
             onConfirm={(newData) => {
               const newTodo = {
                 id: Date.now().toString(),
