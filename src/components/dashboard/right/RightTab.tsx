@@ -6,16 +6,22 @@ import type { Todo } from "../../../types/todo";
 import ScheduleSection from "./ScheduleSection";
 import ModalLayout from "../../modal/ModalLayout";
 import ScheduleList from "../../modal/ScheduleList";
+import PostTodo from "../../modal/PostTodo";
+import { useApplication } from "../../../context/ApplicationContext";
+
 
 export default function RightTab({ googleEvents, setGoogleEvents }: any) {
-  const [modalType, setModalType] = useState<"schedule" | "todo" | null>(null);
+  const [modalType, setModalType] = useState<
+    "schedule" | "todo" | "postTodo" | null
+  >(null);
   const [selectedEvents, setSelectedEvents] = useState<any[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [weeklyEvents, setWeeklyEvents] = useState<any[]>([]);
   const timeouts = useRef<{ [key: string]: ReturnType<typeof setTimeout> }>({});
+  const { applications } = useApplication();
 
   const [todoData, setTodoData] = useState<Todo[]>([
-    { id: "1", summary: "포트폴리오 수정", isCompleted: false },
+    { id: "1", summary: "포트폴리오 수정", isCompleted: false, relatedJob: "네이버" },
   ]);
 
   const handleToggle = (id: string) => {
@@ -71,14 +77,14 @@ export default function RightTab({ googleEvents, setGoogleEvents }: any) {
 
       <TodoSection
         todos={todoData}
-        onAdd={handleAddTodo}
+        onAdd={() => setModalType("postTodo")} 
         onToggle={handleToggle}
         onClick={() => setModalType("todo")}
       />
 
-      {modalType && (
+      {(modalType === "schedule" || modalType === "todo") && (
         <ModalLayout
-          isOpen={modalType !== null}
+          isOpen={true}
           onClose={() => setModalType(null)}
           title={modalType === "schedule" ? "이번주 일정" : "할 일"}
         >
@@ -88,7 +94,6 @@ export default function RightTab({ googleEvents, setGoogleEvents }: any) {
               onClose={() => setModalType(null)}
             />
           )}
-
           {modalType === "todo" && (
             <TodoList
               todos={todoData}
@@ -97,6 +102,24 @@ export default function RightTab({ googleEvents, setGoogleEvents }: any) {
             />
           )}
         </ModalLayout>
+      )}
+
+      {modalType === "postTodo" && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50">
+          <PostTodo
+            onClose={() => setModalType(null)}
+            applications={applications}
+            onConfirm={(newData) => {
+              const newTodo = {
+                id: Date.now().toString(),
+                isCompleted: false,
+                ...newData,
+              };
+              setTodoData((prev) => [...prev, newTodo]);
+              setModalType(null);
+            }}
+          />
+        </div>
       )}
     </div>
   );

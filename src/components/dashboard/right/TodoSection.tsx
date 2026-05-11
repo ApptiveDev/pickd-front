@@ -13,6 +13,15 @@ export default function TodoSection({
   onToggle,
   onClick,
 }: TodoSectionProps) {
+  const formatDateTime = (date?: string, time?: string) => {
+    if (!date) return "기한 없음";
+
+    const formattedDate = date.replace(/-/g, "/").slice(5);
+    const formattedTime = time || "";
+
+    return `${formattedDate} ${formattedTime}`.trim();
+  };
+
   return (
     <div
       onClick={onClick}
@@ -32,6 +41,7 @@ export default function TodoSection({
           + 추가
         </button>
       </div>
+
       <div
         className={`h-[220px] overflow-y-auto pr-1 ${
           todos.length === 0 ? "flex items-center justify-center" : ""
@@ -41,24 +51,20 @@ export default function TodoSection({
           <p className="text-base text-gray-400">할 일 없음</p>
         ) : (
           todos.map((t) => (
-            <div key={t.id} className="flex items-center gap-4 mb-3">
+            <div key={t.id} className="flex items-center gap-4 mb-3 last:mb-0">
               <div
                 onClick={(e) => {
                   e.stopPropagation();
                   onToggle(t.id);
                 }}
                 className={`
-              w-[15px] h-[15px] rounded-full flex items-center justify-center
-                      ${
-                        t.isCompleted
-                          ? "border-2 border-green-500 bg-white"
-                          : "bg-[#D9D9D9]"
-                      }
-            `}
+                  w-[18px] h-[18px] rounded-full flex items-center justify-center flex-shrink-0
+                  ${t.isCompleted ? "border-2 border-green-500 bg-white" : "bg-[#D9D9D9]"}
+                `}
               >
                 {t.isCompleted && (
                   <svg
-                    className="w-[15px] h-[15px] text-green-500"
+                    className="w-3 h-3 text-green-500"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -66,22 +72,33 @@ export default function TodoSection({
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      strokeWidth="3.5"
+                      strokeWidth="4"
                       d="M5 13l4 4L19 7"
                     />
                   </svg>
                 )}
               </div>
 
-              <p
-                className={`
-              text-base
-              font-regular
-              ${t.isCompleted ? "line-through text-gray-400" : ""}
-            `}
-              >
-                {t.summary}
-              </p>
+              <div className="flex flex-col gap-0.5">
+                <h3
+                  className={`text-[14px] font-semibold text-gray-800 leading-tight ${t.isCompleted ? "line-through text-gray-400" : ""}`}
+                >
+                  {t.relatedJob && (
+                    <span
+                      className={`${t.isCompleted ? "text-gray-400" : "text-[#2563EB]"} mr-1`}
+                    >
+                      [{t.relatedJob}]
+                    </span>
+                  )}
+                  {t.summary}
+                </h3>
+
+                <div className="flex items-center gap-3">
+                  <span className="text-[12px] text-gray-400 tabular-nums font-medium">
+                    {formatDateTime(t.dueDate, t.dueTime)}
+                  </span>
+                </div>
+              </div>
             </div>
           ))
         )}
