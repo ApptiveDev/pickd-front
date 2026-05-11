@@ -33,15 +33,24 @@ const MainCalendar = () => {
       .catch((err) => console.error("캘린더 가져오기 실패", err));
   };
 
-  useEffect(() => { loadEvents(); }, []);
+  useEffect(() => {
+    loadEvents();
+  }, []);
 
   const mergedEvents = [
     ...googleEvents.map((e) => ({
       date: getEventDate(e),
       title: e.summary || "일정",
-      type: (e.summary || "").includes("면접") ? "interview" : (e.summary || "").includes("마감") ? "deadline" : "default"
+      type: (e.summary || "").includes("면접")
+        ? "interview"
+        : (e.summary || "").includes("마감")
+          ? "deadline"
+          : "default",
     })),
-  ].filter((e): e is { date: Date; title: string; type: string } => e !== null && e.date !== null);
+  ].filter(
+    (e): e is { date: Date; title: string; type: string } =>
+      e !== null && e.date !== null,
+  );
 
   return (
     <div className="w-full h-full main-calendar-container">
@@ -55,21 +64,26 @@ const MainCalendar = () => {
         value={date}
         onChange={(val) => setDate(val as Date)}
         tileContent={({ date, view }) => {
-          if (view !== 'month') return null;
-          
-          const dayEvents = mergedEvents.filter(ev => isSameDay(ev.date, date));
+          if (view !== "month") return null;
+
+          const dayEvents = mergedEvents.filter((ev) =>
+            isSameDay(ev.date, date),
+          );
 
           return (
             <div className="flex flex-col gap-1 mt-1 w-full overflow-hidden px-1">
               {dayEvents.map((ev, i) => {
                 let colorClass = "bg-blue-50 text-blue-600 border-blue-100";
-                if (ev.type === "interview") colorClass = "bg-purple-50 text-purple-600 border-purple-100";
-                if (ev.type === "deadline") colorClass = "bg-red-50 text-red-600 border-red-100";
-                if (ev.type === "apply") colorClass = "bg-green-50 text-green-600 border-green-100";
+                if (ev.type === "interview")
+                  colorClass = "bg-purple-50 text-purple-600 border-purple-100";
+                if (ev.type === "deadline")
+                  colorClass = "bg-red-50 text-red-600 border-red-100";
+                if (ev.type === "apply")
+                  colorClass = "bg-green-50 text-green-600 border-green-100";
 
                 return (
-                  <div 
-                    key={i} 
+                  <div
+                    key={i}
                     className={`text-[10px] px-1.5 py-0.5 rounded border truncate shadow-sm font-medium ${colorClass}`}
                   >
                     {ev.title}
@@ -81,15 +95,26 @@ const MainCalendar = () => {
         }}
       />
 
-      {/* 3. 캘린더 높이를 키우기 위한 스타일 주입 */}
       <style>{`
         .main-calendar-container .react-calendar {
           width: 100%;
           border: none;
           font-family: inherit;
         }
+          .main-calendar-container .react-calendar__navigation__label {
+          font-weight: 600;
+          font-size: 1.25rem !important;
+          color: #111827;
+        }
+        .main-calendar-container .react-calendar__navigation button {
+          min-width: 44px;
+          background: none;
+          font-size: 1.5rem;
+          color: #6b7280;
+          transition: color 0.2s;
+      }
         .main-calendar-container .react-calendar__tile {
-          min-height: 120px; /* 칸 높이 고정 */
+          min-height: 120px; 
           display: flex;
           flex-direction: column;
           align-items: flex-start;
