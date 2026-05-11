@@ -100,8 +100,10 @@ export default function MainScreen() {
                 setEditData(null);
               }}
               onSuccess={async () => {
-                await loadData();
-                await loadCalendarEvents();
+                await Promise.all([loadData(), loadCalendarEvents()]);
+                setIsModalOpen(false);
+                setSelectedApplication(null);
+                setEditData(null);
               }}
               editData={editData}
             />
