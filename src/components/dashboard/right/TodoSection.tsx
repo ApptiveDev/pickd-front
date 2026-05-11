@@ -13,13 +13,12 @@ export default function TodoSection({
   onToggle,
   onClick,
 }: TodoSectionProps) {
-  
   const formatDateTime = (date?: string, time?: string) => {
     if (!date) return "기한 없음";
-    
-    const formattedDate = date.replace(/-/g, "/").slice(5); 
+
+    const formattedDate = date.replace(/-/g, "/").slice(5);
     const formattedTime = time || "";
-    
+
     return `${formattedDate} ${formattedTime}`.trim();
   };
 
@@ -42,7 +41,7 @@ export default function TodoSection({
           + 추가
         </button>
       </div>
-      
+
       <div
         className={`h-[220px] overflow-y-auto pr-1 ${
           todos.length === 0 ? "flex items-center justify-center" : ""
@@ -81,10 +80,19 @@ export default function TodoSection({
               </div>
 
               <div className="flex flex-col gap-0.5">
-                <h3 className={`text-[15px] font-bold text-gray-800 leading-tight ${t.isCompleted ? "line-through text-gray-400" : ""}`}>
-                  {t.relatedJob ? `[${t.relatedJob}] ` : ""}{t.summary}
+                <h3
+                  className={`text-[14px] font-semibold text-gray-800 leading-tight ${t.isCompleted ? "line-through text-gray-400" : ""}`}
+                >
+                  {t.relatedJob && (
+                    <span
+                      className={`${t.isCompleted ? "text-gray-400" : "text-[#2563EB]"} mr-1`}
+                    >
+                      [{t.relatedJob}]
+                    </span>
+                  )}
+                  {t.summary}
                 </h3>
-                
+
                 <div className="flex items-center gap-3">
                   <span className="text-[12px] text-gray-400 tabular-nums font-medium">
                     {formatDateTime(t.dueDate, t.dueTime)}

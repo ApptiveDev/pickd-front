@@ -58,13 +58,17 @@ export default function TodoListModal({
 
             <div className="flex flex-col gap-0.5">
               <h3
-                className={`text-[15px] font-bold text-gray-800 leading-tight transition-all ${
-                  todo.isCompleted ? "line-through text-gray-400" : ""
-                }`}
-              >
-                {todo.relatedJob ? `[${todo.relatedJob}] ` : ""}
-                {todo.summary}
-              </h3>
+                  className={`text-[15px] font-bold text-gray-800 leading-tight ${todo.isCompleted ? "line-through text-gray-400" : ""}`}
+                >
+                  {todo.relatedJob && (
+                    <span
+                      className={`${todo.isCompleted ? "text-gray-400" : "text-[#2563EB]"} mr-1`}
+                    >
+                      [{todo.relatedJob}]
+                    </span>
+                  )}
+                  {todo.summary}
+                </h3>
 
               <div className="flex items-center gap-3">
                 <span className="text-[12px] text-gray-400 tabular-nums font-medium">
