@@ -6,9 +6,12 @@ import type { Todo } from "../../../types/todo";
 import ScheduleSection from "./ScheduleSection";
 import ModalLayout from "../../modal/ModalLayout";
 import ScheduleList from "../../modal/ScheduleList";
+import PostTodo from "../../modal/PostTodo";
 
 export default function RightTab({ googleEvents, setGoogleEvents }: any) {
-  const [modalType, setModalType] = useState<"schedule" | "todo" | null>(null);
+  const [modalType, setModalType] = useState<
+    "schedule" | "todo" | "postTodo" | null
+  >(null);
   const [selectedEvents, setSelectedEvents] = useState<any[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [weeklyEvents, setWeeklyEvents] = useState<any[]>([]);
@@ -71,14 +74,14 @@ export default function RightTab({ googleEvents, setGoogleEvents }: any) {
 
       <TodoSection
         todos={todoData}
-        onAdd={handleAddTodo}
+        onAdd={() => setModalType("postTodo")} // 바로 모달을 띄우도록 변경
         onToggle={handleToggle}
         onClick={() => setModalType("todo")}
       />
 
-      {modalType && (
+      {(modalType === "schedule" || modalType === "todo") && (
         <ModalLayout
-          isOpen={modalType !== null}
+          isOpen={true}
           onClose={() => setModalType(null)}
           title={modalType === "schedule" ? "이번주 일정" : "할 일"}
         >
@@ -88,7 +91,6 @@ export default function RightTab({ googleEvents, setGoogleEvents }: any) {
               onClose={() => setModalType(null)}
             />
           )}
-
           {modalType === "todo" && (
             <TodoList
               todos={todoData}
@@ -97,6 +99,23 @@ export default function RightTab({ googleEvents, setGoogleEvents }: any) {
             />
           )}
         </ModalLayout>
+      )}
+
+      {modalType === "postTodo" && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50">
+          <PostTodo
+            onClose={() => setModalType(null)}
+            onConfirm={(newData) => {
+              const newTodo = {
+                id: Date.now().toString(),
+                isCompleted: false,
+                ...newData,
+              };
+              setTodoData((prev) => [...prev, newTodo]);
+              setModalType(null);
+            }}
+          />
+        </div>
       )}
     </div>
   );
