@@ -44,7 +44,20 @@ export function ApplicationProvider({ children }: any) {
   };
 
   const toggleTodo = async (todoId: number) => {
+    const targetTodo = applications
+      .flatMap((app) => app.todos || [])
+      .find((todo) => todo.id === todoId);
+    if (!targetTodo) return;
+
     await toggleTodoApi(todoId);
+
+    if (!targetTodo.completed) {
+      setTimeout(async () => {
+        await deleteTodoApi(todoId);
+        await loadData();
+      }, 10000);
+    }
+
     await loadData();
   };
 

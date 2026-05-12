@@ -1,16 +1,16 @@
 import type { Todo } from "../../types/todo";
+import { useApplication } from "../../context/ApplicationContext";
 
 interface TodoListModalProps {
   todos: Todo[];
-  onToggle: (id: number) => void;
   onClose: () => void;
 }
 
 export default function TodoListModal({
   todos,
-  onToggle,
   onClose,
 }: TodoListModalProps) {
+  const { toggleTodo } = useApplication();
   const formatDateTime = (dateTime?: string) => {
     if (!dateTime) return "기한 없음";
 
@@ -32,7 +32,7 @@ export default function TodoListModal({
           <div
             key={todo.id}
             className="flex items-center gap-3 cursor-pointer group"
-            onClick={() => onToggle?.(todo.id)}
+            onClick={() => toggleTodo?.(todo.id)}
           >
             <div
               className={`w-5 h-5 rounded-full border-1.5 flex items-center justify-center transition-all flex-shrink-0 ${

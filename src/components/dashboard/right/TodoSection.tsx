@@ -15,9 +15,8 @@ export default function TodoSection({
   onClick,
   onAdd,
 }: TodoSectionProps) {
-  const timeouts = useRef<{ [key: number]: ReturnType<typeof setTimeout> }>({});
   const [mode, setMode] = useState<"all" | "focused">("all");
-  const { toggleTodo, removeTodo } = useApplication();
+  const { toggleTodo } = useApplication();
 
   const formatDateTime = (dateTime?: string) => {
     if (!dateTime) return "기한 없음";
@@ -40,26 +39,6 @@ export default function TodoSection({
         ? todos.filter((todo) => todo.application?.id === targetApplication?.id)
         : []
       : todos;
-
-  const handleToggle = (id: number) => {
-    const target = todos.find((t) => t.id === id);
-
-    toggleTodo(id);
-
-    if (target && !target.completed) {
-      const timeout = setTimeout(() => {
-        removeTodo(id);
-        delete timeouts.current[id];
-      }, 10000); // 일단 10초만 이후 하루로 변경
-
-      timeouts.current[id] = timeout;
-    } else {
-      if (timeouts.current[id]) {
-        clearTimeout(timeouts.current[id]);
-        delete timeouts.current[id];
-      }
-    }
-  };
 
   return (
     <div
@@ -114,7 +93,7 @@ export default function TodoSection({
               <div
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleToggle(t.id);
+                  toggleTodo(t.id);
                 }}
                 className={`
                   w-[18px] h-[18px] rounded-full flex items-center justify-center flex-shrink-0
@@ -145,7 +124,7 @@ export default function TodoSection({
                   {mode === "all" && t.application?.company && (
                     <span
                       className={`mr-1 ${
-                        t.completed ? "text-gray-400" : "text-[#2563EB]"
+                        t.completed ? "text-gray-400" : "text-[#64748B]"
                       }`}
                     >
                       [{t.application.company}]

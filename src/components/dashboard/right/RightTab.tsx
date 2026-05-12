@@ -21,7 +21,7 @@ export default function RightTab({
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const [weeklyEvents, setWeeklyEvents] = useState<any[]>([]);
 
-  const { applications, addTodo, toggleTodo } = useApplication();
+  const { applications, addTodo } = useApplication();
 
   return (
     <div className="w-[95%] bg-[F8FAFC]">
@@ -62,7 +62,6 @@ export default function RightTab({
           {modalType === "todo" && (
             <TodoList
               todos={todoData}
-              onToggle={toggleTodo}
               onClose={() => setModalType(null)}
             />
           )}
