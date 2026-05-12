@@ -52,7 +52,11 @@ export default function PostRegistration({
   useEffect(() => {
     if (editData) {
       Object.entries(editData).forEach(([key, value]) => {
-        if (key === "applyDate" || key === "deadlineDate") {
+        if (
+          key === "applyDate" ||
+          key === "deadlineDate" ||
+          key === "interviewDate"
+        ) {
           const date = value ? String(value).split("T")[0] : "";
           updateField(key as any, date);
         } else {
@@ -190,21 +194,22 @@ export default function PostRegistration({
                   value={formData.jobTitle || ""}
                   onChange={(e) => updateField("jobTitle", e.target.value)}
                 />
-                <input
-                  type="text"
-                  placeholder="직무 (예: 서비스 기획자)"
-                  className="w-full py-3 px-4 border border-[#E2E8F0] rounded-xl text-[14px] outline-none"
-                  value={formData.position}
-                  onChange={(e) => updateField("position", e.target.value)}
-                />
-                <input
-                  type="text"
-                  placeholder="산업 (예: IT/테크)"
-                  className="w-full py-3 px-4 border border-[#E2E8F0] rounded-xl text-[14px] outline-none"
-                  value={formData.industry || ""}
-                  onChange={(e) => updateField("industry", e.target.value)}
-                />
-
+                <div className="grid grid-cols-2 gap-3">
+                  <input
+                    type="text"
+                    placeholder="직무 (예: 서비스 기획자)"
+                    className="w-full py-3 px-4 border border-[#E2E8F0] rounded-xl text-[14px] outline-none"
+                    value={formData.position}
+                    onChange={(e) => updateField("position", e.target.value)}
+                  />
+                  <input
+                    type="text"
+                    placeholder="산업 (예: IT/테크)"
+                    className="w-full py-3 px-4 border border-[#E2E8F0] rounded-xl text-[14px] outline-none"
+                    value={formData.industry || ""}
+                    onChange={(e) => updateField("industry", e.target.value)}
+                  />
+                </div>
                 <select
                   className="w-full py-3 px-4 border border-[#E2E8F0] rounded-xl text-[14px] outline-none bg-white text-[#0F172A]"
                   value={formData.status}
@@ -217,7 +222,7 @@ export default function PostRegistration({
                   <option value="최종합격">최종합격</option>
                 </select>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-3 gap-3">
                   <div className="flex flex-col gap-1">
                     <label className="text-[11px] font-bold text-[#94A3B8] ml-1">
                       지원일
@@ -227,6 +232,19 @@ export default function PostRegistration({
                       className="w-full py-2.5 px-4 border border-[#E2E8F0] rounded-xl text-[14px] outline-none text-[#475569]"
                       value={formData.applyDate}
                       onChange={(e) => updateField("applyDate", e.target.value)}
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[11px] font-bold text-[#94A3B8] ml-1">
+                      면접일
+                    </label>
+                    <input
+                      type="date"
+                      className="w-full py-2.5 px-4 border border-[#E2E8F0] rounded-xl text-[14px] outline-none text-[#475569]"
+                      value={formData.interviewDate}
+                      onChange={(e) =>
+                        updateField("interviewDate", e.target.value)
+                      }
                     />
                   </div>
                   <div className="flex flex-col gap-1">
@@ -266,6 +284,9 @@ export default function PostRegistration({
 
                 applyDate: formData.applyDate
                   ? formData.applyDate + "T00:00:00"
+                  : null,
+                interviewDate: formData.interviewDate
+                  ? formData.interviewDate + "T00:00:00"
                   : null,
                 deadlineDate: formData.deadlineDate
                   ? formData.deadlineDate + "T00:00:00"

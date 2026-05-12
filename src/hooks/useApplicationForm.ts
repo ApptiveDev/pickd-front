@@ -10,6 +10,7 @@ export const useApplicationForm = (initialData?: any) => {
     industry: initialData?.industry || "",
     status: initialData?.status || "",
     applyDate: initialData?.applyDate || "",
+    interviewDate: initialData?.interviewDate || "",
     deadlineDate: initialData?.deadlineDate || "",
     memo: initialData?.memo || "",
     file: initialData?.file || null,

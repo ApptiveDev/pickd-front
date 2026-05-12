@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import type { Todo } from "../types/todo";
+import { useEffect, useRef, useState } from "react";
 import type { Application } from "../types/application";
 import Header from "../components/dashboard/main/Header";
 import CompanyInfo from "../components/modal/CompanyInfo";
@@ -12,12 +13,26 @@ export default function MainScreen() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState<any>(null);
+  const [focusedApplication, setFocusedApplication] = useState<any>(null);
   const [editData, setEditData] = useState<any>(null);
+  const timeouts = useRef<{ [key: string]: ReturnType<typeof setTimeout> }>({});
 
   const [googleEvents, setGoogleEvents] = useState<any[]>([]);
   const [user, setUser] = useState<any>(null);
 
   const { loadData } = useApplication();
+  const { applications } = useApplication();
+
+  const allTodos = applications.flatMap((app) =>
+    (app.todos || []).map((todo) => ({
+      ...todo,
+      application: {
+        id: app.id,
+        company: app.company,
+        jobTitle: app.jobTitle,
+      },
+    })),
+  );
 
   useEffect(() => {
     fetch("/api/user", {
@@ -49,14 +64,20 @@ export default function MainScreen() {
     loadCalendarEvents();
   }, []);
 
+  const handleAfterChange = async () => {
+    await loadData();
+
+    setTimeout(loadCalendarEvents, 300);
+  };
+
   const handleCompanyClick = (application: any) => {
     setSelectedApplication(application);
     setIsCompanyModalOpen(true);
   };
 
   return (
-    <div className="flex w-full min-h-full">
-      <div className="flex-1 p-6">
+    <div className="flex w-full min-h-full overflow-hidden">
+      <div className="flex-1 min-w-0 p-6">
         {user && (
           <>
             <Header user={user} />
@@ -73,7 +94,11 @@ export default function MainScreen() {
                   setEditData(row);
                   setIsModalOpen(true);
                 }}
+                onDelete={() => {}}
+                onChange={handleAfterChange}
                 onCompanyClick={handleCompanyClick}
+                focusedApplication={focusedApplication}
+                setFocusedApplication={setFocusedApplication}
               />
             </div>
           </>
@@ -83,8 +108,10 @@ export default function MainScreen() {
       {user && (
         <div className="w-[18.05%] min-w-[280px] border-l border-gray-200 p-6 bg-white/50">
           <RightTab
+            todoData={allTodos}
             googleEvents={googleEvents}
             setGoogleEvents={setGoogleEvents}
+            focusedApplication={focusedApplication}
           />
         </div>
       )}
@@ -100,7 +127,11 @@ export default function MainScreen() {
                 setEditData(null);
               }}
               onSuccess={async () => {
-                await Promise.all([loadData(), loadCalendarEvents()]);
+                await loadData();
+                
+                setTimeout(async () => {
+                  await loadCalendarEvents();
+                }, 500);
                 setIsModalOpen(false);
                 setSelectedApplication(null);
                 setEditData(null);

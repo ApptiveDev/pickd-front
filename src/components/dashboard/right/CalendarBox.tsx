@@ -55,7 +55,6 @@ function getThisWeekEvents(events: any[]) {
 
 export default function CalendarBox({
   defaultEvents,
-  setDefaultEvents,
   setWeeklyEvents,
   setSelectedDate,
   setSelectedEvents,
@@ -66,7 +65,6 @@ export default function CalendarBox({
   setSelectedDate: (date: Date | null) => void;
   setSelectedEvents: (events: any[]) => void;
 }) {
-  const { applications } = useApplication();
   const [date, setDate] = useState(new Date());
 
   const allEvents = [...defaultEvents].filter(Boolean);
@@ -80,7 +78,7 @@ export default function CalendarBox({
 
   useEffect(() => {
     setWeeklyEvents(weeklyEvents);
-  }, [defaultEvents, applications]);
+  }, [defaultEvents]);
 
   const mergedEvents = [
     ...defaultEvents
@@ -108,25 +106,6 @@ export default function CalendarBox({
       .filter((e) => e !== null),
   ];
 
-  const loadEvents = () => {
-    fetch("/api/calendar/events", {
-      credentials: "include",
-    })
-      .then(async (res) => {
-        const text = await res.text();
-        if (!res.ok) throw new Error(text);
-        return text ? JSON.parse(text) : [];
-      })
-      .then((data) => {
-        setDefaultEvents(data);
-      })
-      .catch((err) => console.error("캘린더 가져오기 실패", err));
-  };
-
-  useEffect(() => {
-    loadEvents();
-  }, []);
-
   useEffect(() => {
     const selectedDayEvents = allEvents.filter((e) => {
       const d = getEventDate(e);
@@ -134,7 +113,7 @@ export default function CalendarBox({
     });
 
     setSelectedEvents(selectedDayEvents);
-  }, [date, defaultEvents, applications]);
+  }, [date, defaultEvents]);
 
   return (
     <div className="bg-white rounded-2xl p-2 border border-[#E2E8F0] shadow-[0px_1px_3px_0px_#00000040]">

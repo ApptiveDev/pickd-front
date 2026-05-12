@@ -1,24 +1,28 @@
 import type { Todo } from "../../types/todo";
+import { useApplication } from "../../context/ApplicationContext";
 
 interface TodoListModalProps {
   todos: Todo[];
-  onToggle: (id: string) => void;
   onClose: () => void;
 }
 
 export default function TodoListModal({
   todos,
-  onToggle,
   onClose,
 }: TodoListModalProps) {
-  
-  const formatDateTime = (date?: string, time?: string) => {
-    if (!date) return "기한 없음";
-    
-    const formattedDate = date.replace(/-/g, "/").slice(5);
-    const formattedTime = time || "";
-    
-    return `${formattedDate} ${formattedTime}`.trim();
+  const { toggleTodo } = useApplication();
+  const formatDateTime = (dateTime?: string) => {
+    if (!dateTime) return "기한 없음";
+
+    const date = new Date(dateTime);
+
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+
+    return `${month}/${day} ${hours}:${minutes}`;
   };
 
   return (
@@ -28,16 +32,16 @@ export default function TodoListModal({
           <div
             key={todo.id}
             className="flex items-center gap-3 cursor-pointer group"
-            onClick={() => onToggle(todo.id)}
+            onClick={() => toggleTodo?.(todo.id)}
           >
             <div
               className={`w-5 h-5 rounded-full border-1.5 flex items-center justify-center transition-all flex-shrink-0 ${
-                todo.isCompleted
-                  ? "border-green-500 bg-transparent" 
-                  : "border-[#D9D9D9] bg-[#D9D9D9] group-hover:border-gray-400" 
+                todo.completed
+                  ? "border-green-500 bg-transparent"
+                  : "border-[#D9D9D9] bg-[#D9D9D9] group-hover:border-gray-400"
               }`}
             >
-              {todo.isCompleted && (
+              {todo.completed && (
                 <div className="flex items-center justify-center">
                   <svg
                     className="w-3 h-3 text-green-500"
@@ -58,21 +62,23 @@ export default function TodoListModal({
 
             <div className="flex flex-col gap-0.5">
               <h3
-                  className={`text-[15px] font-bold text-gray-800 leading-tight ${todo.isCompleted ? "line-through text-gray-400" : ""}`}
-                >
-                  {todo.relatedJob && (
-                    <span
-                      className={`${todo.isCompleted ? "text-gray-400" : "text-[#2563EB]"} mr-1`}
-                    >
-                      [{todo.relatedJob}]
-                    </span>
-                  )}
-                  {todo.summary}
-                </h3>
+                className={`text-[15px] font-bold leading-tight ${todo.completed ? "line-through text-gray-400" : "text-gray-800"}`}
+              >
+                {todo.application?.company && (
+                  <span
+                    className={`mr-1 ${
+                      todo.completed ? "text-gray-400" : "text-[#2563EB]"
+                    }`}
+                  >
+                    [{todo.application.company}]
+                  </span>
+                )}
+                {todo.title}
+              </h3>
 
               <div className="flex items-center gap-3">
                 <span className="text-[12px] text-gray-400 tabular-nums font-medium">
-                  {formatDateTime(todo.dueDate, todo.dueTime)}
+                  {formatDateTime(todo.dueDateTime)}
                 </span>
               </div>
             </div>

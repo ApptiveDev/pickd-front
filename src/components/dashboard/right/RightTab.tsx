@@ -1,62 +1,27 @@
+import { useState } from "react";
 import CalendarBox from "./CalendarBox";
 import TodoSection from "./TodoSection";
-import { useState, useRef } from "react";
+import PostTodo from "../../modal/PostTodo";
 import TodoList from "../../modal/TodoList";
-import type { Todo } from "../../../types/todo";
 import ScheduleSection from "./ScheduleSection";
 import ModalLayout from "../../modal/ModalLayout";
 import ScheduleList from "../../modal/ScheduleList";
-import PostTodo from "../../modal/PostTodo";
 import { useApplication } from "../../../context/ApplicationContext";
 
-
-export default function RightTab({ googleEvents, setGoogleEvents }: any) {
+export default function RightTab({
+  todoData,
+  googleEvents,
+  setGoogleEvents,
+  focusedApplication,
+}: any) {
   const [modalType, setModalType] = useState<
     "schedule" | "todo" | "postTodo" | null
   >(null);
   const [selectedEvents, setSelectedEvents] = useState<any[]>([]);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const [weeklyEvents, setWeeklyEvents] = useState<any[]>([]);
-  const timeouts = useRef<{ [key: string]: ReturnType<typeof setTimeout> }>({});
-  const { applications } = useApplication();
 
-  const [todoData, setTodoData] = useState<Todo[]>([
-    { id: "1", summary: "포트폴리오 수정", isCompleted: false, relatedJob: "네이버" },
-  ]);
-
-  const handleToggle = (id: string) => {
-    const target = todoData.find((t) => t.id === id);
-
-    setTodoData((prev) =>
-      prev.map((t) =>
-        t.id === id ? { ...t, isCompleted: !t.isCompleted } : t,
-      ),
-    );
-
-    if (target && !target.isCompleted) {
-      const timeout = setTimeout(() => {
-        setTodoData((prev) => prev.filter((t) => t.id !== id));
-        delete timeouts.current[id];
-      }, 10000); // 일단 임시로 10초 뒤에 삭제되도록 이후 86400000 로 변경
-
-      timeouts.current[id] = timeout;
-    } else {
-      if (timeouts.current[id]) {
-        clearTimeout(timeouts.current[id]);
-        delete timeouts.current[id];
-      }
-    }
-  };
-
-  const handleAddTodo = () => {
-    const newTodo = {
-      id: Date.now().toString(),
-      summary: "새 할 일",
-      isCompleted: false,
-    };
-
-    setTodoData((prev) => [...prev, newTodo]);
-  };
+  const { applications, addTodo } = useApplication();
 
   return (
     <div className="w-[95%] bg-[F8FAFC]">
@@ -77,8 +42,8 @@ export default function RightTab({ googleEvents, setGoogleEvents }: any) {
 
       <TodoSection
         todos={todoData}
-        onAdd={() => setModalType("postTodo")} 
-        onToggle={handleToggle}
+        focusedApplication={focusedApplication}
+        onAdd={() => setModalType("postTodo")}
         onClick={() => setModalType("todo")}
       />
 
@@ -97,7 +62,6 @@ export default function RightTab({ googleEvents, setGoogleEvents }: any) {
           {modalType === "todo" && (
             <TodoList
               todos={todoData}
-              onToggle={handleToggle}
               onClose={() => setModalType(null)}
             />
           )}
@@ -109,13 +73,12 @@ export default function RightTab({ googleEvents, setGoogleEvents }: any) {
           <PostTodo
             onClose={() => setModalType(null)}
             applications={applications}
-            onConfirm={(newData) => {
-              const newTodo = {
-                id: Date.now().toString(),
-                isCompleted: false,
-                ...newData,
-              };
-              setTodoData((prev) => [...prev, newTodo]);
+            onConfirm={(newData: any) => {
+              if (!newData.applicationId || !newData.title) {
+                return;
+              }
+
+              addTodo(newData);
               setModalType(null);
             }}
           />

@@ -3,7 +3,7 @@ import { QuotePopup } from "../../../components/dashboard/QuotePopup";
 
 export default function Header({ user }: { user: any }) {
   return (
-    <div className="flex justify-between items-start mt-[150px] mb-6">
+    <div className="flex justify-between items-start mt-[60px] mb-6">
       <div>
         <h1 className="text-[40px] font-bold text-[#0F172A] font-inter ml-7">
           {user ? `${user.nickname}님의 대시보드` : "대시보드"}

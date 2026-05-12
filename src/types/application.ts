@@ -1,3 +1,5 @@
+import type { Todo } from "./todo";
+
 export type Application = {
   id: number;
   company: string;
@@ -12,6 +14,8 @@ export type Application = {
   file?: File | null;
   submitted?: boolean;
   checklistInComplete?: boolean;
+
+  todos?: Todo[];
 };
 
 export type RegistrationTab = "URL" | "PDF" | "IMAGE" | "MANUAL";
