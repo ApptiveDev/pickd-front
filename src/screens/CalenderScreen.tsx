@@ -1,7 +1,5 @@
 import MainCalendar from '../components/dashboard/calender/MainCalender';
 import SideDetailPanel from '../components/dashboard/calender/SideDetail/SideDetailPanel';
-import Schedulebar from '../components/dashboard/calender/Schedulebar';
-import Deadlinebar from '../components/dashboard/calender/Deadlinebar';
 
 const CalendarScreen = () => {
   return (
