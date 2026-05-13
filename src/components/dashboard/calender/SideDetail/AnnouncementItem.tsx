@@ -1,22 +1,22 @@
 import React from 'react';
 import { Star } from 'lucide-react';
 
-interface AnnouncementProps {
-  title: string;      // 공고 제목 (예: 프론트엔드 개발)
-  company: string;    // 기업명 (예: 네이버)
-  step: string;       // 전형 단계 (예: 서류 전형)
-  dday: string;       // 디데이 (예: D-1)
-  isHighPriority?: boolean; // 중요 표시 (노란 별 여부)
+interface AnnouncementItemProps {
+  title: string;
+  company: string;
+  step: string;
+  dday: string;
 }
 
-const AnnouncementItem = ({ title, company, step, dday, isHighPriority }: AnnouncementProps) => {
+const AnnouncementItem = ({ title, company, step, dday }: AnnouncementItemProps) => {
+  const isUrgent = dday === 'D-Day' || dday === 'D-1';
+
   return (
-    <div className="flex items-center justify-between group cursor-pointer">
+    <div className="flex items-center justify-between group cursor-pointer p-2 hover:bg-gray-50 rounded-lg transition-colors">
       <div className="flex items-center gap-3">
-        {/* 별 아이콘: 중요도에 따라 색상 변경 */}
         <Star 
           size={18} 
-          className={`${isHighPriority ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'} group-hover:scale-110 transition-transform`} 
+          className="text-gray-300" 
         />
         
         <div>
@@ -32,11 +32,8 @@ const AnnouncementItem = ({ title, company, step, dday, isHighPriority }: Announ
         </div>
       </div>
 
-      {/* D-Day 배지: 이미지처럼 부드러운 빨간/노란 톤 적용 */}
       <div className={`text-[10px] font-bold px-2 py-1 rounded-md ${
-        dday === 'D-Day' || dday === 'D-1' 
-          ? 'bg-red-50 text-red-500' 
-          : 'bg-yellow-50 text-yellow-600'
+        isUrgent ? 'bg-red-50 text-red-500' : 'bg-yellow-50 text-yellow-600'
       }`}>
         {dday}
       </div>

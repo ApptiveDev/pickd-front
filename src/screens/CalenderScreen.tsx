@@ -13,7 +13,7 @@ const CalendarScreen = () => {
 
   {/* 오른쪽: 상세 정보 패널 (Fixed Width 추천) */}
   <div className="w-[400px] flex flex-col bg-white overflow-y-auto">
-    <SideDetailPanel />
+    <SideDetailPanel data={[]} />
   </div>
 </div>
   );
