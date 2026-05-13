@@ -42,6 +42,10 @@ export default function PostTodo({ onClose, onConfirm, applications }: PostTodoP
   };
 
   return (
+    <div 
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/30 backdrop-blur-sm"
+      onClick={onClose}
+    >
     <div className="bg-white rounded-2xl p-6 w-[400px] shadow-xl" onClick={(e) => e.stopPropagation()}>
       <h2 className="text-xl font-bold mb-4 text-[#0F172A]">할 일 추가</h2>
 
@@ -121,5 +125,6 @@ export default function PostTodo({ onClose, onConfirm, applications }: PostTodoP
         </button>
       </div>
     </div>
+  </div>
   );
 }
