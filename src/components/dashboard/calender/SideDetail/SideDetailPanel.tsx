@@ -166,8 +166,8 @@ const SideDetailPanel = ({ data }: Props) => {
         <section className="p-6 border-b border-gray-100">
           <div className="flex items-center gap-1 mb-4">
             <ChevronDown size={18} className="text-gray-400" />
-            <span className="font-semibold text-gray-700">다가오는 공고</span>
-            <span className="bg-gray-100 text-gray-500 text-xs px-2 py-0.5 rounded-full">
+            <h3 className="font-bold text-gray-800 text-base">다가오는 공고</h3>
+            <span className="flex items-center justify-center w-5 h-5 bg-gray-200 text-gray-500 text-[11px] font-bold rounded-full">
               {sortedList.length}
             </span>
           </div>
@@ -204,7 +204,7 @@ const SideDetailPanel = ({ data }: Props) => {
                   className="p-4 bg-gray-50 rounded-xl flex justify-between items-center group hover:bg-blue-50 transition-colors"
                 >
                   <div>
-                    <p className="font-medium text-gray-800">
+                    <p className="font-medium text-gray-800 text-[15px]">
                       {schedule.title}
                       <span className="text-gray-400 ml-2 text-sm font-normal">
                         {schedule.company}
