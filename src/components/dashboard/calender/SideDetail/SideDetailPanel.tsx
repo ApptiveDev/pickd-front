@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import ProgressCircle from "./ProgressCircle";
 import SectionHeader from "./SectionHeader";
 import TodoItem from "./TodoItem";
 import AnnouncementItem from "./AnnouncementItem";
 import type { Application } from "../../../../types/application";
+import type { Todo } from '../../../../types/todo';
 
 interface Props {
   data: Application[];
@@ -23,10 +24,42 @@ const SideDetailPanel = ({ data }: Props) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const [todos, setTodos] = useState([
-    { id: 1, text: "자기소개서 수정하기", completed: false },
-    { id: 2, text: "포트폴리오 업데이트", completed: true },
-    { id: 3, text: "기술 면접 대비 (React)", completed: false },
+  const [todos, setTodos] = useState<Todo[]>([
+    {
+      id: 1,
+      title: "자기소개서 수정하기",
+      completed: false,
+      dueDateTime: "2024-03-20T10:00:00",
+      memo: "긴급! 1번 문항 위주로 수정",
+      application: {
+        id: 101,
+        company: "구글코리아",
+        jobTitle: "프론트엔드 개발자",
+      },
+    },
+    {
+      id: 2,
+      title: "포트폴리오 업데이트",
+      completed: true,
+      dueDateTime: "2024-03-19T14:00:00",
+      application: {
+        id: 102,
+        company: "네이버",
+        jobTitle: "웹 서비스 개발",
+      },
+    },
+    {
+      id: 3,
+      title: "기술 면접 대비 (React)",
+      completed: false,
+      dueDateTime: "2024-03-21T16:30:00",
+      memo: "훅(Hooks) 원리 파악하기",
+      application: {
+        id: 103,
+        company: "카카오",
+        jobTitle: "플랫폼 엔지니어",
+      },
+    },
   ]);
 
   useEffect(() => {
@@ -45,8 +78,12 @@ const SideDetailPanel = ({ data }: Props) => {
       date: app.deadlineDate ? new Date(app.deadlineDate) : null,
     })),
     ...googleEvents
-      .filter(e => (e.summary || "").includes("마감") || (e.summary || "").includes("면접"))
-      .map(e => {
+      .filter(
+        (e) =>
+          (e.summary || "").includes("마감") ||
+          (e.summary || "").includes("면접"),
+      )
+      .map((e) => {
         const summary = e.summary || "";
         const match = summary.match(/^\[(.*?)\]\s*(\S+)\s*(.*)$/);
 
@@ -54,11 +91,11 @@ const SideDetailPanel = ({ data }: Props) => {
         let finalCompany = "";
 
         if (match) {
-          const tag = match[1];    
-          const company = match[2];  
-          const jobTitle = match[3]; 
+          const tag = match[1];
+          const company = match[2];
+          const jobTitle = match[3];
 
-          finalTitle = `[${tag}] ${jobTitle}`; 
+          finalTitle = `[${tag}] ${jobTitle}`;
           finalCompany = company;
         } else {
           finalCompany = summary.split(" ").pop() || "";
@@ -66,12 +103,12 @@ const SideDetailPanel = ({ data }: Props) => {
 
         return {
           id: `google-${e.id}`,
-          title: finalTitle,     
-          company: finalCompany,  
+          title: finalTitle,
+          company: finalCompany,
           step: summary.includes("면접") ? "면접 전형" : "마감 임박",
           date: getEventDate(e),
         };
-      })
+      }),
   ];
 
   const todaySchedules = combinedAnnouncements
@@ -98,9 +135,11 @@ const SideDetailPanel = ({ data }: Props) => {
   };
 
   const toggleTodo = (id: number) => {
-    setTodos(todos.map(todo => 
-      todo.id === id ? { ...todo, completed: !todo.completed } : todo
-    ));
+    setTodos(
+      todos.map((todo) =>
+        todo.id === id ? { ...todo, completed: !todo.completed } : todo,
+      ),
+    );
   };
 
   const displayItems = isExpanded ? sortedList : sortedList.slice(0, 3);
@@ -182,22 +221,23 @@ const SideDetailPanel = ({ data }: Props) => {
         </section>
 
         <section className="p-6">
-          <SectionHeader 
-            title="오늘의 할 일" 
-            count={todos.filter(t => !t.completed).length} 
+          <SectionHeader
+            title="오늘의 할 일"
+            count={todos.filter((t) => !t.completed).length}
           />
           <div className="mt-4 space-y-2">
             {todos.length > 0 ? (
               todos.map((todo) => (
                 <TodoItem
                   key={todo.id}
-                  task={todo.text}
-                  company="회사명" 
-                  time="14:00"
-                  priority="보통" 
-                  isOverdue={false} 
-                  completed={todo.completed}
-                  onToggle={() => toggleTodo(todo.id)}
+                  todo={todo}
+                  onToggle={(id) => {
+                    setTodos((prev) =>
+                      prev.map((t) =>
+                        t.id === id ? { ...t, completed: !t.completed } : t,
+                      ),
+                    );
+                  }}
                 />
               ))
             ) : (
@@ -206,7 +246,6 @@ const SideDetailPanel = ({ data }: Props) => {
               </p>
             )}
           </div>
-          
         </section>
       </div>
     </div>
