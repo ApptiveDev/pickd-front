@@ -32,7 +32,7 @@ const AnnouncementItem = ({
         </div>
 
         <div>
-          <h4 className="font-bold text-[#334155] text-[15px] mb-1">{title}</h4>
+          <h4 className="font-semibold text-[#334155] text-[15px] mb-1">{title}</h4>
 
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-400">{company}</span>
