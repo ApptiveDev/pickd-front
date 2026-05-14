@@ -1,20 +1,19 @@
 import MainCalendar from '../components/dashboard/calender/MainCalender';
-import Schedulebar from '../components/dashboard/calender/Schedulebar';
-import Deadlinebar from '../components/dashboard/calender/Deadlinebar';
+import SideDetailPanel from '../components/dashboard/calender/SideDetail/SideDetailPanel';
 
 const CalendarScreen = () => {
   return (
-    <div className="flex h-screen bg-gray-50">
-      <Schedulebar />
+    <div className="flex h-screen w-full bg-gray-50">
+  {/* 왼쪽: 캘린더 영역 */}
+  <div className="flex-1 border-r border-gray-200 overflow-auto">
+    <MainCalendar />
+  </div>
 
-      <main className="flex-1 flex flex-col overflow-hidden">
-        <div className="flex-1 overflow-auto">
-          <MainCalendar />
-        </div>
-      </main>
-
-      <Deadlinebar />
-    </div>
+  {/* 오른쪽: 상세 정보 패널 (Fixed Width 추천) */}
+  <div className="w-[400px] flex flex-col bg-white overflow-y-auto">
+    <SideDetailPanel data={[]} />
+  </div>
+</div>
   );
 };
 
