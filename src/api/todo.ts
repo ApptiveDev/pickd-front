@@ -34,3 +34,15 @@ export const deleteTodoApi = async (id: number) => {
     credentials: "include",
   });
 };
+
+export const getTodos = async () => {
+  const res = await fetch("/api/todo", {
+    credentials: "include",
+  });
+
+  if (!res.ok) {
+    throw new Error("할 일 조회 실패");
+  }
+
+  return res.json();
+};

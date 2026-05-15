@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { Application } from "../types/application";
 import type { Todo } from "../types/todo";
+import { createTodo, toggleTodoApi, getTodos } from "../api/todo";
 
 function getEventDate(e: any): Date | null {
   if (!e.start) return null;
@@ -22,44 +23,41 @@ function getEventDate(e: any): Date | null {
 
 export const useSidePanelData = (data: Application[]) => {
   const [googleEvents, setGoogleEvents] = useState<any[]>([]);
-  const [todos, setTodos] = useState<Todo[]>([
-    {
-      id: 1,
-      title: "자기소개서 수정하기",
-      completed: false,
-      dueDateTime: "2025-03-20T10:00:00",
-      memo: "긴급! 1번 문항 위주로 수정",
-      application: {
-        id: 101,
-        company: "구글코리아",
-        jobTitle: "프론트엔드 개발자",
-      },
-    },
-    {
-      id: 2,
-      title: "포트폴리오 업데이트",
-      completed: false,
-      dueDateTime: "2027-03-19T14:00:00",
-      application: {
-        id: 102,
-        company: "네이버",
-        jobTitle: "웹 서비스 개발",
-      },
-    },
-  ]);
+  const [todos, setTodos] = useState<Todo[]>([]);
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  // 추후 할일 백엔드 API 연동 필요 - 현재는 임시 데이터로 구현
   useEffect(() => {
-    fetch("/api/calendar/events", {
-      credentials: "include",
-    })
-      .then((res) => (res.ok ? res.json() : []))
-      .then((data) => setGoogleEvents(data))
-      .catch((err) => console.error("캘린더 가져오기 실패", err));
-  }, []);
+  const fetchData = async () => {
+    try {
+      const calendarRes = await fetch("/api/calendar/events", {
+        credentials: "include",
+      });
+
+      const calendarData = calendarRes.ok
+        ? await calendarRes.json()
+        : [];
+
+      setGoogleEvents(calendarData);
+
+      const todoRes = await fetch("/api/todo", {
+        credentials: "include",
+      });
+
+      const todoData = todoRes.ok
+        ? await todoRes.json()
+        : [];
+
+      setTodos((prev) => [...prev, ...todoData]);
+
+    } catch (err) {
+      console.error("데이터 가져오기 실패", err);
+    }
+  };
+
+  fetchData();
+}, []);
 
   const combinedAnnouncements = [
     ...data.map((app) => ({
@@ -123,27 +121,41 @@ export const useSidePanelData = (data: Application[]) => {
     .filter((item) => item.date && item.date >= today)
     .sort((a, b) => a.date!.getTime() - b.date!.getTime());
 
-  // 추후 할일 백엔드 API 연동 필요 - 현재는 임시 데이터로 구현
-  const handleAddTodo = (newTodoData: any) => {
-    const newTodo: Todo = {
-      id: Date.now(),
-      title: newTodoData.title,
-      completed: false,
-      dueDateTime: newTodoData.dueDateTime,
-      application: newTodoData.application,
+  const handleAddTodo = async (newTodoData: any) => {
+  try {
+    const selectedApplication = data.find(
+      (app) => app.company === newTodoData.relatedJob,
+    );
+
+    const createdTodo = await createTodo({
+      title: newTodoData.summary,
+      dueDate: newTodoData.dueDate,
+      dueTime: newTodoData.dueTime,
       memo: newTodoData.memo,
-    };
+      applicationId: selectedApplication?.id,
+    });
 
-    setTodos((prev) => [...prev, newTodo]);
-  };
+    setTodos((prev) => [...prev, createdTodo]);
+  } catch (error) {
+    console.error("할 일 생성 실패:", error);
+  }
+};
 
-  const toggleTodo = (id: number) => {
+  const toggleTodo = async (id: number) => {
+  try {
+    await toggleTodoApi(id);
+
     setTodos((prev) =>
       prev.map((todo) =>
-        todo.id === id ? { ...todo, completed: !todo.completed } : todo,
+        todo.id === id
+          ? { ...todo, completed: !todo.completed }
+          : todo,
       ),
     );
-  };
+  } catch (error) {
+    console.error("할 일 상태 변경 실패:", error);
+  }
+};
 
   const calculateDDay = (targetDate: Date) => {
     const diff = Math.ceil(
