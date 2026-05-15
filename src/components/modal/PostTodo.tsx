@@ -61,7 +61,7 @@ export default function PostTodo({
 
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-[14px] font-bold text-[#94A3B8] mb-1">
             제목
           </label>
           <input
@@ -70,12 +70,12 @@ export default function PostTodo({
             placeholder="제목을 입력하세요"
             value={formData.title}
             onChange={handleChange}
-            className="w-full border p-2 rounded outline-none focus:border-blue-500"
+            className="w-full border p-2 rounded-xl outline-none focus:border-blue-500"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-[14px] font-bold text-[#94A3B8] mb-1">
             마감일
           </label>
           <input
@@ -83,12 +83,12 @@ export default function PostTodo({
             type="date"
             value={formData.dueDate}
             onChange={handleChange}
-            className="w-full border p-2 rounded outline-none focus:border-blue-500"
+            className="w-full border p-2 rounded-xl outline-none focus:border-blue-500"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-[14px] font-bold text-[#94A3B8] mb-1">
             마감시간
           </label>
           <input
@@ -96,19 +96,19 @@ export default function PostTodo({
             type="time"
             value={formData.dueTime}
             onChange={handleChange}
-            className="w-full border p-2 rounded outline-none focus:border-blue-500"
+            className="w-full border p-2 rounded-xl outline-none focus:border-blue-500"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-[14px] font-bold text-[#94A3B8] mb-1">
             연결 공고
           </label>
           <select
             name="applicationId"
             value={formData.applicationId}
             onChange={handleChange}
-            className="w-full border p-2 rounded outline-none focus:border-blue-500 bg-white cursor-pointer"
+            className="w-full border p-2 rounded-xl outline-none focus:border-blue-500 bg-white cursor-pointer"
           >
             <option value="">연결할 공고를 선택하세요 (선택)</option>
             {applications.map((app) => (
@@ -120,7 +120,7 @@ export default function PostTodo({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-[14px] font-bold text-[#94A3B8] mb-1">
             메모
           </label>
           <textarea
@@ -128,7 +128,7 @@ export default function PostTodo({
             placeholder="메모를 입력하세요"
             value={formData.memo}
             onChange={handleChange}
-            className="w-full border p-2 rounded h-24 resize-none outline-none focus:border-blue-500"
+            className="w-full border p-2 rounded-xl h-24 resize-none outline-none focus:border-blue-500"
           />
         </div>
       </div>
@@ -136,13 +136,13 @@ export default function PostTodo({
       <div className="flex justify-end gap-2 mt-6">
         <button
           onClick={onClose}
-          className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 transition"
+          className="px-7 py-2 bg-gray-200 rounded-xl hover:bg-gray-300 transition"
         >
           취소
         </button>
         <button
           onClick={handleConfirm}
-          className="px-4 py-2 bg-[#2563EB] text-white rounded hover:bg-blue-700 transition"
+          className="px-7 py-2 bg-black text-white rounded-xl hover:bg-gray-700 transition"
         >
           확인
         </button>

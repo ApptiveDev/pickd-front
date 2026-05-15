@@ -1,7 +1,8 @@
+import type { DocumentItem } from "../types/document";
 import { deleteApplication } from "../api/application";
 import { type Application } from "../types/application";
-import { createContext, useContext, useState, useEffect } from "react";
 import { createTodo, toggleTodoApi, deleteTodoApi } from "../api/todo";
+import { createContext, useContext, useState, useEffect } from "react";
 
 type ContextType = {
   applications: Application[];
@@ -15,7 +16,7 @@ type ContextType = {
     applicationId?: number;
   }) => Promise<void>;
 
-  addDocument: (applicationId: number, title: string) => void;
+  addDocument: (applicationId: number, title: DocumentItem) => void;
 
   toggleTodo: (todoId: number) => Promise<void>;
   removeTodo: (todoId: number) => Promise<void>;
@@ -104,22 +105,15 @@ export function ApplicationProvider({ children }: any) {
     await loadData();
   };
 
-  const addDocument = (applicationId: number, title: string) => {
-    const newDocument = {
-      id: Date.now(),
-      title,
-      submitted: false,
-    };
-
+  const addDocument = (applicationId: number, document: DocumentItem) => {
     setApplications((prev) =>
-      prev.map((app) =>
-        app.id === applicationId
-          ? {
-              ...app,
-              documents: [...(app.documents || []), newDocument],
-            }
-          : app,
-      ),
+      prev.map((app) => {
+        if (app.id !== applicationId) return app;
+        return {
+          ...app,
+          documents: [...(app.documents || []), document],
+        };
+      }),
     );
   };
 

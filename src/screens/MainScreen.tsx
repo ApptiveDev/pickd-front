@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import type { Todo } from "../types/todo";
+import { useEffect, useRef, useState } from "react";
 import type { Application } from "../types/application";
 import Header from "../components/dashboard/main/Header";
 import CompanyInfo from "../components/modal/CompanyInfo";
@@ -15,6 +16,7 @@ export default function MainScreen() {
   const [selectedApplication, setSelectedApplication] = useState<any>(null);
   const [focusedApplication, setFocusedApplication] = useState<any>(null);
   const [editData, setEditData] = useState<any>(null);
+  const timeouts = useRef<{ [key: string]: ReturnType<typeof setTimeout> }>({});
 
   const [googleEvents, setGoogleEvents] = useState<any[]>([]);
   const [user, setUser] = useState<any>(null);

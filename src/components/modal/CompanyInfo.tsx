@@ -8,7 +8,6 @@ interface CompanyData {
   position?: string;
   industry?: string;
   jobTitle?: string;
-  requirements?: string; 
   scale?: string;        
   tier2Content?: string; 
 }
@@ -33,10 +32,10 @@ export default function CompanyInfo({ isOpen, onClose, data }: CompanyInfoProps)
             </button>
           </div>
           <ul className="text-sm text-gray-600 space-y-2">
-            <li>• 지원 일정 마감: <span className="font-medium text-gray-800">{data.deadlineDate || "정보 없음"}</span></li>
+            <li>• 공고명: <span className="font-medium text-gray-800">{data.jobTitle || "정보 없음"}</span></li>
+            <li>• 지원 일정 마감: <span className="font-medium text-gray-800">{data.deadlineDate ? data.deadlineDate.split('T')[0] : "정보 없음"}</span></li>
             <li>• 지원 직무: <span className="font-medium text-gray-800">{data.jobTitle || "정보 없음"} ({data.position || "정보 없음"})</span></li>
             <li>• 산업군: <span className="font-medium text-gray-800">{data.industry || "정보 없음"}</span></li>
-            <li>• 지원 자격요건: <span className="font-medium text-gray-800">{data.requirements || "상세 공고 확인 필요"}</span></li>
           </ul>
         </div>
 
