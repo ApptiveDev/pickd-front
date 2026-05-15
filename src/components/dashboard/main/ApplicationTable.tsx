@@ -43,7 +43,7 @@ export default function ApplicationTable({
   const [filterType, setFilterType] = useState<string | null>(null);
   const [filterValue, setFilterValue] = useState<string | null>(null);
 
-  const { applications, deleteApplications } = useApplication();
+  const { applications, deleteApplications, addDocument } = useApplication();
 
   const toggleCheck = (id: number) => {
     setCheckedIds((prev) =>
@@ -129,7 +129,7 @@ export default function ApplicationTable({
                   <td>${escapeHtml(row.status)}</td>
                   <td>${row.submitted ? "제출" : "미제출"}</td>
                   <td>${completedCount}/${totalCount}</td>
-                  <td>${row.file ? "제출됨" : "없음"}</td>
+                  <td>${row.documents ? "제출됨" : "없음"}</td>
                   <td>${escapeHtml(row.memo)}</td>
                 </tr>
               `;
@@ -156,7 +156,7 @@ export default function ApplicationTable({
           row.status,
           row.submitted ? "제출" : "미제출",
           `${completedCount}/${totalCount}`,
-          row.file ? "제출됨" : "없음",
+          row.documents ? "제출됨" : "없음",
           row.memo || "",
         ].join("\t");
       })
@@ -433,7 +433,7 @@ export default function ApplicationTable({
                     </td>
 
                     <td className="px-4 py-2 border-b whitespace-nowrap text-sm text-[#64748B] font-regular">
-                      {row.file ? "제출됨" : "없음"}
+                      {row.documents ? "제출됨" : "없음"}
                     </td>
 
                     <td className="px-4 py-2 border-b text-sm text-[#64748B] font-regular max-w-[180px] truncate">
@@ -446,11 +446,11 @@ export default function ApplicationTable({
                       <ApplicationMenu
                         row={row}
                         onEdit={onEdit}
+                        onAddDocument={addDocument}
                         onDelete={async () => {
                           const ok = window.confirm(
                             `${row.company} 항목을 삭제하시겠습니까?`,
                           );
-
                           if (!ok) return;
                           await deleteApplications([row.id]);
                           onDelete?.(row.id);
@@ -460,8 +460,9 @@ export default function ApplicationTable({
                           if (focusedApplication?.id === row.id) {
                             setFocusedApplication(null);
                           }
-                          if (onChange) await onChange();
-
+                          if (onChange) {
+                            await onChange();
+                          }
                           alert("삭제되었습니다");
                         }}
                       />

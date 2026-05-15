@@ -13,7 +13,7 @@ export const useApplicationForm = (initialData?: any) => {
     interviewDate: initialData?.interviewDate || "",
     deadlineDate: initialData?.deadlineDate || "",
     memo: initialData?.memo || "",
-    file: initialData?.file || null,
+    documents: initialData?.documents || null,
 
   });
 
