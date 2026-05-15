@@ -51,6 +51,7 @@ const SideDetailPanel = ({ data }: Props) => {
     },
   ]);
 
+  // 추후 todo 추가 API 연동 필요 - 현재는 임시로 상태 관리
   useEffect(() => {
     fetch("/api/calendar/events", { credentials: "include" })
       .then((res) => (res.ok ? res.json() : []))
@@ -97,6 +98,7 @@ const SideDetailPanel = ({ data }: Props) => {
       }),
   ];
 
+  // 추후 백엔드 연동 필요 - 현재는 임시로 상태 관리
   const handleAddTodo = (newTodoData: any) => {
     const newTodo: Todo = {
       id: Date.now(),
@@ -193,7 +195,11 @@ const SideDetailPanel = ({ data }: Props) => {
         </section>
 
         <section className="p-6 border-b border-gray-100">
-          <SectionHeader title="오늘의 일정" count={todaySchedules.length} />
+          <SectionHeader
+            title="오늘의 일정"
+            count={todaySchedules.length}
+            showAddButton={false}
+          />
           <div className="mt-3 space-y-3">
             {todaySchedules.length > 0 ? (
               todaySchedules.map((schedule) => (
@@ -213,6 +219,7 @@ const SideDetailPanel = ({ data }: Props) => {
             count={todos.filter((t) => !t.completed).length}
             applications={data}
             onConfirm={handleAddTodo}
+            showAddButton={true}
           />
           <div className="mt-4 space-y-2">
             {todos.length > 0 ? (

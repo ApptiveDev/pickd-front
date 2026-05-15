@@ -6,19 +6,25 @@ import type { Application } from '../../../../types/application';
 interface SectionHeaderProps {
   title: string;
   count?: number;
-  applications?: Application[]; 
+  applications?: Application[];
   onConfirm?: (data: any) => void; 
+  showAddButton?: boolean; 
 }
 
-const SectionHeader = ({ title, count, applications = [], onConfirm }: SectionHeaderProps) => {
+const SectionHeader = ({ 
+  title, 
+  count, 
+  applications = [], 
+  onConfirm,
+  showAddButton = true 
+}: SectionHeaderProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const isTodaySchedule = title.includes("일정");
-
   const handlePostTodo = (data: any) => {
-    console.log('새로운 할 일 데이터:', data);
+    if (onConfirm) {
+      onConfirm(data);
+    }
     setIsModalOpen(false); 
-    // 백엔드 API 연결 필요 
   };
 
   return (
@@ -32,13 +38,14 @@ const SectionHeader = ({ title, count, applications = [], onConfirm }: SectionHe
             </span>
           )}
         </div>
-
-        {!isTodaySchedule && (
+        
+        {showAddButton && (
           <button 
             onClick={() => setIsModalOpen(true)}
-            className="p-1 hover:bg-gray-100 rounded-md transition-colors"
+            className="p-1 hover:bg-gray-100 rounded-md transition-colors group"
+            title="새 할 일 추가"
           >
-            <Plus size={20} className="text-gray-400" />
+            <Plus size={20} className="text-gray-400 group-hover:text-blue-500" />
           </button>
         )}
       </div>
