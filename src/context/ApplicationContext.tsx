@@ -14,6 +14,9 @@ type ContextType = {
     memo?: string;
     applicationId?: number;
   }) => Promise<void>;
+
+  addDocument: (applicationId: number, title: string) => void;
+
   toggleTodo: (todoId: number) => Promise<void>;
   removeTodo: (todoId: number) => Promise<void>;
 
@@ -25,6 +28,25 @@ type ContextType = {
     submitted: number;
     checklistInComplete: number;
   };
+};
+
+const getDeadlineState = (deadline?: string) => {
+  if (!deadline) return null;
+
+  const end = new Date(deadline);
+  const today = new Date();
+
+  end.setHours(0, 0, 0, 0);
+  today.setHours(0, 0, 0, 0);
+
+  const diff = Math.ceil(
+    (end.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
+  );
+
+  if (diff < 0) return "마감완료";
+  if (diff <= 7) return "마감임박";
+
+  return null;
 };
 
 const AppContext = createContext<ContextType | null>(null);
@@ -82,17 +104,51 @@ export function ApplicationProvider({ children }: any) {
     await loadData();
   };
 
+  const addDocument = (applicationId: number, title: string) => {
+    const newDocument = {
+      id: Date.now(),
+      title,
+      submitted: false,
+    };
+
+    setApplications((prev) =>
+      prev.map((app) =>
+        app.id === applicationId
+          ? {
+              ...app,
+              documents: [...(app.documents || []), newDocument],
+            }
+          : app,
+      ),
+    );
+  };
+
   const getCounts = () => {
     const total = applications.length;
-    const ongoing = applications.filter((a) => a.status === "진행중").length;
-    const urgent = applications.filter((a) => a.status === "마감임박").length;
-    const done = applications.filter((a) => a.status === "마감완료").length;
-    const submitted = applications.filter((a) => a.submitted).length;
-    const checklistInComplete = applications.filter(
-      (a) => a.checklistInComplete,
+    const ongoing = applications.filter((a) => a.status === "준비중").length;
+    const submitted = applications.filter(
+      (a) => a.status === "지원완료",
     ).length;
+    const urgent = applications.filter(
+      (a) => getDeadlineState(a.deadlineDate) === "마감임박",
+    ).length;
+    const done = applications.filter(
+      (a) => getDeadlineState(a.deadlineDate) === "마감완료",
+    ).length;
+    const checklistInComplete = applications.filter((a) => {
+      const todos = a.todos || [];
 
-    return { total, ongoing, urgent, done, submitted, checklistInComplete };
+      return todos.length > 0 && todos.some((todo) => !todo.completed);
+    }).length;
+
+    return {
+      total,
+      ongoing,
+      urgent,
+      done,
+      submitted,
+      checklistInComplete,
+    };
   };
 
   return (
@@ -103,6 +159,7 @@ export function ApplicationProvider({ children }: any) {
         getCounts,
         loadData,
         addTodo,
+        addDocument,
         toggleTodo,
         removeTodo,
       }}

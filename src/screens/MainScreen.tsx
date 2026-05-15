@@ -1,5 +1,4 @@
-import type { Todo } from "../types/todo";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import type { Application } from "../types/application";
 import Header from "../components/dashboard/main/Header";
 import CompanyInfo from "../components/modal/CompanyInfo";
@@ -7,7 +6,8 @@ import RightTab from "../components/dashboard/right/RightTab";
 import { useApplication } from "../context/ApplicationContext";
 import ApplyInput from "../components/dashboard/main/ApplyInput";
 import PostRegistration from "../components/modal/PostRegistration";
-import ApplicationTable from "../components/dashboard/main/ApplicationTable";
+import DocumentSection from "../components/dashboard/main/document/DocumentSection";
+import ApplicationTable from "../components/dashboard/main/applicationTable/ApplicationTable";
 
 export default function MainScreen() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -15,7 +15,6 @@ export default function MainScreen() {
   const [selectedApplication, setSelectedApplication] = useState<any>(null);
   const [focusedApplication, setFocusedApplication] = useState<any>(null);
   const [editData, setEditData] = useState<any>(null);
-  const timeouts = useRef<{ [key: string]: ReturnType<typeof setTimeout> }>({});
 
   const [googleEvents, setGoogleEvents] = useState<any[]>([]);
   const [user, setUser] = useState<any>(null);
@@ -101,6 +100,7 @@ export default function MainScreen() {
                 setFocusedApplication={setFocusedApplication}
               />
             </div>
+            <DocumentSection />
           </>
         )}
       </div>
@@ -128,7 +128,7 @@ export default function MainScreen() {
               }}
               onSuccess={async () => {
                 await loadData();
-                
+
                 setTimeout(async () => {
                   await loadCalendarEvents();
                 }, 500);

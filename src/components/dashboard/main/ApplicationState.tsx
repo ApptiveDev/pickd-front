@@ -1,13 +1,27 @@
+import { getDDay } from "../../../utils/application";
 import { useApplication } from "../../../context/ApplicationContext";
 
 export default function ApplicationState() {
   const { applications } = useApplication();
   const total = applications.length;
-  const ongoing = applications.filter((a) => a.status === "진행중").length;
-  const urgent = applications.filter((a) => a.status === "마감임박").length;
-  const done = applications.filter((a) => a.status === "마감완료").length;
+  const ongoing = applications.filter((a) => a.status === "준비중").length;
+  const urgent = applications.filter((a) => {
+    const dday = getDDay(a.deadlineDate);
+    return (
+      dday === "D-Day" ||
+      (dday.startsWith("D-") && parseInt(dday.replace("D-", "")) <= 7)
+    );
+  }).length;
+  const done = applications.filter((a) => {
+    const dday = getDDay(a.deadlineDate);
+    return dday.startsWith("D+");
+  }).length;
   const submitted = applications.filter((a) => a.submitted).length;
-  const checklist = applications.filter((a) => a.checklistInComplete).length;
+
+  const checklist = applications.filter((a) => {
+    const todos = a.todos || [];
+    return todos.length > 0 && todos.some((todo) => !todo.completed);
+  }).length;
 
   return (
     <div className="flex items-center gap-10">
