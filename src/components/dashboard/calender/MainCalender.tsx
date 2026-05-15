@@ -1,6 +1,8 @@
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import EventPopup from "./EventPopup";
+import "./MainCalendar.css";
 
 function getEventDate(e: any): Date | null {
   if (!e.start) return null;
@@ -18,12 +20,31 @@ function isSameDay(d1: Date, d2: Date) {
   );
 }
 
+type EventType = "interview" | "deadline" | "apply" | "default";
+
+type CalendarEvent = {
+  date: Date;
+  title: string;
+  type: EventType;
+};
+
 const MainCalendar = () => {
   const [googleEvents, setGoogleEvents] = useState<any[]>([]);
   const [date, setDate] = useState(new Date());
 
+  const [popup, setPopup] = useState<{
+    date: Date;
+    events: CalendarEvent[];
+    x: number;
+    y: number;
+  } | null>(null);
+
+  const popupRef = useRef<HTMLDivElement>(null);
+
   const loadEvents = () => {
-    fetch("/api/calendar/events", { credentials: "include" })
+    fetch("/api/calendar/events", {
+      credentials: "include",
+    })
       .then(async (res) => {
         const text = await res.text();
         if (!res.ok) throw new Error(text);
@@ -37,23 +58,61 @@ const MainCalendar = () => {
     loadEvents();
   }, []);
 
-  const mergedEvents = [
-    ...googleEvents.map((e) => ({
-      date: getEventDate(e),
-      title: e.summary || "일정",
-      type: (e.summary || "").includes("면접")
-        ? "interview"
-        : (e.summary || "").includes("마감")
-          ? "deadline"
-          : "default",
-    })),
-  ].filter(
-    (e): e is { date: Date; title: string; type: string } =>
-      e !== null && e.date !== null,
-  );
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (popupRef.current && !popupRef.current.contains(e.target as Node)) {
+        setPopup(null);
+      }
+    };
+
+    if (popup) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [popup]);
+
+  const mergedEvents: CalendarEvent[] = googleEvents
+    .map((e) => {
+      const title = e.summary || "";
+      let type: EventType = "default";
+
+      if (title.includes("면접")) type = "interview";
+      else if (title.includes("마감")) type = "deadline";
+      else if (title.includes("제출")) type = "apply";
+
+      const eventDate = getEventDate(e);
+
+      if (!eventDate) return null;
+
+      return {
+        date: eventDate,
+        title: title || "일정",
+        type,
+      };
+    })
+    .filter(Boolean) as CalendarEvent[];
+
+  const getEventColor = (type: EventType) => {
+    if (type === "interview") {
+      return "bg-[#C082F6]/10 text-[#C082F6] border-[#C082F6]/20";
+    }
+
+    if (type === "deadline") {
+      return "bg-[#E77975]/10 text-[#E77975] border-[#E77975]/20";
+    }
+
+    if (type === "apply") {
+      return "bg-[#79AF86]/10 text-[#79AF86] border-[#79AF86]/20";
+    }
+
+    return "bg-blue-50 text-blue-600 border-blue-100";
+  };
 
   return (
-    <div className="w-full h-full main-calendar-container">
+    <div className="w-full h-full main-calendar-container relative">
       <Calendar
         className="w-full border-none"
         calendarType="gregory"
@@ -62,7 +121,10 @@ const MainCalendar = () => {
         showNeighboringMonth={true}
         formatDay={(_, date) => date.getDate().toString()}
         value={date}
-        onChange={(val) => setDate(val as Date)}
+        onChange={(val) => {
+          setDate(val as Date);
+          setPopup(null);
+        }}
         tileContent={({ date, view }) => {
           if (view !== "month") return null;
 
@@ -70,80 +132,49 @@ const MainCalendar = () => {
             isSameDay(ev.date, date),
           );
 
+          const visibleEvents = dayEvents.slice(0, 2);
+          const hiddenCount = dayEvents.length - 2;
+
           return (
             <div className="flex flex-col gap-1 mt-1 w-full overflow-hidden px-1">
-              {dayEvents.map((ev, i) => {
-                let colorClass = "bg-blue-50 text-blue-600 border-blue-100";
-                if (ev.type === "interview")
-                  colorClass = "bg-purple-50 text-purple-600 border-purple-100";
-                if (ev.type === "deadline")
-                  colorClass = "bg-red-50 text-red-600 border-red-100";
-                if (ev.type === "apply")
-                  colorClass = "bg-green-50 text-green-600 border-green-100";
+              {visibleEvents.map((ev, i) => (
+                <div
+                  key={i}
+                  className={`text-[10px] px-1.5 py-0.5 rounded border truncate shadow-sm font-medium ${getEventColor(
+                    ev.type,
+                  )}`}
+                >
+                  {ev.title}
+                </div>
+              ))}
 
-                return (
-                  <div
-                    key={i}
-                    className={`text-[10px] px-1.5 py-0.5 rounded border truncate shadow-sm font-medium ${colorClass}`}
-                  >
-                    {ev.title}
-                  </div>
-                );
-              })}
+              {hiddenCount > 0 && (
+                <button
+                  className="text-[10px] text-blue-500 text-left font-medium"
+                  onClick={(e) => {
+                    e.stopPropagation();
+
+                    const rect = (
+                      e.currentTarget as HTMLElement
+                    ).getBoundingClientRect();
+
+                    setPopup({
+                      date,
+                      events: dayEvents,
+                      x: rect.left,
+                      y: rect.bottom + 8,
+                    });
+                  }}
+                >
+                  +{hiddenCount} more
+                </button>
+              )}
             </div>
           );
         }}
       />
 
-      <style>{`
-        .main-calendar-container .react-calendar {
-          width: 100%;
-          border: none;
-          font-family: inherit;
-        }
-          .main-calendar-container .react-calendar__navigation__label {
-          font-weight: 600;
-          font-size: 1.25rem !important;
-          color: #111827;
-        }
-        .main-calendar-container .react-calendar__navigation button {
-          min-width: 44px;
-          background: none;
-          font-size: 1.5rem;
-          color: #6b7280;
-          transition: color 0.2s;
-      }
-        .main-calendar-container .react-calendar__tile {
-          min-height: 120px; 
-          display: flex;
-          flex-direction: column;
-          align-items: flex-start;
-          justify-content: flex-start;
-          padding: 8px !important;
-          border-right: 1px solid #f3f4f6;
-          border-bottom: 1px solid #f3f4f6;
-        }
-        .main-calendar-container .react-calendar__tile--now {
-          background: #f8faff !important;
-        }
-        .main-calendar-container .react-calendar__tile--now abbr {
-          background: #3b82f6;
-          color: white;
-          width: 24px;
-          height: 24px;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-        .main-calendar-container .react-calendar__month-view__weekdays__weekday {
-          padding: 12px 0;
-          font-size: 0.75rem;
-          color: #9ca3af;
-          text-decoration: none;
-          border-right: 1px solid #f3f4f6;
-        }
-      `}</style>
+      {popup && <EventPopup popup={popup} popupRef={popupRef} />}
     </div>
   );
 };
