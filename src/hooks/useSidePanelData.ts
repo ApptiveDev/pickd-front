@@ -162,7 +162,7 @@ export const useSidePanelData = () => {
 
       const createdTodo =
         await createTodo({
-          title: newTodoData.summary,
+          title: newTodoData.title,
           dueDate:
             newTodoData.dueDate,
           dueTime:
