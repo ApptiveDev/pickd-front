@@ -6,8 +6,9 @@ interface Props {
   setShow: (value: boolean) => void;
 
   filters: { key: string; value: string }[];
-
   sort: { key: string; order: "asc" | "desc" } | null;
+  groupedFilters: Record<string, string[]>;
+
   setFilters: React.Dispatch<
     React.SetStateAction<{ key: string; value: string }[]>
   >;
@@ -33,6 +34,7 @@ export default function ActiveFilter({
   setShow,
   filters,
   sort,
+  groupedFilters,
   setFilters,
   setSort,
 }: Props) {
@@ -66,13 +68,12 @@ export default function ActiveFilter({
     <div className="relative">
       <button
         onClick={() => setShow(!show)}
-        className="flex items-center gap-1 px-3 py-2 rounded-xl border border-[#E2E8F0] hover:bg-gray-50"
+        className="flex items-center gap-1 px-2 py-2 border border-[#F1F5F9] rounded-xl hover:bg-gray-50"
       >
         <Icon
           icon="mdi:filter-variant"
-          className="text-[18px] text-[#64748B]"
+          className="text-[18px] text-[#64748B] translate-x-[2px]"
         />
-        <span className="text-sm text-[#475569]"></span>
       </button>
 
       {show && (
@@ -94,27 +95,28 @@ export default function ActiveFilter({
           </div>
 
           <div className="flex flex-col gap-2">
-            {filters.map((filter, idx) => (
-              <div
-                key={`${filter.key}-${filter.value}-${idx}`}
-                className="flex items-center justify-between gap-3 bg-[#F8FAFC] rounded-xl px-3 py-2"
-              >
-                <div className="flex flex-col min-w-0">
-                  <span className="text-[11px] text-[#94A3B8]">
-                    {filterLabelMap[filter.key] || filter.key}
-                  </span>
+            {Object.entries(groupedFilters).map(([key, values]) => (
+              <div key={key} className="rounded-xl bg-[#F8FAFC] px-3 py-3">
+                <span className="text-[11px] text-[#94A3B8]">
+                  {filterLabelMap[key] || key}
+                </span>
 
-                  <span className="text-sm font-[500] text-[#334155] whitespace-nowrap">
-                    {filter.value}
-                  </span>
+                <div className="mt-2 flex flex-col gap-2">
+                  {values.map((value) => (
+                    <div
+                      key={value}
+                      className="flex items-center gap-1 rounded-lg px-2 text-sm text-[#334155]"
+                    >
+                      <span>{value}</span>
+                      <button
+                        onClick={() => removeFilter(key, value)}
+                        className="text-[#64748B] hover:text-[#334155]"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
                 </div>
-
-                <button
-                  onClick={() => removeFilter(filter.key, filter.value)}
-                  className="shrink-0 text-[#64748B] hover:text-red-500"
-                >
-                  ✕
-                </button>
               </div>
             ))}
 

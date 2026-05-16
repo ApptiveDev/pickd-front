@@ -5,7 +5,6 @@ import TodoList from "../../modal/TodoList";
 import ScheduleSection from "./ScheduleSection";
 import ModalLayout from "../../modal/ModalLayout";
 import ScheduleList from "../../modal/ScheduleList";
-import { useApplication } from "../../../context/ApplicationContext";
 
 export default function RightTab({
   todoData,
@@ -13,9 +12,7 @@ export default function RightTab({
   setGoogleEvents,
   focusedApplication,
 }: any) {
-  const [modalType, setModalType] = useState<
-    "schedule" | "todo" | null
-  >(null);
+  const [modalType, setModalType] = useState<"schedule" | "todo" | null>(null);
   const [selectedEvents, setSelectedEvents] = useState<any[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const [weeklyEvents, setWeeklyEvents] = useState<any[]>([]);
@@ -56,10 +53,7 @@ export default function RightTab({
             />
           )}
           {modalType === "todo" && (
-            <TodoList
-              todos={todoData}
-              onClose={() => setModalType(null)}
-            />
+            <TodoList todos={todoData} onClose={() => setModalType(null)} />
           )}
         </ModalLayout>
       )}

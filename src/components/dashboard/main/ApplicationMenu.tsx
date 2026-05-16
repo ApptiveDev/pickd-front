@@ -45,9 +45,7 @@ export default function ApplicationMenu({
         className="w-full h-full py-2 text-[20px] text-gray-400"
         onClick={(e) => {
           e.stopPropagation();
-
           const rect = e.currentTarget.getBoundingClientRect();
-
           const menuWidth = 220;
           const menuHeight = 320;
 
@@ -63,7 +61,6 @@ export default function ApplicationMenu({
           }
 
           setMenuPosition({ top, left });
-
           setOpen((prev) => !prev);
         }}
       >

@@ -1,7 +1,6 @@
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import { useEffect, useState } from "react";
-import { useApplication } from "../../../context/ApplicationContext";
 
 function getEventDate(e: any): Date | null {
   if (!e.start) return null;
