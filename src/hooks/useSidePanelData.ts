@@ -70,50 +70,34 @@ export const useSidePanelData = () => {
       title: app.jobTitle,
       company: app.company,
       step: app.status,
-      date: app.deadlineDate
-        ? new Date(app.deadlineDate)
-        : null,
+      date: app.deadlineDate ? new Date(app.deadlineDate) : null,
     })),
 
-    ...googleEvents
-      .filter(
-        (e) =>
-          (e.summary || "").includes("마감") ||
-          (e.summary || "").includes("면접") ||
-          (e.summary || "").includes("제출")
-      )
-      .map((e) => {
-        const summary = e.summary || "";
+    ...googleEvents.map((e) => {
+      const summary = e.summary || "";
+      let step = "일반 일정";
 
-        let step = "일반 일정";
+      if (summary.includes("면접")) {
+        step = "면접 전형";
+      } else if (summary.includes("마감")) {
+        step = "지원 마감";
+      } else if (summary.includes("제출")) {
+        step = "서류 제출";
+      }
 
-        if (summary.includes("면접")) {
-          step = "면접 전형";
-        } else if (summary.includes("마감")) {
-          step = "지원 마감";
-        } else if (summary.includes("제출")) {
-          step = "서류 제출";
-        }
+      const cleanTitle = summary.replace(/면접|마감|제출/g, "").trim();
+      const words = cleanTitle.split(" ");
+      const company = words[0];
+      const jobTitle = words.slice(1).join(" ") || cleanTitle;
 
-        const cleanTitle = summary
-          .replace(/면접|마감|제출/g, "")
-          .trim();
-
-        const words = cleanTitle.split(" ");
-
-        const company = words[0];
-        const jobTitle =
-          words.slice(1).join(" ") ||
-          cleanTitle;
-
-        return {
-          id: `google-${e.id}`,
-          title: jobTitle,
-          company,
-          step,
-          date: getEventDate(e),
-        };
-      }),
+      return {
+        id: `google-${e.id}`,
+        title: jobTitle,
+        company,
+        step,
+        date: getEventDate(e),
+      };
+    }),
   ];
 
   const todaySchedules = combinedAnnouncements
@@ -136,16 +120,19 @@ export const useSidePanelData = () => {
     );
 
   const sortedList = combinedAnnouncements
-    .filter(
-      (item) =>
-        item.date &&
-        item.date >= today
-    )
-    .sort(
-      (a, b) =>
-        a.date!.getTime() -
-        b.date!.getTime()
+  .filter((item) => {
+    // '면접' 또는 '마감'이라는 글자가 포함되어 있는지 체크
+    const isValidStep = 
+      item.step?.includes("면접") || 
+      item.step?.includes("마감");
+    
+    return (
+      isValidStep &&
+      item.date &&
+      item.date >= today
     );
+  })
+  .sort((a, b) => a.date!.getTime() - b.date!.getTime());
 
   const handleAddTodo = async (
     newTodoData: any
