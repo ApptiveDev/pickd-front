@@ -1,11 +1,10 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import type { Todo } from "../../../types/todo";
 import { useApplication } from "../../../context/ApplicationContext";
 
 interface TodoSectionProps {
   todos: Todo[];
   onClick: () => void;
-  onAdd: () => void;
   focusedApplication?: any;
 }
 
@@ -13,7 +12,6 @@ export default function TodoSection({
   todos,
   focusedApplication,
   onClick,
-  onAdd,
 }: TodoSectionProps) {
   const [mode, setMode] = useState<"all" | "focused">("all");
   const { toggleTodo } = useApplication();
@@ -62,16 +60,6 @@ export default function TodoSection({
             className="text-sm text-gray-400 hover:text-gray-600"
           >
             {mode === "all" ? "선택한 공고 할 일" : "전체 할 일"}
-          </button>
-
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onAdd();
-            }}
-            className="text-sm px-2 py-1 bg-[#2563EB] text-white rounded-md"
-          >
-            + 추가
           </button>
         </div>
       </div>

@@ -1,9 +1,11 @@
 import React, { useState } from "react";
+import { createPortal } from "react-dom";
 import { type Application } from "../../types/application";
 
 interface PostTodoProps {
   onClose: () => void;
-  applications: Application[];
+  application?: Application;
+  applications?: Application[];
   onConfirm: (data: {
     title: string;
     dueDate: string;
@@ -16,13 +18,14 @@ interface PostTodoProps {
 export default function PostTodo({
   onClose,
   onConfirm,
+  application,
   applications,
 }: PostTodoProps) {
   const [formData, setFormData] = useState({
     title: "",
     dueDate: "",
     dueTime: "",
-    applicationId: "",
+    applicationId: application ? String(application.id) : "",
     memo: "",
   });
 
@@ -48,9 +51,9 @@ export default function PostTodo({
     onConfirm(formData);
   };
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/30 backdrop-blur-sm"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/30 backdrop-blur-sm pointer-events-auto"
       onClick={onClose}
     >
       <div
@@ -99,26 +102,28 @@ export default function PostTodo({
               className="w-full border p-2 rounded-xl outline-none focus:border-blue-500"
             />
           </div>
+          {!application && applications && (
+            <div>
+              <label className="block text-[14px] font-bold text-[#94A3B8] mb-1">
+                연결 공고
+              </label>
 
-          <div>
-            <label className="block text-[14px] font-bold text-[#94A3B8] mb-1">
-              연결 공고
-            </label>
-            <select
-              name="applicationId"
-              value={formData.applicationId}
-              onChange={handleChange}
-              className="w-full border p-2 rounded-xl outline-none focus:border-blue-500 bg-white cursor-pointer"
-            >
-              <option value="">연결할 공고를 선택하세요 (선택)</option>
+              <select
+                name="applicationId"
+                value={formData.applicationId}
+                onChange={handleChange}
+                className="w-full border p-2 rounded-xl outline-none focus:border-blue-500 bg-white cursor-pointer"
+              >
+                <option value="">연결할 공고를 선택하세요</option>
 
-              {applications.map((app) => (
-                <option key={app.id} value={app.id}>
-                  {app.company}
-                </option>
-              ))}
-            </select>
-          </div>
+                {applications.map((app) => (
+                  <option key={app.id} value={app.id}>
+                    {app.company}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           <div>
             <label className="block text-[14px] font-bold text-[#94A3B8] mb-1">
@@ -149,6 +154,7 @@ export default function PostTodo({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

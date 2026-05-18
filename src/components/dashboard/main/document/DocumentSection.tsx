@@ -1,5 +1,5 @@
-import { useApplication } from "../../../../context/ApplicationContext";
 import DocumentCard from "./DocumentCard";
+import { useApplication } from "../../../../context/ApplicationContext";
 
 export default function DocumentSection() {
   const { applications } = useApplication();
