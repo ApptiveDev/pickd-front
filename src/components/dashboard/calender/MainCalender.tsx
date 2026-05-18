@@ -102,11 +102,11 @@ const MainCalendar = () => {
     }
 
     if (type === "deadline") {
-      return "bg-[#E77975]/10 text-[#E77975]";
+      return "bg-[#E77975]/10 text-[#EF4444]";
     }
 
     if (type === "apply") {
-      return "bg-[#79AF86]/10 text-[#79AF86]";
+      return "bg-[#79AF86]/10 text-[#10B981]";
     }
 
     return "bg-blue-50 text-blue-600";
@@ -157,7 +157,7 @@ const MainCalendar = () => {
               {visibleEvents.map((ev, i) => (
                 <div
                   key={i}
-                  className={`text-[10px] px-1.5 py-0.5 rounded border truncate shadow-sm font-medium ${getEventColor(
+                  className={`text-[10px] px-1.5 py-0.5 rounded truncate font-medium ${getEventColor(
                     ev.type,
                   )}`}
                 >
@@ -167,7 +167,7 @@ const MainCalendar = () => {
 
               {hiddenCount > 0 && (
                 <button
-                  className="text-[10px] text-blue-500 text-left font-medium"
+                  className="text-[10px] text-[#94A3B8] text-center font-medium"
                   onClick={(e) => {
                     e.stopPropagation();
 
