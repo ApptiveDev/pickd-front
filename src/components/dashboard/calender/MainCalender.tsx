@@ -3,6 +3,7 @@ import "react-calendar/dist/Calendar.css";
 import { useEffect, useRef, useState } from "react";
 import EventPopup from "./EventPopup";
 import "./MainCalendar.css";
+import { ChevronRightIcon } from "../../../assets/index";
 
 function getEventDate(e: any): Date | null {
   if (!e.start) return null;
@@ -97,27 +98,43 @@ const MainCalendar = () => {
 
   const getEventColor = (type: EventType) => {
     if (type === "interview") {
-      return "bg-[#C082F6]/10 text-[#C082F6] border-[#C082F6]/20";
+      return "bg-[#C082F6]/10 text-[#C082F6]";
     }
 
     if (type === "deadline") {
-      return "bg-[#E77975]/10 text-[#E77975] border-[#E77975]/20";
+      return "bg-[#E77975]/10 text-[#E77975]";
     }
 
     if (type === "apply") {
-      return "bg-[#79AF86]/10 text-[#79AF86] border-[#79AF86]/20";
+      return "bg-[#79AF86]/10 text-[#79AF86]";
     }
 
-    return "bg-blue-50 text-blue-600 border-blue-100";
+    return "bg-blue-50 text-blue-600";
   };
 
   return (
-    <div className="w-full h-full main-calendar-container relative">
+    <div className="main-calendar-container relative">
+      <div className="calendar-filter-dropdown">
+        <div className="relative inline-block w-40">
+          <select className="w-full bg-[#F8FAFC] text-sm text-gray-700 pl-4 pr-8 py-2 rounded-[0.5rem] border border-gray-200/70 appearance-none focus:outline-none cursor-pointer font-medium">
+            <option value="all">전체보기</option>
+            <option value="interview">면접</option>
+            <option value="deadline">마감</option>
+            <option value="apply">제출</option>
+          </select>
+          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+            <ChevronRightIcon size={12} className="rotate-90" />
+          </div>
+        </div>
+      </div>
+
       <Calendar
         className="w-full border-none"
         calendarType="gregory"
         prev2Label={null}
         next2Label={null}
+        prevLabel={ <ChevronRightIcon size={14} className="rotate-180" />} 
+        nextLabel = {<ChevronRightIcon size={14} />} 
         showNeighboringMonth={true}
         formatDay={(_, date) => date.getDate().toString()}
         value={date}
