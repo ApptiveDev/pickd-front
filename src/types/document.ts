@@ -8,4 +8,5 @@ export interface DocumentItem {
   progress: number;
   status: DocumentStatus;
   updatedAt: string;
+  content?: string;
 }

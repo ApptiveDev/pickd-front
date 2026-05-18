@@ -35,7 +35,7 @@ export default function DocumentCard({ item }: Props) {
   return (
     <div className="w-[270px] rounded-[18px] border border-[#E2E8F0] bg-white p-5 shadow-sm">
       <div className="flex items-start justify-between">
-        <h3 className="text-[22px] font-[700] text-[#0F172A]">{item.title}</h3>
+        <h3 className="text-[22px] font-[600] text-[#0F172A]">{item.title}</h3>
         <span
           className={`rounded px-3 py-0.5 text-sm font-semibold ${
             statusStyle[item.status]
@@ -46,7 +46,7 @@ export default function DocumentCard({ item }: Props) {
       </div>
 
       <div className="ml-4"></div>
-      <p className="mt-1 text-[14px] text-[#94A3B8]">
+      <p className="mt-1 text-[14px] text-[#64748B]">
         {item.company} · {item.type}
       </p>
       <div className="mt-4">
@@ -58,7 +58,7 @@ export default function DocumentCard({ item }: Props) {
           </span>
         </div>
 
-        <div className="h-[8px] overflow-hidden rounded-full bg-[#E2E8F0]">
+        <div className="h-[8px] overflow-hidden rounded-full bg-[#F1F5F9]">
           <div
             className="h-full rounded-full bg-[#2563EB]"
             style={{
@@ -68,8 +68,8 @@ export default function DocumentCard({ item }: Props) {
         </div>
       </div>
 
-      <div className="mt-5 flex items-center gap-2 text-[13px] text-[#94A3B8]">
-        <div className="h-[10px] w-[10px] rounded-full bg-[#E2E8F0]" />
+      <div className="mt-5 flex items-center gap-2 text-[13px] text-[#64748B] font-regular">
+        <div className="h-[10px] w-[10px] rounded-full bg-[##F1F5F9]" />
         {getRelativeTime(item.updatedAt)}
       </div>
     </div>

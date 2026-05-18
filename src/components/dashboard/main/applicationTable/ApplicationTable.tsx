@@ -226,29 +226,36 @@ export default function ApplicationTable({
     <div className="bg-white rounded-xl overflow-hidden">
       <div className="px-4 pt-[6px] pb-[6px] flex items-center justify-between">
         <ApplicationState />
-        <div className="flex flex-wrap gap-2 ml-4">
+        <div className="flex items-center gap-2">
           {checkedIds.length > 0 && (
-            <div className="mx-4 flex items-center gap-2 rounded-xl bg-white px-4">
-              <span className="text-sm text-gray-600">
+            <div className="flex items-center rounded-xl bg-white px-4">
+              <span className="text-sm text-[#64748B] px-1">
                 {checkedIds.length}개 선택됨
               </span>
-              <button onClick={handleDeleteSelected} className="text-sm">
+              <button
+                onClick={handleDeleteSelected}
+                className="text-sm text-[#334155] px-3 py-1 hover:bg-gray-50"
+              >
                 삭제
               </button>
-              <button onClick={handleCopySelected} className="text-sm">
+              <button
+                onClick={handleCopySelected}
+                className="text-sm text-[#334155] px-3 py-1 hover:bg-gray-50"
+              >
                 복사
               </button>
             </div>
           )}
+          <ActiveFilter
+            show={showActiveFilters}
+            setShow={setShowActiveFilters}
+            filters={filters}
+            setFilters={setFilters}
+            sort={sort}
+            setSort={setSort}
+            groupedFilters={groupedFilters}
+          />
         </div>
-        <ActiveFilter
-          show={showActiveFilters}
-          setShow={setShowActiveFilters}
-          filters={filters}
-          setFilters={setFilters}
-          sort={sort}
-          setSort={setSort}
-        />
       </div>
 
       <div className="w-full overflow-hidden">

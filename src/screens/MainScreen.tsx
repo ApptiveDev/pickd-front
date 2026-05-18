@@ -1,4 +1,3 @@
-import type { Todo } from "../types/todo";
 import { useEffect, useRef, useState } from "react";
 import type { Application } from "../types/application";
 import Header from "../components/dashboard/main/Header";
@@ -16,7 +15,6 @@ export default function MainScreen() {
   const [selectedApplication, setSelectedApplication] = useState<any>(null);
   const [focusedApplication, setFocusedApplication] = useState<any>(null);
   const [editData, setEditData] = useState<any>(null);
-  const timeouts = useRef<{ [key: string]: ReturnType<typeof setTimeout> }>({});
 
   const [googleEvents, setGoogleEvents] = useState<any[]>([]);
   const [user, setUser] = useState<any>(null);
@@ -108,7 +106,7 @@ export default function MainScreen() {
       </div>
 
       {user && (
-        <div className="w-[18.05%] min-w-[280px] border-l border-gray-200 p-6 bg-white/50">
+        <div className="w-[18.05%] min-w-[280px] border-l border-gray-200 p-6">
           <RightTab
             todoData={allTodos}
             googleEvents={googleEvents}
