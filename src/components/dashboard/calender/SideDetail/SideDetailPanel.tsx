@@ -16,7 +16,7 @@ const SideDetailPanel = ({ }: Props) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const {
-    todos,
+    todayTodos,
     today,
     sortedList,
     todaySchedules,
@@ -120,22 +120,20 @@ const SideDetailPanel = ({ }: Props) => {
           <SectionHeader
             title="오늘의 할 일"
             count={
-              todos.filter(
-                (todo) => !todo.completed,
-              ).length
+              todayTodos.filter((todo) => !todo.completed).length
             }
             onConfirm={handleAddTodo}
             showAddButton={true}
           />
 
           <div className="mt-4 space-y-2">
-            {todos.length > 0 ? (
-              todos.map((todo) => (
-                <TodoItem
-                  key={todo.id}
-                  todo={todo}
-                  onToggle={toggleTodo}
-                />
+            {todayTodos.length > 0 ? (
+      todayTodos.map((todo) => (
+        <TodoItem
+          key={todo.id}
+          todo={todo}
+          onToggle={toggleTodo}
+        />
               ))
             ) : (
               <p className="text-sm text-gray-400 text-center py-4">
