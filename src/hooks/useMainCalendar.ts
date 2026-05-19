@@ -107,7 +107,7 @@ export const useMainCalendar = (applications: Application[]) => {
   }, [allEvents, selectedCompanyId]);
 
   const getEventColor = (type: EventType) => {
-    if (type === "interview") return "bg-[#C082F6]/10 text-[#C082F6]";
+    if (type === "interview") return "bg-[#F9F2FF] text-[#C082F6]";
     if (type === "deadline") return "bg-[#E77975]/10 text-[#EF4444]";
     if (type === "apply") return "bg-[#79AF86]/10 text-[#10B981]";
     return "bg-blue-50 text-blue-600";
