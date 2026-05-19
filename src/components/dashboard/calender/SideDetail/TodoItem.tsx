@@ -40,7 +40,7 @@ const TodoItem = ({ todo, onToggle }: TodoProps) => {
       <div className="flex-1">
         <div className="flex justify-between items-center">
           <p
-            className={`font-medium leading-tight ${
+            className={`font-medium text-[15px] leading-tight ${
               todo.completed
                 ? "text-gray-400 line-through"
                 : "text-gray-800"
