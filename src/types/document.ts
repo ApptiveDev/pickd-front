@@ -9,4 +9,8 @@ export interface DocumentItem {
   status: DocumentStatus;
   updatedAt: string;
   content?: string;
+  application?: {
+    id: number;
+    applyDate?: string;
+  };
 }

@@ -1,10 +1,7 @@
 import ApplicationMenu from "../ApplicationMenu";
 import { getStatusStyle } from "../../../../utils/status";
-import {
-  getDDay,
-  formatDate,
-  getPositionColor,
-} from "../../../../utils/application";
+import { getPositionColor } from "../../../../utils/application";
+import { getDDay, formatApplicationDate } from "../../../../utils/date";
 
 interface Props {
   row: any;
@@ -27,7 +24,6 @@ export default function ApplicationRow({
   toggleCheck,
   onCompanyClick,
   setFocusedApplication,
-  focusedApplication,
   onEdit,
   onDelete,
   onChange,
@@ -100,7 +96,7 @@ export default function ApplicationRow({
         {row.industry || "-"}
       </td>
       <td className="px-4 py-2 border-b whitespace-nowrap text-sm text-[#334155]">
-        {formatDate(row.applyDate)}
+        {formatApplicationDate(row.applyDate)}
       </td>
       <td
         className={`px-4 py-2 border-b whitespace-nowrap text-sm font-semibold ${

@@ -1,4 +1,4 @@
-import { getDDay } from "../../../utils/application";
+import { getDDay } from "../../../utils/date";
 import { useApplication } from "../../../context/ApplicationContext";
 
 export default function ApplicationState() {
