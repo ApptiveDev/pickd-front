@@ -1,16 +1,32 @@
-import { useState } from 'react';
-import MainCalendar from '../components/dashboard/calender/MainCalender';
-import SideDetailPanel from '../components/dashboard/calender/SideDetail/SideDetailPanel';
-import { Icon } from '@iconify/react'; 
+import { useState, useEffect } from "react";
+import MainCalendar from "../components/dashboard/calender/MainCalender";
+import SideDetailPanel from "../components/dashboard/calender/SideDetail/SideDetailPanel";
+import { Icon } from "@iconify/react";
+import type { Application } from "../types/application";
 
 const CalendarScreen = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [applications, setApplications] = useState<Application[]>([]);
+
+  useEffect(() => {
+    const fetchApplications = async () => {
+      try {
+        const response = await fetch("/api/application");
+        const data = await response.json();
+        setApplications(data);
+      } catch (error) {
+        console.error("공고 데이터를 불러오는 데 실패했습니다:", error);
+      }
+    };
+
+    fetchApplications();
+  }, []);
 
   return (
     <div className="relative flex h-screen w-full bg-gray-50 overflow-hidden">
       <div className="flex-1 overflow-auto">
-        <MainCalendar />
-        
+        <MainCalendar applications={applications} />
+
         {!isSidebarOpen && (
           <button
             onClick={() => setIsSidebarOpen(true)}
@@ -30,7 +46,7 @@ const CalendarScreen = () => {
 
       <div
         className={`absolute top-0 right-0 h-full w-[400px] bg-white shadow-xl z-30 flex flex-col overflow-y-auto transform transition-transform duration-300 ease-in-out ${
-          isSidebarOpen ? 'translate-x-0' : 'translate-x-full'
+          isSidebarOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
         <div className="flex justify-between items-center p-4 border-b border-gray-100">
@@ -47,7 +63,6 @@ const CalendarScreen = () => {
           <SideDetailPanel data={[]} />
         </div>
       </div>
-
     </div>
   );
 };
