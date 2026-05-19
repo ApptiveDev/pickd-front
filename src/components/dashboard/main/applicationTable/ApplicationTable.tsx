@@ -3,7 +3,7 @@ import TableFilter from "./TableFilter";
 import ActiveFilter from "./ActiveFilter";
 import ApplicationRow from "./ApplicationRow";
 import ApplicationState from "../ApplicationState";
-import { getDDay } from "../../../../utils/application";
+import { getDDay } from "../../../../utils/date";
 import { useApplication } from "../../../../context/ApplicationContext";
 
 export default function ApplicationTable({

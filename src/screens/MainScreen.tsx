@@ -33,6 +33,13 @@ export default function MainScreen() {
     })),
   );
 
+  const documents = applications.flatMap((app) =>
+    (app.documents || []).map((doc) => ({
+      ...doc,
+      application: app,
+    })),
+  );
+
   useEffect(() => {
     fetch("/api/user", {
       credentials: "include",
@@ -100,7 +107,7 @@ export default function MainScreen() {
                 setFocusedApplication={setFocusedApplication}
               />
             </div>
-            <DocumentSection />
+            <DocumentSection documents={documents} />
           </>
         )}
       </div>
