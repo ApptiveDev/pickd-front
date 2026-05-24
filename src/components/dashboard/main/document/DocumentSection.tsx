@@ -15,7 +15,6 @@ export default function DocumentSection({ documents = [] }: Props) {
       <div className="flex items-center justify-between px-5 py-2">
         <div className="flex items-center gap-2">
           <h2 className="text-ms font-[600] text-[#0F172A]">작성중인 서류</h2>
-
           <span className="text-sm text-[#94A3B8]">{documents.length}건</span>
         </div>
 

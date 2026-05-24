@@ -6,6 +6,7 @@ import RightTab from "../components/dashboard/right/RightTab";
 import { useApplication } from "../context/ApplicationContext";
 import ApplyInput from "../components/dashboard/main/ApplyInput";
 import PostRegistration from "../components/modal/PostRegistration";
+import ApplicationDetailModal from "../components/modal/ApplicationDetailModal";
 import DocumentSection from "../components/dashboard/main/document/DocumentSection";
 import ApplicationTable from "../components/dashboard/main/applicationTable/ApplicationTable";
 
@@ -14,6 +15,7 @@ export default function MainScreen() {
   const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState<any>(null);
   const [focusedApplication, setFocusedApplication] = useState<any>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [editData, setEditData] = useState<any>(null);
 
   const [googleEvents, setGoogleEvents] = useState<any[]>([]);
@@ -105,6 +107,7 @@ export default function MainScreen() {
                 onCompanyClick={handleCompanyClick}
                 focusedApplication={focusedApplication}
                 setFocusedApplication={setFocusedApplication}
+                setIsDetailModalOpen={setIsDetailModalOpen}
               />
             </div>
             <DocumentSection documents={documents} />
@@ -148,6 +151,12 @@ export default function MainScreen() {
           </div>
         </div>
       )}
+
+      <ApplicationDetailModal
+        open={isDetailModalOpen}
+        onClose={() => setIsDetailModalOpen(false)}
+        application={focusedApplication}
+      />
 
       {isCompanyModalOpen && selectedApplication && (
         <CompanyInfo

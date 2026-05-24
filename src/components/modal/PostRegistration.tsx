@@ -215,11 +215,13 @@ export default function PostRegistration({
                   value={formData.status}
                   onChange={(e) => updateField("status", e.target.value)}
                 >
-                  <option value="">지원 상태 선택</option>
-                  <option value="준비중">준비중</option>
-                  <option value="지원완료">지원완료</option>
-                  <option value="면접진행">면접진행</option>
-                  <option value="최종합격">최종합격</option>
+                  <option value="">현재 상태 선택</option>
+                  <option value="지원 예정">지원 예정</option>
+                  <option value="작성중">작성중</option>
+                  <option value="제출 완료">제출 완료</option>
+                  <option value="결과 대기">결과 대기</option>
+                  <option value="면접 전형">면접 전형</option>
+                  <option value="최종 결과">최종 결과</option>
                 </select>
 
                 <div className="grid grid-cols-3 gap-3">

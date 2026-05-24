@@ -2,9 +2,12 @@ import { useState } from "react";
 import TableFilter from "./TableFilter";
 import ActiveFilter from "./ActiveFilter";
 import ApplicationRow from "./ApplicationRow";
-import ApplicationState from "../ApplicationState";
 import { getDDay } from "../../../../utils/date";
 import { useApplication } from "../../../../context/ApplicationContext";
+import { getNextStep } from "../../../../utils/status";
+import { DEFAULT_COLUMNS } from "../../../../types/application";
+import type { DocumentItem } from "../../../../types/document";
+import type { Todo } from "../../../../types/todo";
 
 export default function ApplicationTable({
   onEdit,
@@ -13,6 +16,7 @@ export default function ApplicationTable({
   onDelete,
   focusedApplication,
   setFocusedApplication,
+  setIsDetailModalOpen,
 }: any) {
   const [checkedIds, setCheckedIds] = useState<number[]>([]);
   const [showActiveFilters, setShowActiveFilters] = useState(false);
@@ -24,6 +28,9 @@ export default function ApplicationTable({
 
   const { applications, deleteApplications } = useApplication();
   const { addDocument } = useApplication();
+  const [visibleColumns, setVisibleColumns] =
+    useState<string[]>(DEFAULT_COLUMNS);
+
   console.log(applications.map((a) => a.status));
 
   const toggleCheck = (id: number) => {
@@ -64,19 +71,73 @@ export default function ApplicationTable({
       return;
     }
 
-    const headers = [
-      "기업명",
-      "공고명",
-      "직무",
-      "산업",
-      "지원기한",
-      "D-day",
-      "상태",
-      "제출",
-      "할 일",
-      "서류",
-      "메모",
+    const COPY_COLUMNS = [
+      { key: "company", label: "기업명" },
+      { key: "jobTitle", label: "공고명" },
+      { key: "position", label: "직무" },
+      { key: "industry", label: "산업" },
+      { key: "status", label: "현재 상태" },
+      { key: "nextStep", label: "다음 단계" },
+      { key: "deadlineDate", label: "마감일" },
+      { key: "dday", label: "남은 기간" },
+      { key: "documents", label: "작성중인 서류" },
+      { key: "checklistInComplete", label: "일정/할 일" },
+      { key: "important", label: "중요" },
+      { key: "recentUpdated", label: "최근 수정일" },
+      { key: "memo", label: "메모" },
     ];
+
+    const activeColumns = COPY_COLUMNS.filter(
+      (column) =>
+        column.key === "company" ||
+        column.key === "jobTitle" ||
+        visibleColumns.includes(column.key),
+    );
+
+    const headers = activeColumns.map((column) => column.label);
+
+    const getColumnValue = (row: any, key: string) => {
+      const completedCount =
+        row.todos?.filter((todo: Todo) => todo.completed).length || 0;
+
+      const totalCount = row.todos?.length || 0;
+
+      switch (key) {
+        case "company":
+          return row.company;
+        case "jobTitle":
+          return row.jobTitle;
+        case "position":
+          return row.position;
+        case "industry":
+          return row.industry;
+        case "status":
+          return row.status;
+        case "nextStep":
+          return getNextStep(row.status);
+        case "deadlineDate":
+          return row.deadlineDate || "-";
+        case "dday":
+          return getDDay(row.deadlineDate);
+        case "documents":
+          return row.documents?.length
+            ? row.documents
+                .slice(0, 2)
+                .map((doc: DocumentItem) => `${doc.type} · ${doc.status}`)
+                .join(", ")
+            : "—";
+        case "checklistInComplete":
+          return `${completedCount}/${totalCount}`;
+        case "important":
+          return row.important ? "★" : "☆";
+        case "recentUpdated":
+          return row.documents?.[0]?.updatedAt || "-";
+        case "memo":
+          return row.memo || "-";
+        default:
+          return "-";
+      }
+    };
 
     const escapeHtml = (value: any) =>
       String(value ?? "")
@@ -85,65 +146,42 @@ export default function ApplicationTable({
         .replaceAll(">", "&gt;");
 
     const html = `
-      <table border="1" style="border-collapse: collapse;">
-        <thead>
-          <tr>
-            ${headers.map((h) => `<th>${h}</th>`).join("")}
-          </tr>
-        </thead>
+    <table border="1" style="border-collapse: collapse;">
+      <thead>
+        <tr>
+          ${headers.map((h) => `<th>${h}</th>`).join("")}
+        </tr>
+      </thead>
 
-        <tbody>
-          ${selectedRows
-            .map((row) => {
-              const completedCount =
-                row.todos?.filter((todo) => todo.completed).length || 0;
-              const totalCount = row.todos?.length || 0;
-
-              return `
-                <tr>
-                  <td>${escapeHtml(row.company)}</td>
-                  <td>${escapeHtml(row.jobTitle)}</td>
-                  <td>${escapeHtml(row.position)}</td>
-                  <td>${escapeHtml(row.industry)}</td>
-                  <td>${escapeHtml(row.applyDate)}</td>
-                  <td>${escapeHtml(getDDay(row.deadlineDate))}</td>
-                  <td>${escapeHtml(row.status)}</td>
-                  <td>${row.submitted ? "제출" : "미제출"}</td>
-                  <td>${completedCount}/${totalCount}</td>
-                  <td>${row.documents?.length ? `${row.documents.length}건` : "없음"}</td>
-                  <td>${escapeHtml(row.memo)}</td>
-                </tr>
-              `;
-            })
-            .join("")}
-        </tbody>
-      </table>
-    `;
+      <tbody>
+        ${selectedRows
+          .map(
+            (row) => `
+              <tr>
+                ${activeColumns
+                  .map(
+                    (column) =>
+                      `<td>${escapeHtml(getColumnValue(row, column.key))}</td>`,
+                  )
+                  .join("")}
+              </tr>
+            `,
+          )
+          .join("")}
+      </tbody>
+    </table>
+  `;
 
     const text = [
       headers.join("\t"),
 
-      ...selectedRows.map((row) => {
-        const completedCount =
-          row.todos?.filter((todo) => todo.completed).length || 0;
-
-        const totalCount = row.todos?.length || 0;
-
-        return [
-          row.company,
-          row.jobTitle,
-          row.position,
-          row.industry,
-          row.applyDate,
-          getDDay(row.deadlineDate),
-          row.status,
-          row.submitted ? "제출" : "미제출",
-          `${completedCount}/${totalCount}`,
-          row.documents?.length ? `${row.documents.length}건` : "없음",
-          row.memo || "",
-        ].join("\t");
-      }),
+      ...selectedRows.map((row) =>
+        activeColumns
+          .map((column) => getColumnValue(row, column.key))
+          .join("\t"),
+      ),
     ].join("\n");
+
     try {
       await navigator.clipboard.write([
         new ClipboardItem({
@@ -223,9 +261,8 @@ export default function ApplicationTable({
   const EMPTY_COUNT = Math.max(0, 8 - sortedRows.length);
 
   return (
-    <div className="bg-white rounded-xl overflow-hidden">
+    <div className="bg-white rounded-xl overflow-visible">
       <div className="px-4 pt-[6px] pb-[6px] flex items-center justify-between">
-        <ApplicationState />
         <div className="flex items-center gap-2">
           {checkedIds.length > 0 && (
             <div className="flex items-center rounded-xl bg-white px-4">
@@ -246,24 +283,26 @@ export default function ApplicationTable({
               </button>
             </div>
           )}
-          <ActiveFilter
-            show={showActiveFilters}
-            setShow={setShowActiveFilters}
-            filters={filters}
-            setFilters={setFilters}
-            sort={sort}
-            setSort={setSort}
-            groupedFilters={groupedFilters}
-          />
         </div>
+        <ActiveFilter
+          show={showActiveFilters}
+          setShow={setShowActiveFilters}
+          filters={filters}
+          setFilters={setFilters}
+          sort={sort}
+          setSort={setSort}
+          groupedFilters={groupedFilters}
+          visibleColumns={visibleColumns}
+          setVisibleColumns={setVisibleColumns}
+        />
       </div>
 
-      <div className="w-full overflow-hidden">
-        <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
-          <table className="min-w-max w-full border-separate border-spacing-0">
+      <div className="w-full overflow-visible">
+        <div className="overflow-x-auto overflow-y-visible max-h-[400px]">
+          <table className="w-full min-w-full border-separate border-spacing-0">
             <thead className="sticky top-0 z-30 bg-[#F1F5F9] text-sm text-black font-medium">
               <tr>
-                <th className="w-[48px] px-4 py-3 bg-[#F1F5F9] sticky left-0 z-20">
+                <th className="w-[48px] px-4 py-3 bg-[#F1F5F9] sticky left-0 z-20 border-r border-[#E2E8F0]">
                   <label className="flex items-center justify-center cursor-pointer p-2 -m-2">
                     <input
                       type="checkbox"
@@ -305,49 +344,65 @@ export default function ApplicationTable({
                   ["jobTitle", "공고명"],
                   ["position", "직무"],
                   ["industry", "산업"],
-                  ["applyDate", "지원기한"],
-                  ["dday", "D-day"],
-                  ["status", "지원상태"],
-                  ["submitted", "제출"],
-                  ["checklistInComplete", "할 일"],
-                  ["documents", "서류"],
-                  ["notes", "메모"],
-                ].map(([key, label], idx) => (
-                  <th
-                    key={key + idx}
-                    className="px-4 py-3 text-left whitespace-nowrap relative bg-[#F1F5F9]"
-                  >
-                    <div className="flex items-center gap-1">
-                      {label}
+                  ["status", "현재 상태"],
+                  ["nextStep", "다음 단계"],
+                  ["deadlineDate", "마감일"],
+                  ["dday", "남은 기간"],
+                  ["documents", "작성중인 서류"],
+                  ["checklistInComplete", "일정/할 일"],
+                  ["important", "중요"],
+                  ["recentUpdated", "최근 수정일"],
+                  ["memo", "메모"],
+                ]
+                  .filter(([key]) => {
+                    if (key === "company" || key === "jobTitle") {
+                      return true;
+                    }
+                    return visibleColumns.includes(key);
+                  })
+                  .map(([key, label], idx) => (
+                    <th
+                      key={key + idx}
+                      className="px-4 py-3 text-left whitespace-nowrap relative bg-[#F1F5F9] border-r border-[#E2E8F0]"
+                    >
+                      <div className="flex items-center gap-1">
+                        {label}
 
-                      {["applyDate", "dday", "checklistInComplete"].includes(
-                        key,
-                      ) ? (
-                        <TableFilter
-                          mode="sort"
-                          columnKey={key}
-                          setFilters={setFilters}
-                          handleSort={handleSort}
-                        />
-                      ) : !["documents", "notes"].includes(key) ? (
-                        <TableFilter
-                          mode="filter"
-                          columnKey={key}
-                          values={getUniqueValues(key)}
-                          setFilters={setFilters}
-                        />
-                      ) : null}
-                    </div>
-                  </th>
-                ))}
+                        {["applyDate", "dday", "checklistInComplete"].includes(
+                          key,
+                        ) ? (
+                          <TableFilter
+                            mode="sort"
+                            columnKey={key}
+                            setFilters={setFilters}
+                            handleSort={handleSort}
+                          />
+                        ) : ![
+                            "documents",
+                            "important",
+                            "recentUpdated",
+                            "nextStep",
+                            "memo",
+                          ].includes(key) ? (
+                          <TableFilter
+                            mode="filter"
+                            columnKey={key}
+                            values={getUniqueValues(key)}
+                            setFilters={setFilters}
+                          />
+                        ) : null}
+                      </div>
+                    </th>
+                  ))}
                 <th className="w-[56px] min-w-[56px] max-w-[56px] sticky right-0 bg-[#F1F5F9] z-20"></th>
               </tr>
             </thead>
-            <tbody className="max-h-[400px] overflow-y-auto">
+            <tbody>
               {sortedRows.map((row) => (
                 <ApplicationRow
                   key={row.id}
                   row={row}
+                  visibleColumns={visibleColumns}
                   checkedIds={checkedIds}
                   toggleCheck={toggleCheck}
                   onCompanyClick={onCompanyClick}
@@ -359,11 +414,12 @@ export default function ApplicationTable({
                   deleteApplications={deleteApplications}
                   addDocument={addDocument}
                   setCheckedIds={setCheckedIds}
+                  setIsDetailModalOpen={setIsDetailModalOpen}
                 />
               ))}
               {Array.from({ length: EMPTY_COUNT }).map((_, i) => (
                 <tr key={`empty-${i}`} className="h-[67px]">
-                  {Array(13)
+                  {Array(visibleColumns.length + 4)
                     .fill(null)
                     .map((_, idx) => (
                       <td key={idx}>&nbsp;</td>

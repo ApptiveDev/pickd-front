@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { formatDate } from "../../../utils/date";
 import type { Todo } from "../../../types/todo";
 import { useApplication } from "../../../context/ApplicationContext";
 
@@ -18,19 +19,11 @@ export default function TodoSection({
 
   const formatDateTime = (dateTime?: string) => {
     if (!dateTime) return "기한 없음";
-
-    const date = new Date(dateTime);
-
-    const month = date.getMonth() + 1;
-    const day = date.getDate();
-
-    const hours = String(date.getHours()).padStart(2, "0");
-    const minutes = String(date.getMinutes()).padStart(2, "0");
-
-    return `${month}/${day} ${hours}:${minutes}`;
+    else return formatDate(dateTime);
   };
 
-  const targetApplication = focusedApplication || todos[0]?.application;
+  const targetApplication = focusedApplication || todos[0];
+
   const filteredTodos =
     mode === "focused"
       ? focusedApplication
@@ -51,6 +44,7 @@ export default function TodoSection({
               ? `${targetApplication?.company} 할 일`
               : "선택된 공고 할 일"}
         </h4>
+
         <div className="flex items-center gap-2">
           <button
             onClick={(e) => {
@@ -76,58 +70,73 @@ export default function TodoSection({
               : "할 일 없음"}
           </p>
         ) : (
-          filteredTodos.map((t) => (
-            <div key={t.id} className="flex items-center gap-4 mb-3 last:mb-0">
+          filteredTodos.map((t) => {
+            const companyName = t.company || t.application?.company;
+
+            return (
               <div
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleTodo(t.id);
-                }}
-                className={`
-                  w-[18px] h-[18px] rounded-full flex items-center justify-center flex-shrink-0
-                  ${t.completed ? "border-2 border-green-500 bg-white" : "bg-[#D9D9D9]"}
-                `}
+                key={t.id}
+                className="flex items-center gap-4 mb-3 last:mb-0"
               >
-                {t.completed && (
-                  <svg
-                    className="w-3 h-3 text-green-500"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="4"
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                )}
-              </div>
-
-              <div className="flex flex-col gap-0.5">
-                <h3
-                  className={`text-[14px] font-semibold leading-tight ${t.completed ? "line-through text-gray-400" : "text-[#0F172A]"}`}
+                <div
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleTodo(t.id);
+                  }}
+                  className={`
+                    w-[18px] h-[18px] rounded-full flex items-center justify-center flex-shrink-0
+                    ${
+                      t.completed
+                        ? "border-2 border-green-500 bg-white"
+                        : "bg-[#D9D9D9]"
+                    }
+                  `}
                 >
-                  {mode === "all" && t.application?.company && (
-                    <span
-                      className={`mr-1 ${
-                        t.completed ? "text-gray-400" : "text-[#64748B]"
-                      }`}
+                  {t.completed && (
+                    <svg
+                      className="w-3 h-3 text-green-500"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
                     >
-                      [{t.application.company}]
-                    </span>
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="4"
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
                   )}
+                </div>
 
-                  {t.title}
-                </h3>
+                <div className="flex flex-col gap-0.5">
+                  <h3
+                    className={`text-[14px] font-semibold leading-tight ${
+                      t.completed
+                        ? "line-through text-gray-400"
+                        : "text-[#0F172A]"
+                    }`}
+                  >
+                    {mode === "all" && companyName && (
+                      <span
+                        className={`mr-1 ${
+                          t.completed ? "text-gray-400" : "text-[#64748B]"
+                        }`}
+                      >
+                        [{companyName}]
+                      </span>
+                    )}
 
-                <span className="text-[12px] text-gray-400">
-                  {formatDateTime(t.dueDateTime)}
-                </span>
+                    {t.title}
+                  </h3>
+
+                  <span className="text-[12px] text-gray-400">
+                    {formatDateTime(t.dueDateTime)}
+                  </span>
+                </div>
               </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
     </div>

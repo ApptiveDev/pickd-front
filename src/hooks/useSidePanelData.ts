@@ -1,6 +1,11 @@
 import { useEffect, useState } from "react";
 import type { Todo } from "../types/todo";
-import { createTodo, toggleTodoApi, getTodos, deleteTodoApi,} from "../api/todo";
+import {
+  createTodo,
+  toggleTodoApi,
+  getTodos,
+  deleteTodoApi,
+} from "../api/todo";
 
 import { useApplication } from "../context/ApplicationContext";
 
@@ -134,11 +139,14 @@ export const useSidePanelData = () => {
         dueTime: newTodoData.dueTime,
         memo: newTodoData.memo,
         applicationId: selectedApplication?.id,
+        company: selectedApplication?.company,
+        jobTitle: selectedApplication?.jobTitle,
       });
 
       const todoWithApplication = {
         ...createdTodo,
-        application: selectedApplication,
+        company: selectedApplication?.company,
+        jobTitle: selectedApplication?.jobTitle,
       };
 
       setTodos((prev) => [...prev, todoWithApplication]);
