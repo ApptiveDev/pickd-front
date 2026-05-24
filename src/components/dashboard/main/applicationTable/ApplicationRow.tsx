@@ -24,7 +24,6 @@ export default function ApplicationRow({
   toggleCheck,
   onCompanyClick,
   setFocusedApplication,
-  focusedApplication,
   onEdit,
   onDelete,
   onChange,
