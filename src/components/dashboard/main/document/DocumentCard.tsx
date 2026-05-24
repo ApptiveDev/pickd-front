@@ -1,5 +1,5 @@
-import { getDDay, formatApplicationDate } from "../../../../utils/date";
 import { type DocumentItem } from "../../../../types/document";
+import { getDDay, formatApplicationDate } from "../../../../utils/date";
 import { getRelativeTime, statusStyle } from "../../../../utils/document";
 
 interface Props {
@@ -38,7 +38,7 @@ export default function DocumentCard({ item }: Props) {
           </span>
         </div>
 
-        <div className="h-[8px] overflow-hidden rounded-full bg-[#E2E8F0]">
+        <div className="h-[8px] overflow-hidden rounded-full bg-[#F1F5F9]">
           <div
             className="h-full rounded-full bg-[#3B82F6]"
             style={{

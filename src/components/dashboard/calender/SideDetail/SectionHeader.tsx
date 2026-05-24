@@ -36,7 +36,7 @@ const SectionHeader = ({
           </h3>
 
           {count !== undefined && (
-            <span className="flex items-center justify-center w-5 h-5 bg-gray-200 text-gray-500 text-[11px] font-bold rounded-full">
+            <span className="flex items-center justify-center w-5 h-5 bg-[#F1F5F9] text-[#94A3B8] text-[11px] font-bold rounded-full">
               {count}
             </span>
           )}
