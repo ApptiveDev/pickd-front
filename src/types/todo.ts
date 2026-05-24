@@ -5,6 +5,10 @@ export interface Todo {
   dueDateTime?: string;
   memo?: string;
 
+  applicationId?: number;
+  company?: string;
+  jobTitle?: string;
+
   application?: {
     id: number;
     company?: string;

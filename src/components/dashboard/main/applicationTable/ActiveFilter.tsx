@@ -1,5 +1,6 @@
 import { Icon } from "@iconify/react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { COLUMN_OPTIONS, DEFAULT_COLUMNS } from "../../../../types/application";
 
 interface Props {
   show: boolean;
@@ -15,6 +16,9 @@ interface Props {
   setSort: React.Dispatch<
     React.SetStateAction<{ key: string; order: "asc" | "desc" } | null>
   >;
+
+  visibleColumns: string[];
+  setVisibleColumns: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
 const filterLabelMap: Record<string, string> = {
@@ -37,8 +41,12 @@ export default function ActiveFilter({
   groupedFilters,
   setFilters,
   setSort,
+  visibleColumns,
+  setVisibleColumns,
 }: Props) {
   const filterRef = useRef<HTMLDivElement | null>(null);
+  const columnRef = useRef<HTMLDivElement | null>(null);
+  const [isColumnOpen, setIsColumnOpen] = useState(false);
 
   const removeFilter = (key: string, value: string) => {
     setFilters((prev) =>
@@ -50,15 +58,25 @@ export default function ActiveFilter({
     setSort(null);
   };
 
+  const toggleColumn = (key: string) => {
+    setVisibleColumns((prev) =>
+      prev.includes(key) ? prev.filter((item) => item !== key) : [...prev, key],
+    );
+  };
+
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (filterRef.current && !filterRef.current.contains(e.target as Node)) {
+      const target = e.target as Node;
+
+      if (filterRef.current && !filterRef.current.contains(target)) {
         setShow(false);
       }
+
+      if (columnRef.current && !columnRef.current.contains(target)) {
+        setIsColumnOpen(false);
+      }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
-
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
@@ -66,15 +84,71 @@ export default function ActiveFilter({
 
   return (
     <div className="relative">
-      <button
-        onClick={() => setShow(!show)}
-        className="flex items-center gap-1 px-2 py-2 border border-[#F1F5F9] rounded-xl hover:bg-gray-50"
-      >
-        <Icon
-          icon="mdi:filter-variant"
-          className="text-[18px] text-[#64748B] translate-x-[2px]"
-        />
-      </button>
+      <div className="ml-auto flex gap-3 w-fit">
+        <button
+          onClick={() => setShow(!show)}
+          className="w-9 h-9 flex items-center justify-center rounded-xl border border-[#F1F5F9] hover:bg-gray-50 transition"
+        >
+          <Icon
+            icon="mdi:filter-variant"
+            className="text-[24px] text-[#64748B]"
+          />
+        </button>
+        <div ref={columnRef} className="relative">
+          <button
+            onClick={() => setIsColumnOpen(!isColumnOpen)}
+            className="w-9 h-9 flex items-center justify-center rounded-xl border border-[#F1F5F9] hover:bg-gray-50 transition"
+          >
+            <Icon
+              icon="material-symbols:view-column-outline"
+              className="text-[24px] text-[#64748B]"
+            />
+          </button>
+
+          {isColumnOpen && (
+            <div className="absolute top-12 right-0 w-[280px] bg-white border border-[#E2E8F0] rounded-2xl shadow-lg z-50 overflow-hidden">
+              <div className="px-6 py-4 border-b border-[#F1F5F9]">
+                <p className="text-[15px] font-semibold text-[#334155]">
+                  표시할 컬럼 선택
+                </p>
+              </div>
+
+              <div className="py-2">
+                {COLUMN_OPTIONS.map((column) => {
+                  const checked = visibleColumns.includes(column.key);
+
+                  return (
+                    <button
+                      key={column.key}
+                      onClick={() => toggleColumn(column.key)}
+                      className="w-full px-6 py-2 flex items-center justify-between hover:bg-[#F8FAFC]"
+                    >
+                      <span className="text-[15px] text-[#334155]">
+                        {column.label}
+                      </span>
+
+                      {checked && (
+                        <Icon
+                          icon="mdi:check"
+                          className="text-[20px] text-[#3B82F6]"
+                        />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button
+                onClick={() => setVisibleColumns(DEFAULT_COLUMNS)}
+                className="w-full px-6 py-3 border-t border-[#F1F5F9] flex items-center gap-2 text-[#64748B] hover:bg-[#F8FAFC]"
+              >
+                <Icon icon="mdi:restore" className="text-[18px]" />
+                기본값으로 초기화
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
 
       {show && (
         <div

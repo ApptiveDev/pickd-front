@@ -4,6 +4,8 @@ export const createTodo = async (data: {
   dueTime?: string;
   memo?: string;
   applicationId?: number;
+  company?: string;
+  jobTitle?: string;
 }) => {
   const res = await fetch("/api/todo", {
     method: "POST",

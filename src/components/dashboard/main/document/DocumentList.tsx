@@ -15,7 +15,7 @@ export default function DocumentList({ documents }: Props) {
         <span>상태</span>
         <span>진행률</span>
         <span>마감일</span>
-        <span>최근 수정</span>
+        <span>최근 수정일</span>
       </div>
 
       {documents.map((doc) => (

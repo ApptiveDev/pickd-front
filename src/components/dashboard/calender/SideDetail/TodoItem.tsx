@@ -7,7 +7,7 @@ interface TodoProps {
 
 const TodoItem = ({ todo, onToggle }: TodoProps) => {
   console.log("TodoItem 렌더링:", todo);
-  const companyName = todo.application?.company;
+  const companyName = todo.company;
 
   const isUrgent =
     todo.dueDateTime &&
@@ -41,9 +41,7 @@ const TodoItem = ({ todo, onToggle }: TodoProps) => {
         <div className="flex justify-between items-center">
           <p
             className={`font-medium text-[15px] leading-tight ${
-              todo.completed
-                ? "text-gray-400 line-through"
-                : "text-gray-800"
+              todo.completed ? "text-gray-400 line-through" : "text-gray-800"
             }`}
           >
             {todo.title}
@@ -80,9 +78,7 @@ const TodoItem = ({ todo, onToggle }: TodoProps) => {
         </div>
 
         {todo.memo && (
-          <p className="mt-1 text-[12px] text-gray-400 italic">
-            {todo.memo}
-          </p>
+          <p className="mt-1 text-[12px] text-gray-400 italic">{todo.memo}</p>
         )}
       </div>
     </div>
