@@ -2,12 +2,19 @@ import { useState } from "react";
 import { Plus } from "lucide-react";
 import PostTodo from "../../../modal/PostTodo";
 import { useApplication } from "../../../../context/ApplicationContext";
+import type { Application } from "../../../../types/application";
 
 interface SectionHeaderProps {
   title: string;
-  count?: number;
-  onConfirm?: (data: any) => void;
+  count: number;
   showAddButton?: boolean;
+  onConfirm?: (data: {
+    title: string;
+    dueDateTime?: string;
+    applicationId: string;
+    memo: string;
+  }) => void | Promise<void>;
+  applications?: Application[];
 }
 
 const SectionHeader = ({
@@ -15,25 +22,34 @@ const SectionHeader = ({
   count,
   onConfirm,
   showAddButton = true,
+  applications: propApplications,
 }: SectionHeaderProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const { applications } = useApplication();
+  const { applications: contextApplications } = useApplication();
 
-  const handlePostTodo = (data: any) => {
-    if (onConfirm) {
-      onConfirm(data);
+  const todoApplications = propApplications ?? contextApplications;
+
+  const handlePostTodo = async (data: {
+    title: string;
+    dueDateTime?: string;
+    applicationId: string;
+    memo: string;
+  }) => {
+    try {
+      await onConfirm?.(data);
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error("할 일 추가 실패:", error);
+      alert("할 일 추가에 실패했습니다.");
     }
-    setIsModalOpen(false);
   };
 
   return (
     <>
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center gap-2">
-          <h3 className="font-bold text-gray-800 text-base">
-            {title}
-          </h3>
+          <h3 className="font-bold text-gray-800 text-base">{title}</h3>
 
           {count !== undefined && (
             <span className="flex items-center justify-center w-5 h-5 bg-[#F1F5F9] text-[#94A3B8] text-[11px] font-bold rounded-full">
@@ -60,7 +76,7 @@ const SectionHeader = ({
         <PostTodo
           onClose={() => setIsModalOpen(false)}
           onConfirm={handlePostTodo}
-          applications={applications} // 여기서 실제 공고 연결
+          applications={todoApplications}
         />
       )}
     </>

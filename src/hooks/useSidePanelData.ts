@@ -127,34 +127,49 @@ export const useSidePanelData = () => {
     );
   });
 
-  const handleAddTodo = async (newTodoData: any) => {
+  const handleAddTodo = async (newTodoData: {
+    title: string;
+    dueDateTime?: string;
+    applicationId: string;
+    memo: string;
+  }) => {
     try {
       const selectedApplication = applications.find(
         (app) => String(app.id) === String(newTodoData.applicationId),
       );
 
+      if (!selectedApplication) {
+        alert("연결된 공고를 찾을 수 없습니다.");
+        return;
+      }
+
       const createdTodo = await createTodo({
         title: newTodoData.title,
-        dueDateTime: newTodoData.dueDate
-          ? newTodoData.dueTime
-            ? `${newTodoData.dueDate}T${newTodoData.dueTime}`
-            : `${newTodoData.dueDate}T00:00`
-          : undefined,
+        dueDateTime: newTodoData.dueDateTime,
         memo: newTodoData.memo,
-        applicationId: selectedApplication?.id,
-        company: selectedApplication?.company,
-        jobTitle: selectedApplication?.jobTitle,
+        applicationId: selectedApplication.id,
+        company: selectedApplication.company,
+        jobTitle: selectedApplication.jobTitle,
       });
 
       const todoWithApplication = {
         ...createdTodo,
-        company: selectedApplication?.company,
-        jobTitle: selectedApplication?.jobTitle,
+        dueDateTime: createdTodo.dueDateTime ?? newTodoData.dueDateTime,
+        company: selectedApplication.company,
+        jobTitle: selectedApplication.jobTitle,
+        application: {
+          id: selectedApplication.id,
+          company: selectedApplication.company,
+          jobTitle: selectedApplication.jobTitle,
+        },
       };
 
       setTodos((prev) => [...prev, todoWithApplication]);
+
+      await loadData();
     } catch (error) {
       console.error("할 일 생성 실패:", error);
+      throw error;
     }
   };
 

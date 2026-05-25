@@ -12,7 +12,7 @@ interface Props {
   data: Application[];
 }
 
-const SideDetailPanel = ({ }: Props) => {
+const SideDetailPanel = ({ data }: Props) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const {
@@ -25,9 +25,7 @@ const SideDetailPanel = ({ }: Props) => {
     calculateDDay,
   } = useSidePanelData();
 
-  const displayItems = isExpanded
-    ? sortedList
-    : sortedList.slice(0, 3);
+  const displayItems = isExpanded ? sortedList : sortedList.slice(0, 3);
 
   const extraCount = sortedList.length - 3;
 
@@ -42,9 +40,7 @@ const SideDetailPanel = ({ }: Props) => {
               day: "numeric",
             })}
           </h2>
-          <p className="text-sm text-gray-500 mt-1">
-            오늘의 진행률
-          </p>
+          <p className="text-sm text-gray-500 mt-1">오늘의 진행률</p>
         </div>
 
         <ProgressCircle percentage={13} />
@@ -53,14 +49,9 @@ const SideDetailPanel = ({ }: Props) => {
       <div className="flex-1 overflow-y-auto custom-scrollbar">
         <section className="p-6 border-b border-gray-100">
           <div className="flex items-center gap-1 mb-4">
-            <ChevronDown
-              size={18}
-              className="text-gray-400"
-            />
+            <ChevronDown size={18} className="text-gray-400" />
 
-            <h3 className="font-bold text-gray-800 text-base">
-              다가오는 공고
-            </h3>
+            <h3 className="font-bold text-gray-800 text-base">다가오는 공고</h3>
 
             <span className="flex items-center justify-center w-5 h-5 bg-[#F1F5F9] text-[#94A3B8] text-[11px] font-bold rounded-full">
               {sortedList.length}
@@ -81,32 +72,27 @@ const SideDetailPanel = ({ }: Props) => {
 
           {sortedList.length > 3 && (
             <button
-              onClick={() =>
-                setIsExpanded(!isExpanded)
-              }
+              onClick={() => setIsExpanded(!isExpanded)}
               className="w-full text-center text-sm text-gray-400 mt-4 hover:text-blue-500 hover:underline transition-colors"
             >
-              {isExpanded
-                ? "접기"
-                : `더보기 +${extraCount}`}
+              {isExpanded ? "접기" : `더보기 +${extraCount}`}
             </button>
           )}
         </section>
 
         <section className="p-6 border-b border-gray-100">
           <SectionHeader
-            title="오늘의 일정"
-            count={todaySchedules.length}
-            showAddButton={false}
+            title="오늘의 할 일"
+            count={todayTodos.filter((todo) => !todo.completed).length}
+            onConfirm={handleAddTodo}
+            showAddButton={true}
+            applications={data}
           />
 
           <div className="mt-3 space-y-3">
             {todaySchedules.length > 0 ? (
               todaySchedules.map((schedule) => (
-                <ScheduleItem
-                  key={schedule.id}
-                  schedule={schedule}
-                />
+                <ScheduleItem key={schedule.id} schedule={schedule} />
               ))
             ) : (
               <p className="text-sm text-gray-400 text-center py-4">
@@ -119,21 +105,15 @@ const SideDetailPanel = ({ }: Props) => {
         <section className="p-6">
           <SectionHeader
             title="오늘의 할 일"
-            count={
-              todayTodos.filter((todo) => !todo.completed).length
-            }
+            count={todayTodos.filter((todo) => !todo.completed).length}
             onConfirm={handleAddTodo}
             showAddButton={true}
           />
 
           <div className="mt-4 space-y-2">
             {todayTodos.length > 0 ? (
-      todayTodos.map((todo) => (
-        <TodoItem
-          key={todo.id}
-          todo={todo}
-          onToggle={toggleTodo}
-        />
+              todayTodos.map((todo) => (
+                <TodoItem key={todo.id} todo={todo} onToggle={toggleTodo} />
               ))
             ) : (
               <p className="text-sm text-gray-400 text-center py-4">
