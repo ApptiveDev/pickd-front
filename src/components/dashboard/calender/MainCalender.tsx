@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import EventPopup from "./EventPopup";
@@ -8,9 +9,10 @@ import { useMainCalendar, isSameDay } from "../../../hooks/useMainCalendar";
 
 interface MainCalendarProps {
   applications: Application[];
+  onCalendarRefetch?: (refetchFn: () => void) => void;
 }
 
-const MainCalendar = ({ applications = [] }: MainCalendarProps) => {
+const MainCalendar = ({ applications = [], onCalendarRefetch }: MainCalendarProps) => {
   const {
     date,
     selectedCompanyId,
@@ -21,7 +23,14 @@ const MainCalendar = ({ applications = [] }: MainCalendarProps) => {
     handleCompanyChange,
     handleDateChange,
     setPopup,
+    loadEvents,
   } = useMainCalendar(applications);
+
+  useEffect(() => {
+    if (onCalendarRefetch) {
+      onCalendarRefetch(loadEvents);
+    }
+  }, [loadEvents, onCalendarRefetch]);
 
   return (
     <div className="main-calendar-container relative">

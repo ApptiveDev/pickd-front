@@ -1,6 +1,6 @@
 import { useEffect, useState, type RefObject } from "react";
 
-type EventType = "interview" | "deadline" | "apply" | "default";
+type EventType = "interview" | "deadline" | "apply" | "todo" | "default";
 
 type CalendarEvent = {
   date: Date;
@@ -19,23 +19,18 @@ interface EventPopupProps {
 }
 
 const EventPopup = ({ popup, popupRef }: EventPopupProps) => {
-  // 팝업의 최종 렌더링 위치를 관리하는 상태
   const [coords, setCoords] = useState({ x: popup.x, y: popup.y });
 
   useEffect(() => {
     if (popupRef.current) {
-      const popupHeight = popupRef.current.offsetHeight; // 팝업의 실제 높이
-      const windowHeight = window.innerHeight; // 브라우저 화면 전체 높이
+      const popupHeight = popupRef.current.offsetHeight; 
+      const windowHeight = window.innerHeight; 
 
       let finalY = popup.y;
 
-      // 팝업이 화면 아래쪽 경계를 벗어나는지 확인 (여백 16px 고려)
       if (popup.y + popupHeight > windowHeight - 16) {
-        // 화면을 벗어난다면, 마우스/버튼 위쪽으로 팝업이 배치되도록 위치를 올립니다.
-        // 버튼 아래로 열리던 것을 버튼 위로 열리게 변경하는 셈입니다.
         finalY = popup.y - popupHeight; 
         
-        // 만약 위로 올렸는데 0보다 작아지면 화면 맨 위(16px)에 고정
         if (finalY < 16) {
           finalY = 16;
         }
@@ -55,6 +50,9 @@ const EventPopup = ({ popup, popupRef }: EventPopupProps) => {
     if (type === "apply") {
       return "bg-green-50 text-green-600 border-green-100";
     }
+    if (type === "todo") {
+      return "bg-blue-50 text-blue-600 border-blue-100";
+    }
     return "bg-blue-50 text-blue-600 border-blue-100";
   };
 
@@ -62,6 +60,7 @@ const EventPopup = ({ popup, popupRef }: EventPopupProps) => {
     if (type === "interview") return "면접";
     if (type === "deadline") return "마감";
     if (type === "apply") return "지원";
+    if (type === "todo") return "할 일";
     return "일정";
   };
 
@@ -71,7 +70,7 @@ const EventPopup = ({ popup, popupRef }: EventPopupProps) => {
       className="fixed z-50 bg-white rounded-2xl shadow-xl border border-gray-100 p-4 min-w-[220px]"
       style={{
         left: coords.x,
-        top: coords.y, // 👈 보정된 y 좌표를 사용합니다.
+        top: coords.y, 
       }}
     >
       <div className="font-semibold text-sm mb-3">
