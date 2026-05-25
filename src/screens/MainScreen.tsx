@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import type { Application } from "../types/application";
 import Header from "../components/dashboard/main/Header";
 import CompanyInfo from "../components/modal/CompanyInfo";
@@ -18,8 +18,6 @@ export default function MainScreen() {
   const [focusedApplication, setFocusedApplication] = useState<any>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [editData, setEditData] = useState<any>(null);
-
-  // 우측 드로어(Sidebar) 열림 상태 추가
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const [googleEvents, setGoogleEvents] = useState<any[]>([]);
@@ -87,15 +85,13 @@ export default function MainScreen() {
   };
 
   return (
-    // relative 속성을 추가하여 드로어가 이 영역을 기준으로 absolute 배치되도록 합니다.
     <div className="relative flex w-full min-h-full overflow-hidden bg-gray-50">
       <div className="flex-1 min-w-0 p-6">
         {user && (
           <>
             <div className="flex justify-between items-center">
               <Header user={user} />
-              
-              {/* 드로어가 닫혀있을 때만 열기 버튼을 보여줍니다 */}
+
               {!isSidebarOpen && (
                 <button
                   onClick={() => setIsSidebarOpen(true)}
@@ -131,22 +127,19 @@ export default function MainScreen() {
         )}
       </div>
 
-      {/* 드로어 배경 딤드(Dimmed) 처리 */}
       {user && isSidebarOpen && (
         <div
-          className="absolute inset-0 bg-black/20 z-20 transition-opacity"
+          className="absolute inset-0 bg-transparent z-20" 
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
 
-      {/* 우측 슬라이드 드로어 (RightTab) */}
       {user && (
         <div
-          className={`absolute top-0 right-0 h-full w-[400px] bg-white shadow-xl z-30 flex flex-col overflow-y-auto transform transition-transform duration-300 ease-in-out ${
+          className={`absolute top-0 right-0 h-full w-[350px] bg-white shadow-xl z-30 flex flex-col overflow-y-auto transform transition-transform duration-300 ease-in-out ${
             isSidebarOpen ? "translate-x-0" : "translate-x-full"
           }`}
         >
-
           <div className="flex-1 p-6">
             <RightTab
               todoData={allTodos}
@@ -158,7 +151,6 @@ export default function MainScreen() {
         </div>
       )}
 
-      {/* 모달 및 기타 컴포넌트들 */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
           <div>
