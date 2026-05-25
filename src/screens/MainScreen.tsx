@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import type { Application } from "../types/application";
 import Header from "../components/dashboard/main/Header";
 import CompanyInfo from "../components/modal/CompanyInfo";
@@ -9,6 +9,7 @@ import PostRegistration from "../components/modal/PostRegistration";
 import ApplicationDetailModal from "../components/modal/ApplicationDetailModal";
 import DocumentSection from "../components/dashboard/main/document/DocumentSection";
 import ApplicationTable from "../components/dashboard/main/applicationTable/ApplicationTable";
+import { Icon } from "@iconify/react"; // 아이콘 컴포넌트 추가
 
 export default function MainScreen() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -17,6 +18,7 @@ export default function MainScreen() {
   const [focusedApplication, setFocusedApplication] = useState<any>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [editData, setEditData] = useState<any>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const [googleEvents, setGoogleEvents] = useState<any[]>([]);
   const [user, setUser] = useState<any>(null);
@@ -74,7 +76,6 @@ export default function MainScreen() {
 
   const handleAfterChange = async () => {
     await loadData();
-
     setTimeout(loadCalendarEvents, 300);
   };
 
@@ -84,11 +85,22 @@ export default function MainScreen() {
   };
 
   return (
-    <div className="flex w-full min-h-full overflow-hidden">
+    <div className="relative flex w-full min-h-full overflow-hidden bg-gray-50">
       <div className="flex-1 min-w-0 p-6">
         {user && (
           <>
-            <Header user={user} />
+            <div className="flex justify-between items-center">
+              <Header user={user} />
+
+              {!isSidebarOpen && (
+                <button
+                  onClick={() => setIsSidebarOpen(true)}
+                  className="p-2 bg-white rounded-md shadow-md border border-gray-200 hover:bg-gray-50 text-gray-600 transition-all"
+                >
+                  <Icon icon="lucide:sidebar-open" className="w-5 h-5" />
+                </button>
+              )}
+            </div>
 
             <div className="mt-6 space-y-4">
               <ApplyInput onAdd={() => setIsModalOpen(true)} />
@@ -115,14 +127,27 @@ export default function MainScreen() {
         )}
       </div>
 
+      {user && isSidebarOpen && (
+        <div
+          className="absolute inset-0 bg-transparent z-20" 
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       {user && (
-        <div className="w-[18.05%] min-w-[280px] border-l border-gray-200 p-6">
-          <RightTab
-            todoData={allTodos}
-            googleEvents={googleEvents}
-            setGoogleEvents={setGoogleEvents}
-            focusedApplication={focusedApplication}
-          />
+        <div
+          className={`absolute top-0 right-0 h-full w-[350px] bg-white shadow-xl z-30 flex flex-col overflow-y-auto transform transition-transform duration-300 ease-in-out ${
+            isSidebarOpen ? "translate-x-0" : "translate-x-full"
+          }`}
+        >
+          <div className="flex-1 p-6">
+            <RightTab
+              todoData={allTodos}
+              googleEvents={googleEvents}
+              setGoogleEvents={setGoogleEvents}
+              focusedApplication={focusedApplication}
+            />
+          </div>
         </div>
       )}
 
@@ -138,7 +163,6 @@ export default function MainScreen() {
               }}
               onSuccess={async () => {
                 await loadData();
-
                 setTimeout(async () => {
                   await loadCalendarEvents();
                 }, 500);
