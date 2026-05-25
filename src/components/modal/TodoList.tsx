@@ -1,29 +1,14 @@
 import type { Todo } from "../../types/todo";
 import { useApplication } from "../../context/ApplicationContext";
+import { formatDate } from "../../utils/date";
 
 interface TodoListModalProps {
   todos: Todo[];
   onClose: () => void;
 }
 
-export default function TodoListModal({
-  todos,
-  onClose,
-}: TodoListModalProps) {
+export default function TodoListModal({ todos, onClose }: TodoListModalProps) {
   const { toggleTodo } = useApplication();
-  const formatDateTime = (dateTime?: string) => {
-    if (!dateTime) return "기한 없음";
-
-    const date = new Date(dateTime);
-
-    const month = date.getMonth() + 1;
-    const day = date.getDate();
-
-    const hours = String(date.getHours()).padStart(2, "0");
-    const minutes = String(date.getMinutes()).padStart(2, "0");
-
-    return `${month}/${day} ${hours}:${minutes}`;
-  };
 
   return (
     <div className="py-2">
@@ -78,7 +63,7 @@ export default function TodoListModal({
 
               <div className="flex items-center gap-3">
                 <span className="text-[12px] text-gray-400 tabular-nums font-medium">
-                  {formatDateTime(todo.dueDateTime)}
+                  {formatDate(todo.dueDateTime, "기한 없음")}
                 </span>
               </div>
             </div>

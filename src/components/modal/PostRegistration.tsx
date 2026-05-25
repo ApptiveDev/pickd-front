@@ -281,7 +281,7 @@ export default function PostRegistration({
                 jobTitle: formData.jobTitle,
                 position: formData.position,
                 industry: formData.industry,
-                status: formData.status,
+                status: formData.status || "지원 예정",
                 memo: formData.memo,
 
                 applyDate: formData.applyDate

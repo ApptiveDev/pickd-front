@@ -1,7 +1,6 @@
 export const createTodo = async (data: {
   title: string;
-  dueDate?: string;
-  dueTime?: string;
+  dueDateTime?: string;
   memo?: string;
   applicationId?: number;
   company?: string;

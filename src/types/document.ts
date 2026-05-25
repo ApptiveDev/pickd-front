@@ -1,4 +1,4 @@
-export type DocumentStatus = "작성중" | "수정중" | "검토중" | "완료";
+export type DocumentStatus = "작성중" | "검토중" | "수정 필요" | "제출 완료";
 
 export interface DocumentItem {
   id: number;

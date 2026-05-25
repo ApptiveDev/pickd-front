@@ -1,12 +1,14 @@
 import { type DocumentItem } from "../../../../types/document";
+import DocumentStatus from "./DocumentStatus";
 import { getDDay, formatApplicationDate } from "../../../../utils/date";
-import { getRelativeTime, statusStyle } from "../../../../utils/document";
+import { getRelativeTime } from "../../../../utils/document";
 
 interface Props {
   item: DocumentItem;
+  onStatusChange?: (status: DocumentItem["status"]) => void;
 }
 
-export default function DocumentCard({ item }: Props) {
+export default function DocumentCard({ item, onStatusChange }: Props) {
   return (
     <div className="w-[270px] rounded-[18px] border border-[#E2E8F0] bg-white p-5 shadow-sm">
       <div className="flex items-start justify-between">
@@ -20,13 +22,12 @@ export default function DocumentCard({ item }: Props) {
           </p>
         </div>
 
-        <span
-          className={`rounded px-3 py-1 text-xs font-semibold ${
-            statusStyle[item.status]
-          }`}
-        >
-          {item.status}
-        </span>
+        <DocumentStatus
+          status={item.status}
+          onChange={async (status) => {
+            onStatusChange?.(status);
+          }}
+        />
       </div>
 
       <div className="mt-4">

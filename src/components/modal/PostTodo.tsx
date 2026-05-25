@@ -8,8 +8,7 @@ interface PostTodoProps {
   applications?: Application[];
   onConfirm: (data: {
     title: string;
-    dueDate: string;
-    dueTime: string;
+    dueDateTime?: string;
     applicationId: string;
     memo: string;
   }) => void;
@@ -48,7 +47,18 @@ export default function PostTodo({
       return;
     }
 
-    onConfirm(formData);
+    onConfirm({
+      title: formData.title,
+      dueDateTime: formData.dueDate
+        ? formData.dueTime
+          ? `${formData.dueDate}T${formData.dueTime}`
+          : `${formData.dueDate}T00:00`
+        : undefined,
+
+      applicationId: formData.applicationId,
+
+      memo: formData.memo,
+    });
   };
 
   return createPortal(
