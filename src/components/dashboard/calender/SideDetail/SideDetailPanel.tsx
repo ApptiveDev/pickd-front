@@ -82,10 +82,10 @@ const SideDetailPanel = ({ data }: Props) => {
 
         <section className="p-6 border-b border-gray-100">
           <SectionHeader
-            title="오늘의 할 일"
-            count={todayTodos.filter((todo) => !todo.completed).length}
+            title="오늘의 일정" 
+            count={todaySchedules.length}
             onConfirm={handleAddTodo}
-            showAddButton={true}
+            showAddButton={false}
             applications={data}
           />
 
