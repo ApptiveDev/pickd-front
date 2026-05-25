@@ -35,6 +35,18 @@ export const useSidePanelData = () => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
+  const fetchCalendarEvents = async () => {
+    try {
+      const calendarRes = await fetch("/api/calendar/events", {
+        credentials: "include",
+      });
+      const calendarData = calendarRes.ok ? await calendarRes.json() : [];
+      setGoogleEvents(calendarData);
+    } catch (error) {
+      console.error("캘린더 가져오기 실패:", error);
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -44,19 +56,8 @@ export const useSidePanelData = () => {
         console.error("할 일 조회 실패:", error);
       }
 
-      try {
-        const calendarRes = await fetch("/api/calendar/events", {
-          credentials: "include",
-        });
-
-        const calendarData = calendarRes.ok ? await calendarRes.json() : [];
-
-        setGoogleEvents(calendarData);
-      } catch (error) {
-        console.error("캘린더 가져오기 실패:", error);
-      }
-    };
-
+      await fetchCalendarEvents();
+    }
     fetchData();
   }, []);
 
@@ -127,7 +128,8 @@ export const useSidePanelData = () => {
     );
   });
 
-  const handleAddTodo = async (newTodoData: {
+
+const handleAddTodo = async (newTodoData: {
     title: string;
     dueDateTime?: string;
     applicationId: string;

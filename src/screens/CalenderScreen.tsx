@@ -60,7 +60,7 @@ const CalendarScreen = () => {
         </div>
 
         <div className="flex-1">
-          <SideDetailPanel data={[]} />
+          <SideDetailPanel applications={applications} />
         </div>
       </div>
     </div>

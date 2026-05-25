@@ -9,10 +9,10 @@ import ScheduleItem from "./ScheduleItem";
 import { useSidePanelData } from "../../../../hooks/useSidePanelData";
 
 interface Props {
-  data: Application[];
+  applications: Application[];
 }
 
-const SideDetailPanel = ({ data }: Props) => {
+const SideDetailPanel = ({ applications: data }: Props) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const {
@@ -82,10 +82,10 @@ const SideDetailPanel = ({ data }: Props) => {
 
         <section className="p-6 border-b border-gray-100">
           <SectionHeader
-            title="오늘의 할 일"
-            count={todayTodos.filter((todo) => !todo.completed).length}
+            title="오늘의 일정"
+            count={todaySchedules.length}
             onConfirm={handleAddTodo}
-            showAddButton={true}
+            showAddButton={false}
             applications={data}
           />
 

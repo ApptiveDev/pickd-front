@@ -17,7 +17,7 @@ export function isSameDay(d1: Date, d2: Date) {
   );
 }
 
-export type EventType = "interview" | "deadline" | "apply" | "default";
+export type EventType = "interview" | "deadline" | "apply" | "todo" | "default";
 
 export type CalendarEvent = {
   date: Date;
@@ -84,7 +84,7 @@ export const useMainCalendar = (applications: Application[]) => {
         if (title.includes("면접")) type = "interview";
         else if (title.includes("마감")) type = "deadline";
         else if (title.includes("제출")) type = "apply";
-
+        else if (title.includes("할 일")) type = "todo";
         const eventDate = getEventDate(e);
         if (!eventDate) return null;
 
@@ -110,6 +110,7 @@ export const useMainCalendar = (applications: Application[]) => {
     if (type === "interview") return "bg-[#F9F2FF] text-[#C082F6]";
     if (type === "deadline") return "bg-[#E77975]/10 text-[#EF4444]";
     if (type === "apply") return "bg-[#79AF86]/10 text-[#10B981]";
+    if (type === "todo") return "bg-[#BFDBFE]/10 text-[#3B82F6]";
     return "bg-blue-50 text-blue-600";
   };
 
@@ -134,5 +135,6 @@ export const useMainCalendar = (applications: Application[]) => {
     handleCompanyChange,
     handleDateChange,
     setPopup,
+    loadEvents,
   };
 };
