@@ -1,11 +1,34 @@
-export function formatDate(dateInput: string | Date) {
+export function formatDate(
+  dateInput?: string | Date | null,
+  emptyText: string = "-",
+) {
+  if (!dateInput) return emptyText;
   const d = new Date(dateInput);
+  if (isNaN(d.getTime())) return emptyText;
 
-  return `${d.getMonth() + 1}/${d.getDate()} ${d
-    .getHours()
-    .toString()
-    .padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}`;
+  const month = d.getMonth() + 1;
+  const day = d.getDate();
+  const hours = d.getHours();
+  const minutes = d.getMinutes();
+  const hasTime = !(hours === 0 && minutes === 0);
+
+  if (!hasTime) {
+    return `${month}/${day}`;
+  }
+  return `${month}/${day} ${String(hours).padStart(2, "0")}:${String(
+    minutes,
+  ).padStart(2, "0")}`;
 }
+
+export const extractDateString = (value: any) => {
+  if (!value) return "";
+  if (typeof value === "string") return value;
+  if (value?.value) {
+    return new Date(Number(value.value)).toISOString();
+  }
+
+  return "";
+};
 
 export const getDDay = (deadline?: string) => {
   if (!deadline) return "-";

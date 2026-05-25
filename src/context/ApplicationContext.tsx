@@ -14,8 +14,7 @@ type ContextType = {
   loadData: () => Promise<void>;
   addTodo: (data: {
     title: string;
-    dueDate?: string;
-    dueTime?: string;
+    dueDateTime?: string;
     memo?: string;
     applicationId?: number;
   }) => Promise<void>;

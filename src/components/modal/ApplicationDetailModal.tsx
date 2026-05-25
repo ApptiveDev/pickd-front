@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Icon } from "@iconify/react";
-import { getDDay } from "../../utils/date";
+import { formatDate, getDDay } from "../../utils/date";
 import PostTodo from "./PostTodo";
+import { useApplication } from "../../context/ApplicationContext";
 
 interface Props {
   open: boolean;
@@ -28,14 +29,16 @@ export default function ApplicationDetailModal({
   const [showAddMenu, setShowAddMenu] = useState(false);
   const [todoModalOpen, setTodoModalOpen] = useState(false);
   const [scheduleModalOpen, setScheduleModalOpen] = useState(false);
+  const { addTodo, applications } = useApplication();
   if (!open || !application) return null;
+  const currentApplication =
+    applications.find((app) => app.id === application.id) || application;
 
   return (
     <>
       <div className="fixed inset-0 z-[99] flex items-center justify-center bg-black/40 backdrop-blur-[1px]">
-        <div className="relative w-[1180px] max-h-[92vh] overflow-y-auto rounded-[20px] bg-white shadow-[0_10px_40px_rgba(15,23,42,0.12)]">
-          {/* 헤더 */}
-          <div className="border-b border-[#EEF2F6] px-7 pt-5 pb-6">
+        <div className="relative w-[1100px] min-h-[600px] max-h-[90vh] overflow-y-auto rounded-[20px] bg-[#F8FAFC] shadow-[0_10px_40px_rgba(15,23,42,0.12)]">
+          <div className="border-b border-[#EEF2F6] px-8 pt-5 pb-3 bg-white">
             <div className="flex items-start justify-between">
               <div>
                 <div className="flex items-center gap-2 text-[13px] text-[#94A3B8]">
@@ -53,11 +56,10 @@ export default function ApplicationDetailModal({
                   </div>
 
                   <div>
-                    <h1 className="text-[30px] font-bold leading-none text-[#0F172A]">
+                    <h1 className="text-[25px] font-bold leading-none text-[#0F172A]">
                       {application.company}
                     </h1>
-
-                    <p className="mt-2 text-[15px] text-[#64748B]">
+                    <p className="mt-1 text-[14px] text-[#64748B]">
                       {application.jobTitle} · {application.position}
                     </p>
                   </div>
@@ -73,41 +75,39 @@ export default function ApplicationDetailModal({
             </div>
           </div>
 
-          <div className="space-y-7 px-7 py-6">
-            {/* 공고 기본 정보 */}
+          <div className="space-y-6 px-8 mt-5">
             <Section title="공고 기본 정보">
-              <div className="flex flex-col gap-5">
-                <InfoRow label="기업명" value={application.company} />
-                <InfoRow label="공고명" value={application.jobTitle} />
-                <InfoRow label="직무" value={application.position} />
-                <InfoRow
-                  label="마감일"
-                  value={
-                    application.deadlineDate ? (
-                      <div className="flex items-center gap-20">
-                        <span>{application.deadlineDate.split("T")[0]}</span>
+              <div className="rounded-2xl border border-[#E9EEF5] bg-white px-6 py-3 mb-7">
+                <div className="flex flex-col gap-4">
+                  <InfoRow label="기업명" value={currentApplication.company} />
+                  <InfoRow label="공고명" value={currentApplication.jobTitle} />
+                  <InfoRow label="직무" value={currentApplication.position} />
+                  <InfoRow
+                    label="마감일"
+                    value={
+                      currentApplication.deadlineDate ? (
+                        <div className="flex items-center gap-20">
+                          <span>
+                            {currentApplication.deadlineDate.split("T")[0]}
+                          </span>
 
-                        <span className="text-[#94A3B8]">
-                          {getDDay(application.deadlineDate)}
-                        </span>
-                      </div>
-                    ) : (
-                      "-"
-                    )
-                  }
-                />
+                          <span className="text-[#94A3B8]">
+                            {getDDay(currentApplication.deadlineDate)}
+                          </span>
+                        </div>
+                      ) : (
+                        "-"
+                      )
+                    }
+                  />
+                </div>
               </div>
             </Section>
 
-            {/* 전형 흐름 */}
-            <Section>
-              <h2 className="mb-4 text-lg font-semibold text-[#334155]">
-                전형 흐름
-              </h2>
-
-              <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-[#E2E8F0] p-5">
+            <Section title="전형 흐름">
+              <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-[#E2E8F0] px-5 py-3 bg-white">
                 {flow.map((step, index) => {
-                  const active = step === application.status;
+                  const active = step === currentApplication.status;
 
                   return (
                     <div key={step} className="flex items-center gap-2">
@@ -173,82 +173,106 @@ export default function ApplicationDetailModal({
                 </div>
               }
             >
-              <div className="overflow-hidden rounded-2xl border border-[#E9EEF5]">
+              <div className="overflow-hidden rounded-2xl border border-[#E9EEF5] bg-white">
                 <table className="w-full">
                   <thead className="bg-[#FAFBFC]">
                     <tr className="border-b border-[#EEF2F6] text-left">
                       <th className="px-5 py-3 text-[13px] font-semibold text-[#64748B]">
                         유형
                       </th>
-
-                      <th className="px-5 py-3 text-[13px] font-semibold text-[#64748B]">
+                      <th className="px-5 py- text-[13px] font-semibold text-[#64748B]">
                         제목
                       </th>
-
                       <th className="px-5 py-3 text-[13px] font-semibold text-[#64748B]">
                         날짜
                       </th>
-
                       <th className="px-5 py-3 text-[13px] font-semibold text-[#64748B]">
                         상태
                       </th>
                     </tr>
                   </thead>
-
                   <tbody>
                     {[
-                      {
-                        type: "일정",
-                        title: "서류 마감",
-                        date: "5/20 18:00",
-                        status: "예정",
-                      },
-                      {
+                      ...(currentApplication.applyDate
+                        ? [
+                            {
+                              id: "apply",
+                              type: "일정",
+                              title: "지원 예정",
+                              date: formatDate(
+                                currentApplication.applyDate,
+                                "기한 없음",
+                              ),
+                              status: "예정",
+                            },
+                          ]
+                        : []),
+
+                      ...(currentApplication.deadlineDate
+                        ? [
+                            {
+                              id: "deadline",
+                              type: "일정",
+                              title: "서류 마감",
+                              date: formatDate(
+                                currentApplication.deadlineDate,
+                                "기한 없음",
+                              ),
+                              status: "예정",
+                            },
+                          ]
+                        : []),
+
+                      ...(currentApplication.interviewDate
+                        ? [
+                            {
+                              id: "interview",
+                              type: "일정",
+                              title: "면접 예정",
+                              date: formatDate(
+                                currentApplication.interviewDate,
+                                "기한 없음",
+                              ),
+                              status: "예정",
+                            },
+                          ]
+                        : []),
+
+                      ...(currentApplication.todos || []).map((todo: any) => ({
+                        id: todo.id,
                         type: "할 일",
-                        title: "자소서 1번 수정",
-                        date: "5/18",
-                        status: "진행 중",
-                      },
-                      {
-                        type: "할 일",
-                        title: "기업분석 정리",
-                        date: "5/19",
-                        status: "예정",
-                      },
-                      {
-                        type: "일정",
-                        title: "면접 예정",
-                        date: "미정",
-                        status: "예정",
-                      },
-                    ].map((item, index) => (
+                        title: todo.title,
+                        date: formatDate(todo.dueDateTime, "기한 없음"),
+                        status: todo.completed ? "완료" : "진행 중",
+                      })),
+                    ].map((item) => (
                       <tr
-                        key={index}
+                        key={item.id}
                         className="border-b border-[#F1F5F9] last:border-b-0"
                       >
-                        <td className="px-5 py-3 text-[14px] text-[#64748B]">
+                        <td className="px-5 py-2 text-[14px] text-[#64748B]">
                           {item.type}
                         </td>
 
-                        <td className="px-5 py-3 text-[14px] font-medium text-[#0F172A]">
+                        <td className="px-5 py-2 text-[14px] font-medium text-[#0F172A]">
                           {item.title}
                         </td>
 
-                        <td className="px-5 py-3 text-[14px] text-[#64748B]">
+                        <td className="px-5 py-2 text-[14px] text-[#64748B]">
                           {item.date}
                         </td>
 
-                        <td className="px-5 py-3">
+                        <td className="px-5 py-2">
                           <span
-                            className={`
-                            rounded-md px-2 py-[5px]
-                            text-[12px] font-semibold
-                            ${
-                              item.status === "진행 중"
-                                ? "bg-[#DBEAFE] text-[#2563EB]"
-                                : "bg-[#F1F5F9] text-[#64748B]"
-                            }
-                          `}
+                            className={`rounded-md px-2 py-[5px] text-[12px] font-semibold
+                                  ${
+                                    item.status === "진행 중"
+                                      ? "bg-[#DBEAFE] text-[#2563EB]"
+                                      : item.status === "완료"
+                                        ? "bg-[#DCFCE7] text-[#16A34A]"
+                                        : "bg-[#F1F5F9] text-[#64748B]"
+                                  }
+                                `}
                           >
                             {item.status}
                           </span>
@@ -260,26 +284,11 @@ export default function ApplicationDetailModal({
               </div>
             </Section>
 
-            {/* 메모 */}
             <Section title="메모">
               <textarea
-                defaultValue={application.memo}
+                defaultValue={currentApplication.memo}
                 placeholder="메모를 입력하세요"
-                className="
-                min-h-[120px]
-                w-full
-                resize-none
-                rounded-2xl
-                border
-                border-[#E9EEF5]
-                px-5
-                py-4
-                text-[15px]
-                outline-none
-                transition-colors
-                placeholder:text-[#94A3B8]
-                focus:border-[#2563EB]
-              "
+                className=" min-h-[120px] w-full resize-none rounded-2xl border border-[#E2E8F0] bg-[#FCFDFE] px-5 py-4 mb-2 text-[15px] outline-none transition-colors placeholder:text-[#94A3B8] focus:border-[#2563EB]"
               />
             </Section>
           </div>
@@ -287,11 +296,14 @@ export default function ApplicationDetailModal({
       </div>
       {todoModalOpen && (
         <PostTodo
-          application={application}
-          applications={[application]}
+          application={currentApplication}
+          applications={[currentApplication]}
           onClose={() => setTodoModalOpen(false)}
-          onConfirm={(data) => {
-            console.log(data);
+          onConfirm={async (data) => {
+            await addTodo({
+              ...data,
+              applicationId: currentApplication.id,
+            });
 
             setTodoModalOpen(false);
           }}
@@ -304,8 +316,10 @@ export default function ApplicationDetailModal({
 function Section({ title, right, children }: any) {
   return (
     <section>
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-[17px] font-semibold text-[#334155]">{title}</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-[17px] font-semibold text-[#334155] mb-2">
+          {title}
+        </h2>
         {right}
       </div>
 

@@ -126,9 +126,9 @@ export default function PostDocument({
               className="w-full cursor-pointer rounded-xl border bg-white p-2 outline-none focus:border-blue-500"
             >
               <option value="작성중">작성중</option>
-              <option value="수정중">수정중</option>
               <option value="검토중">검토중</option>
-              <option value="완료">완료</option>
+              <option value="수정 필요">수정 필요</option>
+              <option value="제출 완료">제출 완료</option>
             </select>
           </div>
 

@@ -38,6 +38,19 @@ export default function ApplicationMenu({
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+  useEffect(() => {
+    const handleScroll = () => {
+      setOpen(false);
+    };
+
+    if (open) {
+      window.addEventListener("scroll", handleScroll, true);
+    }
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll, true);
+    };
+  }, [open]);
 
   return (
     <div className="relative flex justify-center">
@@ -142,8 +155,7 @@ export default function ApplicationMenu({
           onConfirm={async (data) => {
             await addTodo({
               title: data.title,
-              dueDate: data.dueDate,
-              dueTime: data.dueTime,
+              dueDateTime: data.dueDateTime,
               memo: data.memo,
               applicationId: Number(data.applicationId),
             });

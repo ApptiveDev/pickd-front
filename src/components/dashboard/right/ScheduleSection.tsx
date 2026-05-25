@@ -1,12 +1,7 @@
 import { useState } from "react";
 import type { Schedule } from "../../../types/schedule";
-
-const categoryColor = {
-  면접: "bg-[#F9F2FF] text-[#C082F6] text-[12px] font-semibold",
-  마감: "bg-[#F9F2FF] text-[#EF4444] text-[12px] font-semibold",
-  제출: "bg-blue-100 text-blue-500 text-[12px] font-semibold",
-  일반: "bg-gray-100 text-gray-500 text-[12px] font-semibold",
-};
+import { formatDate } from "../../../utils/date";
+import { categoryColor, getScheduleCategory } from "../../../utils/schedule";
 
 interface ScheduleSectionProps {
   weeklyEvents: Schedule[];
@@ -35,18 +30,6 @@ export default function ScheduleSection({
   };
 
   const filteredEvents = mode === "week" ? weeklyEvents : selectedEvents;
-
-  const getCategory = (e: Schedule) => {
-    if (e.category) return e.category;
-
-    const text = e.summary || "";
-
-    if (text.includes("면접")) return "면접";
-    if (text.includes("마감")) return "마감";
-    if (text.includes("제출")) return "제출";
-
-    return "일반";
-  };
 
   return (
     <div
@@ -81,13 +64,9 @@ export default function ScheduleSection({
         ) : (
           filteredEvents.map((e, index) => {
             const d = getSafeDate(e);
-            const category = getCategory(e);
+            const category = getScheduleCategory(e);
 
-            const dateText = d
-              ? `${d.getMonth() + 1}/${d.getDate()} ${String(
-                  d.getHours(),
-                ).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`
-              : "";
+            const dateText = d ? formatDate(d.toISOString()) : "";
 
             return (
               <div

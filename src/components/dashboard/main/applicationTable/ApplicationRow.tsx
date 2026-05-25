@@ -67,6 +67,28 @@ export default function ApplicationRow({
     "최종 결과",
   ];
 
+  const getCurrentDeadlineDate = (row: any) => {
+    switch (row.status) {
+      case "지원 예정":
+      case "작성중":
+        return row.deadlineDate;
+
+      case "제출 완료":
+      case "결과 대기":
+      case "면접 전형":
+        return row.interviewDate;
+
+      case "최종 결과":
+        return row.deadlineDate;
+
+      default:
+        return row.deadlineDate;
+    }
+  };
+
+  const currentDeadlineDate = getCurrentDeadlineDate(row);
+  const currentDday = getDDay(currentDeadlineDate);
+
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (
@@ -86,6 +108,20 @@ export default function ApplicationRow({
     };
   }, [statusOpen]);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      setStatusOpen(false);
+    };
+
+    if (statusOpen) {
+      window.addEventListener("scroll", handleScroll, true);
+    }
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll, true);
+    };
+  }, [statusOpen]);
+
   return (
     <tr
       onClick={() => {
@@ -102,7 +138,7 @@ export default function ApplicationRow({
     >
       <td className="border-b text-sm border-r border-[#F1F5F9]">
         <label
-          className="flex items-center justify-center cursor-pointer p-2 -m-2"
+          className="flex items-center justify-center cursor-pointer p-2 -m-1.5"
           onClick={(e) => e.stopPropagation()}
         >
           <input
@@ -153,7 +189,7 @@ export default function ApplicationRow({
         </td>
       )}
       {visibleColumns.includes("industry") && (
-        <td className="border-b whitespace-nowrap text-sm text-[#334155] border-r border-[#F1F5F9]">
+        <td className="border-b whitespace-nowrap text-sm font-semibold border-r border-[#F1F5F9]">
           {row.industry || "-"}
         </td>
       )}
@@ -208,15 +244,18 @@ export default function ApplicationRow({
                     {statuses.map((status) => (
                       <div
                         key={status}
-                        onClick={(e) => {
+                        onClick={async (e) => {
                           e.stopPropagation();
-                          updateApplication(row.id, (prev) => ({
-                            ...prev,
+                          const updated = {
+                            ...row,
                             status,
-                          }));
+                          };
+                          await updateApplicationApi(row.id, updated);
+                          updateApplication(row.id, () => updated);
+                          await onChange?.();
                           setStatusOpen(false);
                         }}
-                        className={` px-2 py-2 text-sm font-medium rounded-lg cursor-pointer  whitespace-nowrap text-center transition-colors
+                        className={`px-2 py-2 text-sm font-medium rounded-lg cursor-pointer  whitespace-nowrap text-center transition-colors
                         ${
                           row.status === status
                             ? "bg-[#2563EB] text-white"
@@ -241,34 +280,36 @@ export default function ApplicationRow({
       )}
       {visibleColumns.includes("deadlineDate") && (
         <td className="border-b whitespace-nowrap text-sm text-[#334155] border-r border-[#F1F5F9]">
-          {formatApplicationDate(row.applyDate)}
+          {formatApplicationDate(currentDeadlineDate)}
         </td>
       )}
+
       {visibleColumns.includes("dday") && (
         <td
           className={`border-b whitespace-nowrap text-sm font-semibold border-r border-[#F1F5F9] ${
-            getDDay(row.deadlineDate) === "-"
+            currentDday === "-"
               ? "text-[#64748B]"
-              : getDDay(row.deadlineDate).startsWith("D+")
+              : currentDday.startsWith("D+")
                 ? "text-[#94A3B8]"
-                : getDDay(row.deadlineDate) === "D-Day" ||
-                    (getDDay(row.deadlineDate).startsWith("D-") &&
-                      parseInt(getDDay(row.deadlineDate).replace("D-", "")) <=
-                        7)
+                : currentDday === "D-Day" ||
+                    (currentDday.startsWith("D-") &&
+                      parseInt(currentDday.replace("D-", "")) <= 7)
                   ? "text-[#EF4444]"
                   : "text-[#64748B]"
           }`}
         >
-          {getDDay(row.deadlineDate)}
+          {currentDday}
         </td>
       )}
       {visibleColumns.includes("documents") && (
-        <td className="border-b border-r border-[#F1F5F9] px-4 py-3 text-[#64748B]">
+        <td className="border-b border-r border-[#F1F5F9]">
           {row.documents?.length ? (
             <div className="flex flex-col gap-1">
               {row.documents.slice(0, 2).map((doc: any) => (
-                <div key={doc.id} className="truncate">
-                  {doc.type} · {doc.status}
+                <div key={doc.id} className="truncate text-[13px]">
+                  <span className="text-[#334155] text-sm">{doc.type}</span>
+                  <span className="text-[#94A3B8] mx-1">·</span>
+                  <span className="text-[#94A3B8]">{doc.status || "—"}</span>
                 </div>
               ))}
             </div>

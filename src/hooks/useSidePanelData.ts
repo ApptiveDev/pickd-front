@@ -135,8 +135,11 @@ export const useSidePanelData = () => {
 
       const createdTodo = await createTodo({
         title: newTodoData.title,
-        dueDate: newTodoData.dueDate,
-        dueTime: newTodoData.dueTime,
+        dueDateTime: newTodoData.dueDate
+          ? newTodoData.dueTime
+            ? `${newTodoData.dueDate}T${newTodoData.dueTime}`
+            : `${newTodoData.dueDate}T00:00`
+          : undefined,
         memo: newTodoData.memo,
         applicationId: selectedApplication?.id,
         company: selectedApplication?.company,

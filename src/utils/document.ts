@@ -2,9 +2,9 @@ import type { DocumentStatus } from "../types/document";
 
 export const statusStyle: Record<DocumentStatus, string> = {
   작성중: "bg-[#ECFDF5] text-[#10B981]",
-  수정중: "bg-[#FFFBEB] text-[#F59E0B]",
-  검토중: "bg-[#EFF6FF] text-[#2563EB]",
-  완료: "bg-[#F9F2FF] text-[#C082F6]",
+  검토중: "bg-[#FFFBEB] text-[#F59E0B]",
+  "수정 필요": "bg-[#EFF6FF] text-[#2563EB]",
+  "제출 완료": "bg-[#F9F2FF] text-[#C082F6]",
 };
 
 export const getRelativeTime = (dateString?: string) => {
