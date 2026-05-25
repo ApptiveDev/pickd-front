@@ -9,6 +9,7 @@ import PostRegistration from "../components/modal/PostRegistration";
 import ApplicationDetailModal from "../components/modal/ApplicationDetailModal";
 import DocumentSection from "../components/dashboard/main/document/DocumentSection";
 import ApplicationTable from "../components/dashboard/main/applicationTable/ApplicationTable";
+import { Icon } from "@iconify/react"; // 아이콘 컴포넌트 추가
 
 export default function MainScreen() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -17,6 +18,9 @@ export default function MainScreen() {
   const [focusedApplication, setFocusedApplication] = useState<any>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [editData, setEditData] = useState<any>(null);
+
+  // 우측 드로어(Sidebar) 열림 상태 추가
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const [googleEvents, setGoogleEvents] = useState<any[]>([]);
   const [user, setUser] = useState<any>(null);
@@ -74,7 +78,6 @@ export default function MainScreen() {
 
   const handleAfterChange = async () => {
     await loadData();
-
     setTimeout(loadCalendarEvents, 300);
   };
 
@@ -84,11 +87,24 @@ export default function MainScreen() {
   };
 
   return (
-    <div className="flex w-full min-h-full overflow-hidden">
+    // relative 속성을 추가하여 드로어가 이 영역을 기준으로 absolute 배치되도록 합니다.
+    <div className="relative flex w-full min-h-full overflow-hidden bg-gray-50">
       <div className="flex-1 min-w-0 p-6">
         {user && (
           <>
-            <Header user={user} />
+            <div className="flex justify-between items-center">
+              <Header user={user} />
+              
+              {/* 드로어가 닫혀있을 때만 열기 버튼을 보여줍니다 */}
+              {!isSidebarOpen && (
+                <button
+                  onClick={() => setIsSidebarOpen(true)}
+                  className="p-2 bg-white rounded-md shadow-md border border-gray-200 hover:bg-gray-50 text-gray-600 transition-all"
+                >
+                  <Icon icon="lucide:sidebar-open" className="w-5 h-5" />
+                </button>
+              )}
+            </div>
 
             <div className="mt-6 space-y-4">
               <ApplyInput onAdd={() => setIsModalOpen(true)} />
@@ -115,17 +131,34 @@ export default function MainScreen() {
         )}
       </div>
 
+      {/* 드로어 배경 딤드(Dimmed) 처리 */}
+      {user && isSidebarOpen && (
+        <div
+          className="absolute inset-0 bg-black/20 z-20 transition-opacity"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
+      {/* 우측 슬라이드 드로어 (RightTab) */}
       {user && (
-        <div className="w-[18.05%] min-w-[280px] border-l border-gray-200 p-6">
-          <RightTab
-            todoData={allTodos}
-            googleEvents={googleEvents}
-            setGoogleEvents={setGoogleEvents}
-            focusedApplication={focusedApplication}
-          />
+        <div
+          className={`absolute top-0 right-0 h-full w-[400px] bg-white shadow-xl z-30 flex flex-col overflow-y-auto transform transition-transform duration-300 ease-in-out ${
+            isSidebarOpen ? "translate-x-0" : "translate-x-full"
+          }`}
+        >
+
+          <div className="flex-1 p-6">
+            <RightTab
+              todoData={allTodos}
+              googleEvents={googleEvents}
+              setGoogleEvents={setGoogleEvents}
+              focusedApplication={focusedApplication}
+            />
+          </div>
         </div>
       )}
 
+      {/* 모달 및 기타 컴포넌트들 */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
           <div>
@@ -138,7 +171,6 @@ export default function MainScreen() {
               }}
               onSuccess={async () => {
                 await loadData();
-
                 setTimeout(async () => {
                   await loadCalendarEvents();
                 }, 500);
