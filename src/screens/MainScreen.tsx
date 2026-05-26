@@ -9,7 +9,7 @@ import PostRegistration from "../components/modal/PostRegistration";
 import ApplicationDetailModal from "../components/modal/ApplicationDetailModal";
 import DocumentSection from "../components/dashboard/main/document/DocumentSection";
 import ApplicationTable from "../components/dashboard/main/applicationTable/ApplicationTable";
-import { Icon } from "@iconify/react"; // 아이콘 컴포넌트 추가
+import { Icon } from "@iconify/react";
 
 export default function MainScreen() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -89,13 +89,13 @@ export default function MainScreen() {
       <div className="flex-1 min-w-0 p-6">
         {user && (
           <>
-            <div className="flex justify-between items-center">
+            <div className="relative flex justify-between items-center">
               <Header user={user} />
 
               {!isSidebarOpen && (
                 <button
                   onClick={() => setIsSidebarOpen(true)}
-                  className="p-2 bg-white rounded-md shadow-md border border-gray-200 hover:bg-gray-50 text-gray-600 transition-all"
+                  className="absolute top-0 right-0 p-2 bg-white rounded-md shadow-md border border-gray-200 hover:bg-gray-50 text-gray-600 transition-all z-10"
                 >
                   <Icon icon="lucide:sidebar-open" className="w-5 h-5" />
                 </button>
@@ -129,7 +129,7 @@ export default function MainScreen() {
 
       {user && isSidebarOpen && (
         <div
-          className="absolute inset-0 bg-transparent z-20" 
+          className="absolute inset-0 bg-transparent z-20"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
