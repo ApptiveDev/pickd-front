@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { type Application } from "../types/application";
 
 function getEventDate(e: any): Date | null {
@@ -39,25 +39,49 @@ export const useMainCalendar = (applications: Application[]) => {
   const [date, setDate] = useState(new Date());
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("all");
   const [popup, setPopup] = useState<PopupState | null>(null);
-  
+
   const popupRef = useRef<HTMLDivElement>(null);
 
-  const loadEvents = () => {
-    fetch("/api/calendar/events", {
-      credentials: "include",
-    })
-      .then(async (res) => {
-        const text = await res.text();
-        if (!res.ok) throw new Error(text);
-        return text ? JSON.parse(text) : [];
-      })
-      .then((data) => setGoogleEvents(data))
-      .catch((err) => console.error("캘린더 가져오기 실패", err));
-  };
+  const loadEvents = useCallback(async () => {
+    try {
+      const res = await fetch("/api/calendar/events", {
+        credentials: "include",
+      });
+
+      const text = await res.text();
+
+      if (!res.ok) {
+        throw new Error(text);
+      }
+
+      const data = text ? JSON.parse(text) : [];
+      setGoogleEvents(data);
+    } catch (err) {
+      console.error("캘린더 가져오기 실패", err);
+    }
+  }, []);
 
   useEffect(() => {
     loadEvents();
   }, []);
+
+  useEffect(() => {
+    const handleGoogleCalendarUpdated = () => {
+      loadEvents();
+    };
+
+    window.addEventListener(
+      "googleCalendarUpdated",
+      handleGoogleCalendarUpdated,
+    );
+
+    return () => {
+      window.removeEventListener(
+        "googleCalendarUpdated",
+        handleGoogleCalendarUpdated,
+      );
+    };
+  }, [loadEvents]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -81,14 +105,17 @@ export const useMainCalendar = (applications: Application[]) => {
         const title = e.summary || "";
         let type: EventType = "default";
 
-        if (title.includes("면접")) type = "interview";
+        if (title.includes("할 일")) type = "todo";
         else if (title.includes("마감")) type = "deadline";
         else if (title.includes("제출")) type = "apply";
-        else if (title.includes("할 일")) type = "todo";
+        else if (title.includes("면접")) type = "interview";
         const eventDate = getEventDate(e);
         if (!eventDate) return null;
 
-        const matchedApp = applications.find((app) => title.includes(app.company));
+        const matchedApp = applications.find((app) => {
+          if (!app.company) return false;
+          return title.includes(app.company);
+        });
 
         return {
           date: eventDate,
@@ -113,7 +140,6 @@ export const useMainCalendar = (applications: Application[]) => {
     if (type === "todo") return "bg-[#BFDBFE]/10 text-[#3B82F6]";
     return "bg-blue-50 text-blue-600";
   };
-
 
   const handleCompanyChange = (id: string) => {
     setSelectedCompanyId(id);
