@@ -33,7 +33,7 @@ export const QuotePopup = () => {
 
       {/* 팝업 창 */}
       {isOpen && (
-        <div className="absolute top-14 left-1/2 -translate-x-1/2 w-80 p-5 bg-white rounded-2xl shadow-2xl border border-gray-100 z-10 animate-fade-in">
+        <div className="absolute top-14 right-[-8px] w-80 p-5 bg-white rounded-2xl shadow-2xl border border-gray-100 z-10 animate-fade-in">
           <button
             onClick={() => setIsOpen(false)}
             className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 font-sans text-xl leading-none"
@@ -41,7 +41,6 @@ export const QuotePopup = () => {
             &times;
           </button>
 
-          {/* 명언 내용 섹션 */}
           <div className="flex flex-col items-center gap-4 mt-2">
             <div className="w-10 h-10 bg-green-50 rounded-full flex items-center justify-center">
               <span className="text-xl">✨</span>
@@ -56,7 +55,7 @@ export const QuotePopup = () => {
             </div>
           </div>
 
-          <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white border-t border-l border-gray-100 rotate-45"></div>
+          <div className="absolute -top-2 right-5 w-4 h-4 bg-white border-t border-l border-gray-100 rotate-45"></div>
         </div>
       )}
     </div>
