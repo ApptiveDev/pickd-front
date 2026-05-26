@@ -23,8 +23,8 @@ const SideDetailPanel = ({ applications: data }: Props) => {
     handleAddTodo,
     toggleTodo,
     calculateDDay,
+    isAddingTodo,
   } = useSidePanelData();
-
   const displayItems = isExpanded ? sortedList : sortedList.slice(0, 3);
 
   const extraCount = sortedList.length - 3;
@@ -108,6 +108,8 @@ const SideDetailPanel = ({ applications: data }: Props) => {
             count={todayTodos.filter((todo) => !todo.completed).length}
             onConfirm={handleAddTodo}
             showAddButton={true}
+            applications={data}
+            isSubmitting={isAddingTodo}
           />
 
           <div className="mt-4 space-y-2">

@@ -21,16 +21,41 @@ export default function ScheduleSection({
   const getSafeDate = (e: Schedule): Date | null => {
     if (!e.start) return null;
 
-    const dt = e.start.dateTime as any;
+    const start = e.start as any;
 
-    if (typeof dt === "string") return new Date(dt);
-    if (dt?.value) return new Date(Number(dt.value));
+    const dateTime = start.dateTime;
+    const date = start.date;
+
+    if (typeof dateTime === "string") {
+      return new Date(dateTime);
+    }
+
+    if (dateTime?.value) {
+      return new Date(Number(dateTime.value));
+    }
+
+    if (typeof date === "string") {
+      return new Date(date);
+    }
+
+    if (date?.value) {
+      return new Date(Number(date.value));
+    }
 
     return null;
   };
 
-  const filteredEvents = mode === "week" ? weeklyEvents : selectedEvents;
+  const baseEvents = mode === "week" ? weeklyEvents : selectedEvents;
 
+  const isTodoEvent = (e: Schedule) => {
+    const event = e as any;
+    return (
+      event.type === "todo" || String(event.summary ?? "").startsWith("[할일]")
+    );
+  };
+
+  const displayEvents = baseEvents.filter((event) => !isTodoEvent(event));
+  
   return (
     <div
       onClick={onClick}
@@ -42,42 +67,50 @@ export default function ScheduleSection({
             ? "이번 주 일정"
             : selectedDate
               ? `${selectedDate.getMonth() + 1}월 ${selectedDate.getDate()}일 일정`
-              : ""}
+              : "선택한 날짜 일정"}
         </h4>
+
         <button
           onClick={(e) => {
             e.stopPropagation();
-            setMode(mode === "week" ? "day" : "week");
+            setMode((prev) => (prev === "week" ? "day" : "week"));
           }}
           className="text-sm text-gray-400 hover:text-gray-600"
         >
           {mode === "week" ? "선택한 날짜 일정" : "이번주 일정"}
         </button>
       </div>
+
       <div
         className={`h-[230px] overflow-y-auto pr-1 ${
-          filteredEvents.length === 0 ? "flex items-center justify-center" : ""
+          displayEvents.length === 0 ? "flex items-center justify-center" : ""
         }`}
       >
-        {filteredEvents.length === 0 ? (
+        {displayEvents.length === 0 ? (
           <p className="text-sm font-semibold text-gray-400">일정 없음</p>
         ) : (
-          filteredEvents.map((e, index) => {
+          displayEvents.map((e, index) => {
             const d = getSafeDate(e);
             const category = getScheduleCategory(e);
-
             const dateText = d ? formatDate(d.toISOString()) : "";
+
+            const start = e.start as any;
 
             return (
               <div
-                key={e.id ?? `${e.start?.dateTime}-${index}`}
+                key={
+                  e.id ??
+                  `${start?.dateTime ?? start?.date ?? "schedule"}-${index}`
+                }
                 className="flex gap-4 mb-3"
               >
                 <div className="w-[15px] h-[15px] bg-[#D9D9D9] rounded-full mt-1 shrink-0" />
+
                 <div className="flex-1">
                   <p className="text-[15px] font-semibold break-words">
                     {e.summary}
                   </p>
+
                   <div className="flex items-center gap-2 mt-1 flex-wrap">
                     <p className="text-xs text-[#64748B] font-regular">
                       {dateText}

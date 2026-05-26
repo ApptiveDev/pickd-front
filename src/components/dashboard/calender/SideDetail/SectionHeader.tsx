@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Plus } from "lucide-react";
 import PostTodo from "../../../modal/PostTodo";
 import { useApplication } from "../../../../context/ApplicationContext";
@@ -15,6 +15,7 @@ interface SectionHeaderProps {
     memo: string;
   }) => void | Promise<void>;
   applications?: Application[];
+  isSubmitting?: boolean;
 }
 
 const SectionHeader = ({
@@ -23,12 +24,16 @@ const SectionHeader = ({
   onConfirm,
   showAddButton = true,
   applications: propApplications,
+  isSubmitting = false,
 }: SectionHeaderProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isConfirming, setIsConfirming] = useState(false);
+  const isConfirmingRef = useRef(false);
 
   const { applications: contextApplications } = useApplication();
 
   const todoApplications = propApplications ?? contextApplications;
+  const submitting = isSubmitting || isConfirming;
 
   const handlePostTodo = async (data: {
     title: string;
@@ -36,12 +41,22 @@ const SectionHeader = ({
     applicationId: string;
     memo: string;
   }) => {
+    if (isConfirmingRef.current || isSubmitting) {
+      return;
+    }
+
+    isConfirmingRef.current = true;
+    setIsConfirming(true);
+
     try {
       await onConfirm?.(data);
       setIsModalOpen(false);
     } catch (error) {
       console.error("할 일 추가 실패:", error);
       alert("할 일 추가에 실패했습니다.");
+    } finally {
+      isConfirmingRef.current = false;
+      setIsConfirming(false);
     }
   };
 
@@ -60,13 +75,23 @@ const SectionHeader = ({
 
         {showAddButton && (
           <button
-            onClick={() => setIsModalOpen(true)}
-            className="p-1 hover:bg-gray-100 rounded-md transition-colors group"
+            onClick={() => {
+              if (submitting) return;
+              setIsModalOpen(true);
+            }}
+            className={`p-1 rounded-md transition-colors group ${
+              submitting ? "cursor-not-allowed opacity-50" : "hover:bg-gray-100"
+            }`}
             title="새 할 일 추가"
+            disabled={submitting}
           >
             <Plus
               size={20}
-              className="text-gray-400 group-hover:text-blue-500"
+              className={`${
+                submitting
+                  ? "text-gray-300"
+                  : "text-gray-400 group-hover:text-blue-500"
+              }`}
             />
           </button>
         )}
@@ -74,7 +99,10 @@ const SectionHeader = ({
 
       {isModalOpen && (
         <PostTodo
-          onClose={() => setIsModalOpen(false)}
+          onClose={() => {
+            if (submitting) return;
+            setIsModalOpen(false);
+          }}
           onConfirm={handlePostTodo}
           applications={todoApplications}
         />
