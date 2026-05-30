@@ -9,6 +9,7 @@ import PostRegistration from "../components/modal/PostRegistration";
 import ApplicationDetailModal from "../components/modal/ApplicationDetailModal";
 import DocumentSection from "../components/dashboard/main/document/DocumentSection";
 import ApplicationTable from "../components/dashboard/main/applicationTable/ApplicationTable";
+import CompletedSection from "../components/dashboard/main/CompleteSection";
 import { Icon } from "@iconify/react";
 
 export default function MainScreen() {
@@ -114,6 +115,11 @@ export default function MainScreen() {
               />
             </div>
             <DocumentSection documents={documents} />
+            
+            <CompletedSection 
+                applications={applications} 
+                onCompanyClick={handleCompanyClick} 
+              />
           </>
         )}
       </div>
