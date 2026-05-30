@@ -91,15 +91,6 @@ export default function MainScreen() {
           <>
             <div className="relative flex justify-between items-center">
               <Header user={user} />
-
-              {!isSidebarOpen && (
-                <button
-                  onClick={() => setIsSidebarOpen(true)}
-                  className="absolute top-0 right-0 p-2 bg-white rounded-md shadow-md border border-gray-200 hover:bg-gray-50 text-gray-600 transition-all z-10"
-                >
-                  <Icon icon="lucide:sidebar-open" className="w-5 h-5" />
-                </button>
-              )}
             </div>
 
             <div className="mt-6 space-y-4">
@@ -136,11 +127,23 @@ export default function MainScreen() {
 
       {user && (
         <div
-          className={`absolute top-0 right-0 h-full w-[350px] bg-white shadow-xl z-30 flex flex-col overflow-y-auto transform transition-transform duration-300 ease-in-out ${
+          className={`absolute top-0 right-0 h-full w-[350px] bg-white shadow-xl z-30 flex flex-col transform transition-transform duration-300 ease-in-out ${
             isSidebarOpen ? "translate-x-0" : "translate-x-full"
           }`}
         >
-          <div className="flex-1 p-6">
+          <button
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            className="absolute top-1/3 left-0 -translate-x-full -translate-y-1/2 flex items-center justify-center w-6 h-16 bg-white border border-r-0 border-gray-200 rounded-l-xl shadow-md hover:bg-gray-50 text-gray-500 transition-all group z-40"
+          >
+            <Icon
+              icon={isSidebarOpen ? "lucide:chevron-right" : "lucide:chevron-left"}
+              className={`w-4 h-4 transition-transform ${
+                isSidebarOpen ? "group-hover:translate-x-0.5" : "group-hover:-translate-x-0.5"
+              }`}
+            />
+          </button>
+
+          <div className="flex-1 p-6 overflow-y-auto">
             <RightTab
               todoData={allTodos}
               googleEvents={googleEvents}
