@@ -1,19 +1,22 @@
 import { Icon } from "@iconify/react";
+import { useNavigate } from "react-router-dom";
 import { QuotePopup } from "../../../components/dashboard/QuotePopup";
+import { CalendarIcon } from "../../../assets";
 
 export default function Header({ user }: { user: any }) {
+  const navigate = useNavigate();
   return (
     <div className="flex flex-col mt-[60px] mb-6 px-7 w-full gap-2">
       <div className="flex justify-end items-center gap-3 w-full">
-        <button className="p-1 hover:bg-slate-100 rounded-full transition-colors">
-          <Icon
-            icon="mdi:bell-outline"
-            className="text-[26px] text-[#94A3B8] hover:text-slate-600"
-          />
+        <button
+          onClick={() => navigate("/calendar")}
+          className="w-10 h-10 flex items-center justify-center hover:bg-slate-100 rounded-full transition-colors"
+        >
+          <CalendarIcon size={21} color="#94A3B8" />
         </button>
-        <button className="p-1 hover:bg-slate-100 rounded-full transition-colors flex items-center justify-center">
+        <div className="w-10 h-10 flex items-center justify-center hover:bg-slate-100 rounded-full transition-colors">
           <QuotePopup />
-        </button>
+        </div>
       </div>
 
       <div className="flex justify-between items-end w-full mt-1">
