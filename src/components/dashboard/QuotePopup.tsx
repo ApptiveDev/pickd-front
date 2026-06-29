@@ -1,9 +1,10 @@
-import { useState, useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { CloverIcon } from "../../assets";
 import QUOTES from "../../constants/quotes.json";
 
 export const QuotePopup = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const popupRef = useRef<HTMLDivElement | null>(null);
 
   const currentQuote = useMemo(() => {
     const today = new Date();
@@ -20,8 +21,27 @@ export const QuotePopup = () => {
     setIsOpen((prev) => !prev);
   };
 
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
+      const target = event.target as Node | null;
+      if (target && popupRef.current && !popupRef.current.contains(target)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
+  }, [isOpen]);
+
   return (
-    <div className="relative inline-block">
+    <div ref={popupRef} className="relative inline-block">
       {/* 클로버 아이콘 버튼 */}
       <button
         onClick={togglePopup}

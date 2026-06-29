@@ -22,6 +22,16 @@ export type Application = {
   interviewDate?: string;
   deadlineDate?: string;
   status: ApplicationStatus;
+  nextStep?: string;
+  dday?: string | number;
+  recentUpdated?: string;
+  employmentType?: string;
+  employType?: string;
+  careerType?: string;
+  jobType?: string;
+  finalResult?: string | null;
+  sourceUrl?: string;
+  url?: string;
   submitted?: boolean;
   checklistInComplete?: boolean;
   important?: boolean;
@@ -38,7 +48,6 @@ export const COLUMN_OPTIONS = [
   { key: "dday", label: "남은 기간", default: true },
   { key: "documents", label: "작성중인 서류", default: true },
   { key: "checklistInComplete", label: "일정/할 일", default: true },
-  { key: "important", label: "중요도", default: true },
   { key: "industry", label: "산업", default: false },
   { key: "recentUpdated", label: "최근 수정일", default: false },
   { key: "memo", label: "메모", default: true },

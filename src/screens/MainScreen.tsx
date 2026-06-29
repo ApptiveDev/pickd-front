@@ -86,7 +86,7 @@ export default function MainScreen() {
   };
 
   return (
-    <div className="relative flex w-full min-h-full overflow-hidden bg-gray-50">
+    <div className="relative flex px-[150px] min-h-full overflow-hidden bg-gray-50">
       <div className="flex-1 min-w-0 p-6">
         {user && (
           <>
@@ -115,11 +115,11 @@ export default function MainScreen() {
               />
             </div>
             <DocumentSection documents={documents} />
-            
-            <CompletedSection 
-                applications={applications} 
-                onCompanyClick={handleCompanyClick} 
-              />
+
+            <CompletedSection
+              applications={applications}
+              onCompanyClick={handleCompanyClick}
+            />
           </>
         )}
       </div>
@@ -142,9 +142,13 @@ export default function MainScreen() {
             className="absolute top-1/3 left-0 -translate-x-full -translate-y-1/2 flex items-center justify-center w-6 h-16 bg-white border border-r-0 border-gray-200 rounded-l-xl shadow-md hover:bg-gray-50 text-gray-500 transition-all group z-40"
           >
             <Icon
-              icon={isSidebarOpen ? "lucide:chevron-right" : "lucide:chevron-left"}
+              icon={
+                isSidebarOpen ? "lucide:chevron-right" : "lucide:chevron-left"
+              }
               className={`w-4 h-4 transition-transform ${
-                isSidebarOpen ? "group-hover:translate-x-0.5" : "group-hover:-translate-x-0.5"
+                isSidebarOpen
+                  ? "group-hover:translate-x-0.5"
+                  : "group-hover:-translate-x-0.5"
               }`}
             />
           </button>
@@ -161,8 +165,15 @@ export default function MainScreen() {
       )}
 
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-          <div>
+        <div
+          className="fixed inset-0 bg-black/30 flex items-center justify-center z-50"
+          onClick={() => {
+            setIsModalOpen(false);
+            setSelectedApplication(null);
+            setEditData(null);
+          }}
+        >
+          <div onClick={(event) => event.stopPropagation()}>
             <PostRegistration
               initialData={selectedApplication}
               onClose={() => {

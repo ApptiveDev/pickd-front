@@ -8,7 +8,7 @@ type ContextType = {
   applications: Application[];
   updateApplication: (
     id: number,
-    updater: (prev: Application) => Application,
+    updater: ((prev: Application) => Application) | Partial<Application>,
   ) => void;
   deleteApplications: (ids: number[]) => Promise<void>;
   loadData: () => Promise<void>;
@@ -82,10 +82,21 @@ export function ApplicationProvider({ children }: any) {
 
   const updateApplication = (
     id: number,
-    updater: (prev: Application) => Application,
+    updater: ((prev: Application) => Application) | Partial<Application>,
   ) => {
     setApplications((prev) =>
-      prev.map((app) => (app.id === id ? updater(app) : app)),
+      prev.map((app) => {
+        if (app.id !== id) return app;
+
+        if (typeof updater === "function") {
+          return updater(app);
+        }
+
+        return {
+          ...app,
+          ...updater,
+        };
+      }),
     );
   };
 
