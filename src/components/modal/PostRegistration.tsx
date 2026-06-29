@@ -67,10 +67,16 @@ export default function PostRegistration({
   }, [editData]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-[2px]">
-      <div className="w-full max-w-[500px] bg-white rounded-[24px] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-[2px]"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-[500px] bg-white rounded-[24px] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200"
+        onClick={(event) => event.stopPropagation()}
+      >
         {/* 헤더 */}
-        <div className="flex items-center justify-between px-7 pt-6 pb-4">
+        <div className="flex items-center justify-between px-7 pt-6 pb-2">
           <h2 className="text-[20px] font-extrabold text-[#0F172A] tracking-tight">
             공고등록
           </h2>
@@ -86,9 +92,9 @@ export default function PostRegistration({
           <div className="h-[1px] bg-[#E2E8F0] w-full" />
         </div>
 
-        <div className="p-7">
+        <div className="px-7 pt-5 pb-5">
           {/* 탭 메뉴 */}
-          <div className="flex bg-[#F8F9FB] p-1 rounded-xl mb-6">
+          <div className="flex bg-[#F1F5F9] px-1 py-1 rounded-xl mb-7">
             {tabs.map((tab) => {
               const isActive = activeTab === tab.id;
               return (
@@ -126,16 +132,10 @@ export default function PostRegistration({
           />
 
           {/* 컨텐츠 영역: 내부 스크롤 적용 */}
-          <div className="max-h-[360px] overflow-y-auto mb-8 pr-1 custom-scrollbar">
+          <div className="max-h-[360px] overflow-y-auto mb-8 px-1 custom-scrollbar">
             {activeTab === "URL" && (
               <div className="space-y-4 animate-in fade-in duration-300 py-1">
-                <div className="flex items-center gap-2 px-1 text-[#64748B]">
-                  <LinkIcon size={20} />
-                  <p className="text-[14px] font-semibold tracking-tight">
-                    채용 공고 URL을 입력하세요.
-                  </p>
-                </div>
-                <div className="relative group">
+                <div className="relative group ">
                   <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-blue-500 transition-colors">
                     <LinkIcon size={20} />
                   </div>
@@ -148,7 +148,8 @@ export default function PostRegistration({
                   />
                 </div>
                 <p className="text-[12px] text-[#94A3B8] font-medium leading-relaxed px-1">
-                  * AI가 공고 내용을 자동으로 분석하여 가져옵니다.
+                  채용 공고 페이지의 URL을 입력하면, AI가 자동으로 정보를
+                  분석합니다.
                 </p>
               </div>
             )}

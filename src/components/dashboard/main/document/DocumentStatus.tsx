@@ -23,10 +23,11 @@ export default function DocumentStatus({ status, onChange }: Props) {
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(e.target as Node)
-      ) {
+      const target = e.target as Node;
+      const clickedDropdown = dropdownRef.current?.contains(target);
+      const clickedButton = buttonRef.current?.contains(target);
+
+      if (!clickedDropdown && !clickedButton) {
         setOpen(false);
       }
     };
