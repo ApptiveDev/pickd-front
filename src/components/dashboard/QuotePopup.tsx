@@ -45,7 +45,7 @@ export const QuotePopup = () => {
       {/* 클로버 아이콘 버튼 */}
       <button
         onClick={togglePopup}
-        className="flex items-center justify-center w-12 h-12"
+        className="flex items-center justify-center"
         aria-label="오늘의 명언 보기"
       >
         <CloverIcon size={30} />
