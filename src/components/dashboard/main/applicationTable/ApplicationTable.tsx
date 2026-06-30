@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type DragEvent } from "react";
 import TableFilter from "./TableFilter";
 import ActiveFilter from "./ActiveFilter";
 import ApplicationRow from "./ApplicationRow";
-import { getDDay } from "../../../../utils/date";
+import { getDDay, parseLocalDateTime } from "../../../../utils/date";
 import { useApplication } from "../../../../context/ApplicationContext";
 import { getNextStep } from "../../../../utils/status";
 import {
@@ -487,13 +487,13 @@ export default function ApplicationTable({
       let bValue = 0;
 
       if (sort.key === "applyDate") {
-        aValue = a.applyDate ? new Date(a.applyDate).getTime() : 0;
-        bValue = b.applyDate ? new Date(b.applyDate).getTime() : 0;
+        aValue = parseLocalDateTime(a.applyDate)?.getTime() ?? 0;
+        bValue = parseLocalDateTime(b.applyDate)?.getTime() ?? 0;
       }
 
       if (sort.key === "dday") {
-        aValue = a.deadlineDate ? new Date(a.deadlineDate).getTime() : 0;
-        bValue = b.deadlineDate ? new Date(b.deadlineDate).getTime() : 0;
+        aValue = parseLocalDateTime(a.deadlineDate)?.getTime() ?? 0;
+        bValue = parseLocalDateTime(b.deadlineDate)?.getTime() ?? 0;
       }
 
       if (sort.key === "checklistInComplete") {

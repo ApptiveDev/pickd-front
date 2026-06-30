@@ -8,9 +8,6 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import {
-  ArrowDown,
-  ArrowUp,
-  ArrowUpDown,
   Check,
   ChevronDown,
   GripVertical,
@@ -20,7 +17,7 @@ import {
   Sparkles,
   Star,
 } from "lucide-react";
-import type { ExperienceItem } from "../../types/experience";
+import type { ExperienceId, ExperienceItem } from "../../types/experience";
 import { ResizeHandle, useResizableCols } from "../../hooks/useResizableCols";
 
 export type ExperienceColumnKey =
@@ -40,11 +37,12 @@ export type ExperienceColumnFilter =
 interface Props {
   items: ExperienceItem[];
   onRowClick: (item: ExperienceItem) => void;
-  selectedIds?: number[];
-  onToggleSelect?: (id: number) => void;
-  onToggleSelectAll?: (ids: number[]) => void;
-  onToggleImportant?: (id: number) => void;
-  onTogglePin?: (id: number) => void;
+  selectedIds?: ExperienceId[];
+  onToggleSelect?: (id: ExperienceId) => void;
+  onToggleSelectAll?: (ids: ExperienceId[]) => void;
+  onToggleImportant?: (id: ExperienceId) => void;
+  onTogglePin?: (id: ExperienceId) => void;
+  onOpenPendingDuplicates?: (item: ExperienceItem) => void;
   visibleColumns?: readonly ExperienceColumnKey[];
   columnFilters?: Partial<Record<ExperienceColumnKey, ExperienceColumnFilter>>;
   filterOptions?: Partial<Record<ExperienceColumnKey, string[]>>;
@@ -117,6 +115,7 @@ export default function ExperienceTable({
   onToggleSelectAll,
   onToggleImportant,
   onTogglePin,
+  onOpenPendingDuplicates,
   visibleColumns,
   columnFilters = {},
   filterOptions = {},
@@ -366,6 +365,7 @@ export default function ExperienceTable({
                         columnKey={column.key}
                         item={item}
                         looseItem={looseItem}
+                        onOpenPendingDuplicates={onOpenPendingDuplicates}
                       />
                     </td>
                   ))}
@@ -422,6 +422,9 @@ function TableHead({
   onDragOver,
   onDrop,
 }: TableHeadProps) {
+  void sortDir;
+  void onSort;
+
   return (
     <th
       draggable
@@ -670,10 +673,12 @@ function CellValue({
   columnKey,
   item,
   looseItem,
+  onOpenPendingDuplicates,
 }: {
   columnKey: ExperienceColumnKey;
   item: ExperienceItem;
   looseItem: LooseExperienceItem;
+  onOpenPendingDuplicates?: (item: ExperienceItem) => void;
 }) {
   if (columnKey === "type") return <span>{item.type}</span>;
 
@@ -712,7 +717,7 @@ function CellValue({
   }
 
   if (columnKey === "updated") return <span>{getUpdatedAt(looseItem)}</span>;
-  if (columnKey === "status") return <ManageStatus item={item} />;
+  if (columnKey === "status") return <ManageStatus item={item} onOpenPendingDuplicates={onOpenPendingDuplicates} />;
 
   return null;
 }
@@ -722,7 +727,7 @@ function FixedPinButton({
   onTogglePin,
 }: {
   item: ExperienceItem;
-  onTogglePin?: (id: number) => void;
+  onTogglePin?: (id: ExperienceId) => void;
 }) {
   const pinned = Boolean(item.pinned);
 
@@ -745,15 +750,27 @@ function FixedPinButton({
   );
 }
 
-function ManageStatus({ item }: { item: ExperienceItem }) {
+function ManageStatus({
+  item,
+  onOpenPendingDuplicates,
+}: {
+  item: ExperienceItem;
+  onOpenPendingDuplicates?: (item: ExperienceItem) => void;
+}) {
   if (item.hasMergeCandidate || item.status === "병합 필요") {
     return (
-      <span
-        className="inline-flex items-center gap-1 text-[13px] font-[700] text-[#64748B]"
+      <button
+        type="button"
+        onClick={(event) => {
+          event.stopPropagation();
+          onOpenPendingDuplicates?.(item);
+        }}
+        className="inline-flex items-center gap-1 rounded-[8px] px-2 py-1 text-[12px] font-[800] text-[#EA580C] transition hover:bg-[#FFF7ED]"
         title="비슷한 항목이 있어요"
       >
-        <Layers size={17} strokeWidth={1.8} />
-      </span>
+        <Layers size={15} strokeWidth={1.9} />
+        비슷한 항목
+      </button>
     );
   }
 

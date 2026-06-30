@@ -14,13 +14,19 @@ export type ApplicationStatus = (typeof APPLICATION_STATUSES)[number];
 
 export type Application = {
   id: number;
+  noticeId?: number | null;
   company: string;
   jobTitle: string;
   position: string;
   industry: string;
-  applyDate: string;
+  applyDate?: string;
   interviewDate?: string;
   deadlineDate?: string;
+  applyEventId?: string | null;
+  interviewEventId?: string | null;
+  deadlineEventId?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
   status: ApplicationStatus;
   nextStep?: string;
   dday?: string | number;

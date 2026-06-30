@@ -19,6 +19,16 @@ import {
   FileText,
 } from "lucide-react";
 import Sidebar from "../components/Sidebar";
+import { getApplications } from "../api/application";
+import { getNoticeDetail, type NoticeDetail } from "../api/notice";
+import {
+  createCoverLetterItem,
+  deleteCoverLetterItem,
+  getCoverLetters,
+  updateCoverLetterItem,
+  type CoverLetterItem,
+} from "../api/coverLetter";
+import type { Application } from "../types/application";
 
 type ClassValue =
   | string
@@ -107,187 +117,449 @@ function Button({
   );
 }
 
-// ---------- Mock data registry (keyed by company slug) ----------
-const jobDetails: Record<string, any> = {
-  samsung: {
-    company: "삼성전자",
-    division: "DX부문",
-    title: "2026 상반기 DX부문 SW 엔지니어 신입 채용",
-    role: "SW 엔지니어 (풀스택)",
-    period: "2026-04-01 ~ 2026-04-20",
-    deadline: "2026-04-20 23:59",
-    deadlineDate: new Date("2026-04-20T23:59:00"),
-    dday: 8,
-    expired: false,
-    status: "서류 작성중",
-    docsInProgress: [
-      { id: "samsung-essay-1", name: "삼성전자 자기소개서", progress: 60 },
-      { id: "samsung-resume", name: "삼성전자 이력서", progress: 100 },
-    ],
-    sourceUrl: "https://www.samsungcareers.com/recruit/2026-spring",
-    basic: {
-      기업명: "삼성전자 주식회사",
-      공고명: "2026 상반기 DX부문 SW 엔지니어 신입 채용",
-      "모집 직무": "SW 엔지니어 (Frontend / Backend / Full-stack)",
-      근무지: "경기 수원시 영통구 삼성로 129 (수원사업장)",
-      "채용 형태": "정규직 (3개월 수습)",
-      "접수 시작일": "2026-04-01 (월) 10:00",
-      "접수 마감일": "2026-04-20 (일) 23:59",
-      "D-day": "D-8",
-      등록일: "2026-03-30",
-      "최근 수정일": "2026-04-12",
-    },
-    eligibility: {
-      "지원 자격": [
-        "2026년 8월 이전 학사 이상 학위 취득(예정)자",
-        "병역필 또는 면제자로 해외 여행에 결격사유가 없는 자",
-        "영어 회화 가능자 (OPIc IM2 이상 또는 동등 수준)",
-      ],
-      "필수 조건": [
-        "Computer Science 또는 관련 전공자",
-        "1개 이상 프로그래밍 언어 실무 활용 가능 (Java, C++, Python 등)",
-        "자료구조 / 알고리즘 / 운영체제 기본 지식 보유",
-      ],
-      우대사항: [
-        "오픈소스 프로젝트 기여 경험",
-        "대규모 트래픽 서비스 개발 경험",
-        "AI / ML 관련 프로젝트 경험",
-        "관련 분야 인턴 또는 현장 실습 경험",
-      ],
-      "가산점 요소": [
-        "정보처리기사 자격증 보유자",
-        "삼성 SW 역량테스트 Pro 등급 이상",
-        "특허 출원 / 등록 경험",
-      ],
-      "제출 서류": [
-        "이력서 (자사 양식)",
-        "자기소개서 (4문항)",
-        "성적증명서 1부",
-        "졸업(예정)증명서 1부",
-        "어학 성적 증빙 (해당자)",
-      ],
-    },
-    process: [
-      {
-        step: "서류 전형",
-        schedule: "2026-04-21 ~ 2026-04-28",
-        detail: "이력서 / 자기소개서 평가",
-        note: "합격자 개별 통보",
-      },
-      {
-        step: "SW 역량테스트",
-        schedule: "2026-05-09 (토)",
-        detail: "온라인 코딩 테스트 (3시간)",
-        note: "별도 환경 안내 예정",
-      },
-      {
-        step: "직무 면접",
-        schedule: "2026-05-18 ~ 2026-05-22",
-        detail: "기술 면접 + PT 면접",
-        note: "수원 사업장",
-      },
-      {
-        step: "임원 면접",
-        schedule: "2026-06-01 ~ 2026-06-05",
-        detail: "인성 / 가치관 평가",
-        note: "대면",
-      },
-      {
-        step: "건강검진 / 최종 발표",
-        schedule: "2026-06-15 (월)",
-        detail: "최종 합격자 발표",
-        note: "이메일 통보",
-      },
-    ],
-    essays: [
-      {
-        no: 1,
-        question:
-          "삼성전자에 지원한 동기와 입사 후 이루고 싶은 목표를 본인의 경험과 연계하여 작성해 주십시오.",
-        charLimit: 700,
-        status: "작성중",
-        updated: "2시간 전",
-        preview:
-          "저는 대학 시절 스마트홈 플랫폼 프로젝트를 진행하면서 삼성전자의 SmartThings 생태계에...",
-        docId: "samsung-essay-1",
-      },
-      {
-        no: 2,
-        question:
-          "지원 직무와 관련하여 가장 도전적이었던 프로젝트 경험을 작성해 주십시오.",
-        charLimit: 1000,
-        status: "초안",
-        updated: "어제",
-        preview:
-          "대학원 재학 중 실시간 데이터 처리 파이프라인을 구축하는 프로젝트를 맡았습니다...",
-        docId: "samsung-essay-2",
-      },
-      {
-        no: 3,
-        question: "협업 과정에서 갈등을 해결한 경험을 작성해 주십시오.",
-        charLimit: 700,
-        status: "미작성",
-        updated: null,
-        preview: null,
-        docId: "samsung-essay-3",
-      },
-      {
-        no: 4,
-        question: "최근 관심 있는 기술 트렌드와 그 이유를 작성해 주십시오.",
-        charLimit: 500,
-        status: "미작성",
-        updated: null,
-        preview: null,
-        docId: "samsung-essay-4",
-      },
-    ],
-    jobDescription:
-      "DX부문 내 모바일 / TV / 가전 제품의 SW 플랫폼 및 서비스 개발을 담당합니다. 사용자 경험 개선을 위한 신규 기능 기획·구현, 글로벌 시장 대상 안정적 서비스 운영, 그리고 차세대 AI 기반 기능 연구·개발에 참여하게 됩니다.",
-    competencies: [
-      "Frontend / Backend 개발 역량",
-      "대규모 분산 시스템 이해",
-      "협업 및 커뮤니케이션 능력",
-      "글로벌 협업 경험 (영문 문서 작성·리뷰)",
-    ],
-    rawSource: `[삼성전자] 2026년 상반기 DX부문 SW 엔지니어 신입사원 채용 공고
-
-■ 모집부문
-  - DX부문 SW 엔지니어 (Frontend / Backend / Full-stack)
-
-■ 지원 자격
-  - 2026년 8월 이전 학사 이상 학위 취득(예정)자
-  - 병역필 또는 면제자로 해외 여행에 결격사유가 없는 자
-  - 영어 회화 가능자
-
-■ 우대 사항
-  - 오픈소스 프로젝트 기여 경험
-  - 대규모 트래픽 서비스 개발 경험
-  - AI / ML 관련 프로젝트 경험
-
-■ 전형 절차
-  서류 전형 → SW 역량테스트 → 직무 면접 → 임원 면접 → 건강검진 → 최종 합격
-
-■ 접수 기간
-  2026-04-01 (월) 10:00 ~ 2026-04-20 (일) 23:59
-
-■ 제출 서류
-  이력서, 자기소개서, 성적증명서, 졸업(예정)증명서, 어학 성적
-
-■ 자기소개서 문항
-  1. 지원 동기와 입사 후 목표 (700자)
-  2. 가장 도전적이었던 프로젝트 경험 (1000자)
-  3. 협업 과정에서 갈등을 해결한 경험 (700자)
-  4. 관심 있는 기술 트렌드 (500자)
-
-■ 문의
-  채용 홈페이지 1:1 문의 게시판 이용
-`,
+// ---------- Empty detail fallback ----------
+const emptyJob = {
+  company: "-",
+  division: "-",
+  title: "지원 공고 상세",
+  role: "직무 미지정",
+  period: "- ~ -",
+  deadline: "-",
+  deadlineDate: null,
+  dday: null,
+  expired: false,
+  status: "지원 예정",
+  docsInProgress: [],
+  sourceUrl: "#",
+  basic: {
+    기업명: "-",
+    공고명: "-",
+    "모집 직무": "-",
+    산업: "-",
+    근무지: "-",
+    "채용 형태": "-",
+    "공고 분류": "-",
+    "접수 시작일": "-",
+    "접수 마감일": "-",
+    "D-day": "-",
+    등록일: "-",
+    "최근 수정일": "-",
   },
+  eligibility: {
+    "지원 자격": ["지원 공고 정보를 불러오면 표시됩니다."],
+    "필수 조건": ["지원 공고 정보를 불러오면 표시됩니다."],
+    우대사항: ["지원 공고 정보를 불러오면 표시됩니다."],
+    "가산점 요소": ["지원 공고 정보를 불러오면 표시됩니다."],
+    "제출 서류": ["지원 공고 정보를 불러오면 표시됩니다."],
+  },
+  process: [
+    {
+      step: "지원 일정",
+      schedule: "-",
+      detail: "지원 공고 정보를 불러오면 표시됩니다.",
+      note: null,
+    },
+  ],
+  essays: [],
+  jobDescription: "지원 공고 정보를 불러오면 표시됩니다.",
+  competencies: ["지원 공고 정보를 불러오면 표시됩니다."],
+  rawSource: "",
 };
 
-function getJob(slug: string | undefined) {
-  if (slug && jobDetails[slug]) return jobDetails[slug];
-  return jobDetails.samsung;
+type DetailEssay = {
+  id?: number;
+  no: number;
+  question: string;
+  charLimit: number;
+  status: "미작성" | "작성중" | "초안" | "완료";
+  updated: string | null;
+  preview: string | null;
+  answer?: string | null;
+  orderIndex?: number | null;
+  aiGenerated?: boolean;
+  source?: "APPLICATION" | "NOTICE";
+};
+
+type EssayDraft = {
+  id?: number;
+  question: string;
+  answer: string;
+  maxLength: string;
+  orderIndex: number;
+  aiGenerated: boolean;
+  source?: "APPLICATION" | "NOTICE";
+};
+
+const EMPTY_DRAFT: EssayDraft = {
+  question: "",
+  answer: "",
+  maxLength: "",
+  orderIndex: 0,
+  aiGenerated: false,
+};
+
+function splitText(value?: string | null) {
+  if (!value) return [];
+  return value
+    .split(/\n|•|ㆍ|·|-/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function compact(values: Array<string | null | undefined>) {
+  return values
+    .map((value) => value?.trim())
+    .filter((value): value is string => Boolean(value));
+}
+
+function formatDate(value?: string | Date | null) {
+  if (!value) return "-";
+  if (value instanceof Date) {
+    if (Number.isNaN(value.getTime())) return "-";
+    return value.toLocaleDateString("ko-KR", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
+  }
+
+  const normalized = value.includes("T") ? value : value.replace(" ", "T");
+  const parsed = new Date(normalized);
+  if (!Number.isNaN(parsed.getTime())) {
+    return parsed.toLocaleDateString("ko-KR", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
+  }
+
+  return value;
+}
+
+function formatDateTime(value?: string | Date | null) {
+  if (!value) return "-";
+  const normalized = value instanceof Date ? value : new Date(String(value).replace(" ", "T"));
+  if (Number.isNaN(normalized.getTime())) return String(value);
+
+  return normalized.toLocaleString("ko-KR", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function toDate(value?: string | Date | null) {
+  if (!value) return null;
+  if (value instanceof Date) return Number.isNaN(value.getTime()) ? null : value;
+
+  const parsed = new Date(String(value).replace(" ", "T"));
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function getDday(value?: string | Date | null) {
+  const target = toDate(value);
+  if (!target) return null;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const targetDay = new Date(target);
+  targetDay.setHours(0, 0, 0, 0);
+
+  return Math.ceil((targetDay.getTime() - today.getTime()) / 86_400_000);
+}
+
+function formatDday(dday: number | null) {
+  if (dday == null) return "-";
+  if (dday < 0) return `D+${Math.abs(dday)}`;
+  if (dday === 0) return "D-day";
+  return `D-${dday}`;
+}
+
+function getRelativeTime(value?: string | null) {
+  const date = toDate(value);
+  if (!date) return null;
+  const diff = Date.now() - date.getTime();
+  const minute = Math.floor(diff / 60_000);
+  if (minute < 1) return "방금 전";
+  if (minute < 60) return `${minute}분 전`;
+  const hour = Math.floor(minute / 60);
+  if (hour < 24) return `${hour}시간 전`;
+  const day = Math.floor(hour / 24);
+  if (day < 7) return `${day}일 전`;
+  return formatDate(date);
+}
+
+function labelEmploymentType(value?: string | null) {
+  const labels: Record<string, string> = {
+    FULL_TIME: "정규직",
+    INTERN: "인턴",
+    EXPERIENTIAL_INTERN: "체험형 인턴",
+    CONTRACT: "계약직",
+    FREELANCER: "프리랜서",
+  };
+  return value ? (labels[value] ?? value) : "-";
+}
+
+function labelCategory(value?: string | null) {
+  const labels: Record<string, string> = {
+    FULL_TIME: "신입/정규직",
+    INTERN: "인턴",
+    EXPERIENTIAL_INTERN: "체험형 인턴",
+    CONTRACT: "계약직",
+    FREELANCER: "프리랜서",
+  };
+  return value ? (labels[value] ?? value) : "-";
+}
+
+function getApplicationDeadline(application: Application | null, notice: NoticeDetail | null) {
+  return application?.deadlineDate ?? notice?.endedAt ?? null;
+}
+
+function buildEligibility(application: Application | null, notice: NoticeDetail | null) {
+  const sections = notice?.sections ?? [];
+  const documents = notice?.documents ?? [];
+
+  const generalQualifications = sections.flatMap((section) =>
+    (section.qualifications ?? []).flatMap((qualification) =>
+      splitText(qualification.generalQualification),
+    ),
+  );
+
+  const mandatoryQualifications = sections.flatMap((section) =>
+    (section.qualifications ?? []).flatMap((qualification) =>
+      splitText(qualification.mandatoryQualification),
+    ),
+  );
+
+  const generalPreferences = sections.flatMap((section) =>
+    (section.preferences ?? []).flatMap((preference) =>
+      splitText(preference.generalPreference),
+    ),
+  );
+
+  const additionalPoints = sections.flatMap((section) =>
+    (section.preferences ?? []).flatMap((preference) =>
+      compact([
+        preference.additionalPoints,
+        preference.certificatePreference,
+        preference.veteranPreference,
+        preference.disabilityPreference,
+      ]).flatMap(splitText),
+    ),
+  );
+
+  const submitDocuments = documents.flatMap((document) =>
+    compact([
+      document.mandatoryDocuments,
+      document.proofDocuments,
+      document.submissionNotes,
+    ]).flatMap(splitText),
+  );
+
+  const fallbackSubmitDocuments = (application?.documents ?? []).map(
+    (document) => document.title,
+  );
+
+  return {
+    "지원 자격": generalQualifications.length > 0 ? generalQualifications : ["공고에서 별도 지원 자격을 확인하지 못했어요."],
+    "필수 조건": mandatoryQualifications.length > 0 ? mandatoryQualifications : [application?.position || "지원 직무 정보를 확인해 주세요."],
+    우대사항: generalPreferences.length > 0 ? generalPreferences : ["등록된 우대사항이 없어요."],
+    "가산점 요소": additionalPoints.length > 0 ? additionalPoints : ["등록된 가산점 요소가 없어요."],
+    "제출 서류": submitDocuments.length > 0 ? submitDocuments : fallbackSubmitDocuments.length > 0 ? fallbackSubmitDocuments : ["등록된 제출 서류가 없어요."],
+  };
+}
+
+function buildProcess(notice: NoticeDetail | null) {
+  const processes = notice?.processes ?? [];
+
+  if (processes.length === 0) {
+    return [
+      {
+        step: "지원 일정",
+        schedule: "-",
+        detail: "등록된 전형 정보가 없어요.",
+        note: null,
+      },
+    ];
+  }
+
+  return processes.map((process) => {
+    const scheduleItems = compact([
+      process.applicationPeriod && `접수 ${process.applicationPeriod}`,
+      process.documentScreenSchedule && `서류 ${process.documentScreenSchedule}`,
+      process.writtenExamSchedule && `필기 ${process.writtenExamSchedule}`,
+      process.interviewSchedule && `면접 ${process.interviewSchedule}`,
+      process.joinDate && `입사 ${process.joinDate}`,
+    ]);
+
+    return {
+      step: process.processName || "전형 단계",
+      schedule: scheduleItems.join(" · ") || "-",
+      detail: process.scheduleNotes || "상세 전형 정보",
+      note: process.scheduleNotes,
+    };
+  });
+}
+
+function buildJobDescription(notice: NoticeDetail | null) {
+  const responsibilities = (notice?.sections ?? [])
+    .flatMap((section) => splitText(section.responsibilities))
+    .filter(Boolean);
+
+  return responsibilities.length > 0
+    ? responsibilities.join("\n")
+    : "등록된 직무 설명이 없어요.";
+}
+
+function buildCompetencies(application: Application | null, notice: NoticeDetail | null) {
+  const sections = notice?.sections ?? [];
+  const qualificationTexts = sections.flatMap((section) =>
+    (section.qualifications ?? []).flatMap((qualification) =>
+      compact([
+        qualification.generalQualification,
+        qualification.mandatoryQualification,
+      ]).flatMap(splitText),
+    ),
+  );
+
+  const preferenceTexts = sections.flatMap((section) =>
+    (section.preferences ?? []).flatMap((preference) =>
+      compact([
+        preference.generalPreference,
+        preference.additionalPoints,
+        preference.certificatePreference,
+      ]).flatMap(splitText),
+    ),
+  );
+
+  const competencies = [...qualificationTexts, ...preferenceTexts];
+
+  if (competencies.length > 0) return competencies.slice(0, 8);
+  return compact([application?.position, application?.industry, "공고 상세 내용을 확인해 주세요."]);
+}
+
+function mapCoverLettersToEssays(items: CoverLetterItem[]): DetailEssay[] {
+  return [...items]
+    .sort((a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0) || a.id - b.id)
+    .map((item, index) => {
+      const answer = item.answer?.trim() ?? "";
+      return {
+        id: item.id,
+        no: index + 1,
+        question: item.question,
+        charLimit: item.maxLength ?? 0,
+        status: answer ? "작성중" : "미작성",
+        updated: getRelativeTime(item.updatedAt ?? item.createdAt ?? null),
+        preview: answer || null,
+        answer,
+        orderIndex: item.orderIndex,
+        aiGenerated: item.aiGenerated,
+        source: item.applicationId ? "APPLICATION" : "NOTICE",
+      };
+    });
+}
+
+function buildRawSource(
+  application: Application | null,
+  notice: NoticeDetail | null,
+  coverLetters: CoverLetterItem[],
+) {
+  if (!application && !notice) return "";
+
+  const sections = notice?.sections ?? [];
+  const lines = [
+    `[${notice?.companyName ?? application?.company ?? "기업"}] ${notice?.noticeName ?? application?.jobTitle ?? "채용공고"}`,
+    "",
+    "■ 기본 정보",
+    `기업명: ${notice?.companyName ?? application?.company ?? "-"}`,
+    `공고명: ${notice?.noticeName ?? application?.jobTitle ?? "-"}`,
+    `직무: ${application?.position ?? sections[0]?.jobTitle ?? "-"}`,
+    `산업: ${application?.industry ?? "-"}`,
+    `근무지: ${notice?.workplaceAddress ?? sections[0]?.workplace ?? notice?.region1depth ?? "-"}`,
+    `접수 기간: ${notice?.startedAt ?? "-"} ~ ${notice?.endedAt ?? application?.deadlineDate ?? "-"}`,
+    "",
+    "■ 모집 부문",
+    ...sections.flatMap((section) =>
+      compact([
+        section.sectionName && `- ${section.sectionName}`,
+        section.jobTitle && `  직무: ${section.jobTitle}`,
+        section.responsibilities && `  담당 업무: ${section.responsibilities}`,
+        section.headcount && `  모집 인원: ${section.headcount}`,
+        section.workplace && `  근무지: ${section.workplace}`,
+      ]),
+    ),
+    "",
+    "■ 지원 핵심 정보",
+    ...Object.entries(buildEligibility(application, notice)).flatMap(
+      ([key, values]) => [`${key}`, ...values.map((value) => `  - ${value}`)],
+    ),
+    "",
+    "■ 자기소개서 문항",
+    ...(coverLetters.length > 0
+      ? mapCoverLettersToEssays(coverLetters).map(
+          (essay) => `  ${essay.no}. ${essay.question}${essay.charLimit ? ` (${essay.charLimit}자)` : ""}`,
+        )
+      : ["  등록된 문항 없음"]),
+  ];
+
+  return lines.filter((line) => line != null).join("\n");
+}
+
+function buildJobFromBackend(
+  application: Application | null,
+  notice: NoticeDetail | null,
+  coverLetters: CoverLetterItem[],
+) {
+  if (!application && !notice && coverLetters.length === 0) {
+    return emptyJob;
+  }
+
+  const deadlineValue = getApplicationDeadline(application, notice);
+  const dday = getDday(deadlineValue);
+  const expired = dday != null && dday < 0;
+  const sections = notice?.sections ?? [];
+  const firstSection = sections[0];
+  const essays = mapCoverLettersToEssays(coverLetters);
+  const periodStart = notice?.startedAt ? formatDate(notice.startedAt) : "-";
+  const periodEnd = notice?.endedAt ? formatDate(notice.endedAt) : formatDate(application?.deadlineDate);
+  const sourceUrl = notice?.noticeUrl || application?.sourceUrl || application?.url || "#";
+
+  return {
+    company: notice?.companyName ?? application?.company ?? "-",
+    division: firstSection?.sectionName ?? labelCategory(notice?.category),
+    title: notice?.noticeName ?? application?.jobTitle ?? "지원 공고 상세",
+    role: application?.position || firstSection?.jobTitle || firstSection?.sectionName || "직무 미지정",
+    period: `${periodStart} ~ ${periodEnd}`,
+    deadline: formatDateTime(deadlineValue),
+    deadlineDate: toDate(deadlineValue),
+    dday,
+    expired,
+    status: application?.status ?? "지원 예정",
+    docsInProgress: application?.documents ?? [],
+    sourceUrl,
+    basic: {
+      기업명: notice?.companyName ?? application?.company ?? "-",
+      공고명: notice?.noticeName ?? application?.jobTitle ?? "-",
+      "모집 직무": application?.position || firstSection?.jobTitle || "-",
+      산업: application?.industry ?? "-",
+      근무지: notice?.workplaceAddress ?? firstSection?.workplace ?? notice?.region1depth ?? "-",
+      "채용 형태": labelEmploymentType(notice?.employmentType),
+      "공고 분류": labelCategory(notice?.category),
+      "접수 시작일": notice?.startedAt ? formatDate(notice.startedAt) : "-",
+      "접수 마감일": formatDateTime(deadlineValue),
+      "D-day": formatDday(dday),
+      등록일: formatDate(application?.createdAt),
+      "최근 수정일": formatDateTime(application?.updatedAt),
+    },
+    eligibility: buildEligibility(application, notice),
+    process: buildProcess(notice),
+    essays,
+    jobDescription: buildJobDescription(notice),
+    competencies: buildCompetencies(application, notice),
+    rawSource: buildRawSource(application, notice, coverLetters),
+  };
 }
 
 // ---------- Highlight key helpers ----------
@@ -434,20 +706,115 @@ function HighlightableLine({
 
 // ---------- Main component ----------
 export default function ApplicationJobDetailPage() {
-  const { slug, applicationId } = useParams();
-  const detailSlug = slug ?? applicationId;
+  const { applicationId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const job = getJob(detailSlug);
 
+  const [application, setApplication] = useState<Application | null>(null);
+  const [notice, setNotice] = useState<NoticeDetail | null>(null);
+  const [coverLetters, setCoverLetters] = useState<CoverLetterItem[]>([]);
+  const [pageLoading, setPageLoading] = useState(true);
+  const [pageError, setPageError] = useState<string | null>(null);
   const [rawOpen, setRawOpen] = useState(false);
   const [highlights, setHighlights] = useState<Set<string>>(new Set());
+  const [essayDraft, setEssayDraft] = useState<EssayDraft>(EMPTY_DRAFT);
+  const [essayFormOpen, setEssayFormOpen] = useState(false);
+  const [savingEssay, setSavingEssay] = useState(false);
   const rawButtonRef = useRef<HTMLSpanElement | null>(null);
   const rawPanelRef = useRef<HTMLElement | null>(null);
 
   // 자소서 문항 ref — 작성중인 서류에서 진입 시 마지막 작업 문항으로 스크롤
   const essayRefs = useRef<(HTMLLIElement | null)[]>([]);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  void scrollContainerRef;
+
+  const numericApplicationId = Number(applicationId);
+  const job = buildJobFromBackend(application, notice, coverLetters);
+
+  const loadCoverLettersFor = async (
+    targetApplication: Application,
+    targetNotice: NoticeDetail | null,
+  ) => {
+    const appItems = await getCoverLetters({ applicationId: targetApplication.id });
+    let noticeItems: CoverLetterItem[] = [];
+
+    if (targetApplication.noticeId != null) {
+      try {
+        noticeItems = await getCoverLetters({ noticeId: targetApplication.noticeId });
+      } catch {
+        noticeItems = (targetNotice?.coverLetterItems ?? []).map((item) => ({
+          ...item,
+          noticeId: targetApplication.noticeId ?? null,
+          applicationId: null,
+        }));
+      }
+    }
+
+    const merged = new Map<number, CoverLetterItem>();
+    [...noticeItems, ...appItems].forEach((item) => {
+      merged.set(item.id, item);
+    });
+
+    setCoverLetters(
+      Array.from(merged.values()).sort(
+        (a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0) || a.id - b.id,
+      ),
+    );
+  };
+
+  const loadDetail = async () => {
+    if (!numericApplicationId || Number.isNaN(numericApplicationId)) {
+      setPageError("지원 공고 ID가 올바르지 않아요.");
+      setPageLoading(false);
+      return;
+    }
+
+    try {
+      setPageLoading(true);
+      setPageError(null);
+
+      const applications = await getApplications();
+      const targetApplication = (applications ?? []).find(
+        (item) => Number(item.id) === numericApplicationId,
+      );
+
+      if (!targetApplication) {
+        throw new Error("지원 공고를 찾을 수 없어요.");
+      }
+
+      setApplication(targetApplication);
+
+      let targetNotice: NoticeDetail | null = null;
+      if (targetApplication.noticeId != null) {
+        try {
+          targetNotice = await getNoticeDetail(targetApplication.noticeId);
+        } catch (error) {
+          console.warn("공고 상세 조회 실패:", error);
+        }
+      }
+
+      setNotice(targetNotice);
+      await loadCoverLettersFor(targetApplication, targetNotice);
+    } catch (error) {
+      console.error("지원 공고 상세 조회 실패:", error);
+      setPageError(
+        error instanceof Error
+          ? error.message
+          : "지원 공고 상세 정보를 불러오지 못했어요.",
+      );
+    } finally {
+      setPageLoading(false);
+    }
+  };
+
+  const reloadCoverLetters = async () => {
+    if (!application) return;
+    await loadCoverLettersFor(application, notice);
+  };
+
+  useEffect(() => {
+    void loadDetail();
+  }, [applicationId]);
 
   useEffect(() => {
     if (!rawOpen) return;
@@ -474,14 +841,16 @@ export default function ApplicationJobDetailPage() {
   }, [rawOpen]);
 
   useEffect(() => {
+    if (pageLoading) return;
+
     const fromDoclist =
       new URLSearchParams(location.search).get("from") === "doclist";
     if (!fromDoclist) return;
     // 마지막으로 작업 중인 문항(작성중 or 초안) 찾기
     const lastActiveIdx =
       [...job.essays]
-        .map((e: any, i: number) => ({ i, status: e.status }))
-        .filter(({ status }: any) => status === "작성중" || status === "초안")
+        .map((e: DetailEssay, i: number) => ({ i, status: e.status }))
+        .filter(({ status }) => status === "작성중" || status === "초안")
         .pop()?.i ?? 0;
     const el = essayRefs.current[lastActiveIdx];
     if (el) {
@@ -490,7 +859,7 @@ export default function ApplicationJobDetailPage() {
         120,
       );
     }
-  }, []);
+  }, [pageLoading, location.search, job.essays.length]);
 
   const toggleHighlight = (key: string) => {
     setHighlights((prev) => {
@@ -516,17 +885,146 @@ export default function ApplicationJobDetailPage() {
     });
   };
 
+  const handleAddEssay = () => {
+    setEssayDraft({
+      ...EMPTY_DRAFT,
+      orderIndex: job.essays.length,
+    });
+    setEssayFormOpen(true);
+  };
+
+  const handleEditEssay = (essay: DetailEssay) => {
+    setEssayDraft({
+      id: essay.id,
+      question: essay.question,
+      answer: essay.answer ?? "",
+      maxLength: essay.charLimit ? String(essay.charLimit) : "",
+      orderIndex: essay.orderIndex ?? essay.no - 1,
+      aiGenerated: Boolean(essay.aiGenerated),
+      source: essay.source,
+    });
+    setEssayFormOpen(true);
+  };
+
+  const handleCancelEssay = () => {
+    setEssayFormOpen(false);
+    setEssayDraft(EMPTY_DRAFT);
+  };
+
+  const handleSaveEssay = async () => {
+    if (!application) return;
+    const question = essayDraft.question.trim();
+    if (!question) {
+      toast("문항을 입력해 주세요");
+      return;
+    }
+
+    const maxLength = essayDraft.maxLength.trim()
+      ? Number(essayDraft.maxLength.trim())
+      : null;
+
+    if (maxLength != null && (Number.isNaN(maxLength) || maxLength < 0)) {
+      toast("글자 수는 0 이상의 숫자로 입력해 주세요");
+      return;
+    }
+
+    const payload = {
+      question,
+      answer: essayDraft.answer.trim() || null,
+      maxLength,
+      orderIndex: essayDraft.orderIndex,
+      aiGenerated: essayDraft.aiGenerated,
+      applicationId: application.id,
+      noticeId: null,
+    };
+
+    try {
+      setSavingEssay(true);
+      if (essayDraft.id) {
+        await updateCoverLetterItem(essayDraft.id, payload);
+        toast("자소서 문항을 수정했어요");
+      } else {
+        await createCoverLetterItem(payload);
+        toast("자소서 문항을 추가했어요");
+      }
+      handleCancelEssay();
+      await reloadCoverLetters();
+    } catch (error) {
+      console.error("자소서 문항 저장 실패:", error);
+      toast("문항 저장에 실패했어요");
+    } finally {
+      setSavingEssay(false);
+    }
+  };
+
+  const handleDeleteEssay = async (essay: DetailEssay) => {
+    if (!essay.id) return;
+    const ok = window.confirm("이 자소서 문항을 삭제할까요?");
+    if (!ok) return;
+
+    try {
+      await deleteCoverLetterItem(essay.id);
+      toast("자소서 문항을 삭제했어요");
+      await reloadCoverLetters();
+    } catch (error) {
+      console.error("자소서 문항 삭제 실패:", error);
+      toast("문항 삭제에 실패했어요");
+    }
+  };
+
   const eligibilityHighlightCount = getHighlightCountByPrefix("eligibility::");
   const jdHighlightCount = getHighlightCountByPrefix("jd::");
   const jobDescriptionRows = [
-    { groupKey: "직무 설명", items: [job.jobDescription] },
+    { groupKey: "직무 설명", items: splitText(job.jobDescription).length > 0 ? splitText(job.jobDescription) : [job.jobDescription] },
     { groupKey: "요구 역량", items: job.competencies },
   ];
 
   // Navigate to Tab3 (AI Cover) immediately — no confirmation
-  const goToTab3 = (essayNo: number) => {
-    navigate(`/ai?from=job&slug=${detailSlug ?? "samsung"}&essay=${essayNo}`);
+  const goToTab3 = (essay: DetailEssay) => {
+    const params = new URLSearchParams({
+      from: "job",
+      applicationId: String(application?.id ?? applicationId ?? ""),
+      essay: String(essay.no),
+    });
+
+    if (essay.id) params.set("coverLetterId", String(essay.id));
+    navigate(`/ai?${params.toString()}`);
   };
+
+  if (pageLoading) {
+    return (
+      <div className="flex h-screen bg-background overflow-hidden">
+        <Sidebar />
+        <div className="flex-1 flex items-center justify-center text-[13px] text-muted-foreground">
+          지원 공고 상세 정보를 불러오는 중이에요.
+        </div>
+      </div>
+    );
+  }
+
+  if (pageError) {
+    return (
+      <div className="flex h-screen bg-background overflow-hidden">
+        <Sidebar />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="rounded-xl border border-border bg-card px-6 py-5 text-center shadow-sm">
+            <p className="text-[14px] font-semibold text-foreground">
+              상세 정보를 불러오지 못했어요
+            </p>
+            <p className="mt-1 text-[12px] text-muted-foreground">{pageError}</p>
+            <div className="mt-4 flex items-center justify-center gap-2">
+              <Button variant="outline" size="sm" onClick={() => navigate("/main")}>
+                대시보드로
+              </Button>
+              <Button size="sm" onClick={() => void loadDetail()}>
+                다시 불러오기
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen bg-background overflow-hidden">
@@ -646,7 +1144,7 @@ export default function ApplicationJobDetailPage() {
                           : "text-foreground",
                       )}
                     >
-                      D-{job.dday}
+                      {formatDday(job.dday)}
                     </span>
                   }
                 />
@@ -664,7 +1162,7 @@ export default function ApplicationJobDetailPage() {
               {job.essays.length > 0 &&
                 (() => {
                   const doneCount = job.essays.filter(
-                    (e: any) => e.status === "완료",
+                    (e: DetailEssay) => e.status === "완료",
                   ).length;
                   return (
                     <div className="mt-4 pt-4 border-t border-border/50 flex items-center gap-3">
@@ -675,9 +1173,9 @@ export default function ApplicationJobDetailPage() {
                         </span>
                       </div>
                       <div className="flex items-center gap-1">
-                        {job.essays.map((e: any) => (
+                        {job.essays.map((e: DetailEssay) => (
                           <div
-                            key={e.no}
+                            key={e.id ?? e.no}
                             title={`Q${e.no}: ${e.status}`}
                             className={cn(
                               "w-2.5 h-2.5 rounded-full transition-colors",
@@ -925,19 +1423,123 @@ export default function ApplicationJobDetailPage() {
                 icon={PenLine}
                 title="5. 자소서 문항"
                 subtitle={`${job.essays.length}문항`}
+                rightSlot={
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 text-xs rounded-md"
+                    onClick={handleAddEssay}
+                  >
+                    <PenLine className="w-3.5 h-3.5" />
+                    문항 추가
+                  </Button>
+                }
               />
+
+              {essayFormOpen && (
+                <div className="mb-4 rounded-xl border border-indigo-200 bg-indigo-50/30 p-4">
+                  <div className="flex items-center justify-between gap-3 mb-3">
+                    <p className="text-[13px] font-semibold text-foreground">
+                      {essayDraft.id ? "자소서 문항 수정" : "자소서 문항 추가"}
+                    </p>
+                    <button
+                      onClick={handleCancelEssay}
+                      className="w-7 h-7 rounded-md hover:bg-white border border-transparent hover:border-border text-muted-foreground hover:text-foreground flex items-center justify-center transition-all"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-[11px] font-medium text-muted-foreground mb-1.5">
+                        문항
+                      </label>
+                      <textarea
+                        value={essayDraft.question}
+                        onChange={(event) =>
+                          setEssayDraft((prev) => ({
+                            ...prev,
+                            question: event.target.value,
+                          }))
+                        }
+                        placeholder="예: 지원 동기와 입사 후 목표를 작성해 주세요."
+                        className="min-h-[86px] w-full resize-none rounded-lg border border-border bg-white px-3 py-2 text-[13px] leading-relaxed outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+                      />
+                    </div>
+                    <div className="grid grid-cols-[140px_1fr] gap-3">
+                      <div>
+                        <label className="block text-[11px] font-medium text-muted-foreground mb-1.5">
+                          글자 수 제한
+                        </label>
+                        <input
+                          value={essayDraft.maxLength}
+                          onChange={(event) =>
+                            setEssayDraft((prev) => ({
+                              ...prev,
+                              maxLength: event.target.value.replace(/[^0-9]/g, ""),
+                            }))
+                          }
+                          placeholder="700"
+                          className="h-9 w-full rounded-lg border border-border bg-white px-3 text-[13px] outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-medium text-muted-foreground mb-1.5">
+                          답변 초안/메모 선택 입력
+                        </label>
+                        <input
+                          value={essayDraft.answer}
+                          onChange={(event) =>
+                            setEssayDraft((prev) => ({
+                              ...prev,
+                              answer: event.target.value,
+                            }))
+                          }
+                          placeholder="아직 답변이 없으면 비워둬도 됩니다."
+                          className="h-9 w-full rounded-lg border border-border bg-white px-3 text-[13px] outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex justify-end gap-2 pt-1">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 text-xs"
+                        onClick={handleCancelEssay}
+                        disabled={savingEssay}
+                      >
+                        취소
+                      </Button>
+                      <Button
+                        size="sm"
+                        className="h-8 text-xs"
+                        onClick={handleSaveEssay}
+                        disabled={savingEssay}
+                      >
+                        {savingEssay ? "저장 중" : "저장"}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {job.essays.length === 0 ? (
                 <div className="border border-border rounded-lg px-4 py-6 text-center">
                   <p className="text-[13px] text-muted-foreground">
                     이 공고는 별도 문항이 없어요
                   </p>
+                  <button
+                    onClick={handleAddEssay}
+                    className="mt-2 text-[12px] font-medium text-primary hover:underline"
+                  >
+                    직접 문항 추가하기
+                  </button>
                 </div>
               ) : (
                 <ol className="space-y-3">
-                  {job.essays.map((e: any, idx: number) => (
+                  {job.essays.map((e: DetailEssay, idx: number) => (
                     <li
-                      key={e.no}
+                      key={e.id ?? e.no}
                       ref={(el) => {
                         essayRefs.current[idx] = el;
                       }}
@@ -976,8 +1578,18 @@ export default function ApplicationJobDetailPage() {
                             </div>
                             <div className="flex items-center gap-2 flex-wrap">
                               <EssayStatus status={e.status} />
+                              {e.aiGenerated && (
+                                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-violet-100 text-violet-600">
+                                  AI 추출
+                                </span>
+                              )}
+                              {e.source === "NOTICE" && (
+                                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+                                  공고 문항
+                                </span>
+                              )}
                               <span className="text-[11px] text-muted-foreground tabular-nums">
-                                {e.charLimit.toLocaleString()}자 이내
+                                {e.charLimit ? `${e.charLimit.toLocaleString()}자 이내` : "제한 없음"}
                               </span>
                               {e.updated && (
                                 <span className="text-[11px] text-muted-foreground/50">
@@ -986,23 +1598,41 @@ export default function ApplicationJobDetailPage() {
                               )}
                             </div>
                           </div>
-                          <Button
-                            size="sm"
-                            variant={
-                              e.status === "미작성" ? "outline" : "default"
-                            }
-                            className={cn(
-                              "shrink-0 h-7 text-xs gap-1 whitespace-nowrap rounded-md",
-                              e.status !== "미작성" &&
-                                "bg-indigo-600 hover:bg-indigo-700 text-white border-0",
-                            )}
-                            onClick={() => goToTab3(e.no)}
-                          >
-                            <PenLine className="w-3 h-3" />
-                            {e.status === "미작성"
-                              ? "작성하기"
-                              : "이어서 작성하기"}
-                          </Button>
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-7 text-xs gap-1 whitespace-nowrap rounded-md"
+                              onClick={() => handleEditEssay(e)}
+                            >
+                              수정
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant={
+                                e.status === "미작성" ? "outline" : "default"
+                              }
+                              className={cn(
+                                "h-7 text-xs gap-1 whitespace-nowrap rounded-md",
+                                e.status !== "미작성" &&
+                                  "bg-indigo-600 hover:bg-indigo-700 text-white border-0",
+                              )}
+                              onClick={() => goToTab3(e)}
+                            >
+                              <PenLine className="w-3 h-3" />
+                              {e.status === "미작성"
+                                ? "작성하기"
+                                : "이어서 작성하기"}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-7 px-2 text-xs rounded-md text-muted-foreground hover:text-pickd-red"
+                              onClick={() => void handleDeleteEssay(e)}
+                            >
+                              삭제
+                            </Button>
+                          </div>
                         </div>
 
                         {/* 문항 */}

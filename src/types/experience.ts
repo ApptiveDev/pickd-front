@@ -21,8 +21,10 @@ export interface CustomTopField {
   type?: FieldType;
 }
 
+export type ExperienceId = string | number;
+
 export interface ExperienceItem {
-  id: number;
+  id: ExperienceId;
   type: ExperienceType;
   name: string;
   org?: string;
@@ -32,7 +34,7 @@ export interface ExperienceItem {
   keywords: string[];
   status: ExperienceStatus;
   missing: string[];
-  linkedExperienceIds: number[];
+  linkedExperienceIds: ExperienceId[];
   fields: Record<string, string>;
   important?: boolean;
   importance?: ImportanceLevel;
