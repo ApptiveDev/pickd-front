@@ -1,4 +1,4 @@
-import { Download, Sparkles } from "lucide-react";
+import { Clipboard, Download, Sparkles } from "lucide-react";
 
 interface Props {
   onOpenPaste?: () => void;
@@ -7,8 +7,6 @@ interface Props {
 }
 
 export default function ExperienceHeader({
-  onOpenPaste,
-  onExtract,
   onExportExcel,
 }: Props) {
   const actions = [

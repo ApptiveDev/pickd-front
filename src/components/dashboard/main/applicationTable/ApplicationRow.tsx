@@ -8,7 +8,6 @@ import { getStatusStyle, getNextStep } from "../../../../utils/status";
 import { getRelativeTime } from "../../../../utils/document";
 import { useApplication } from "../../../../context/ApplicationContext";
 import type { ApplicationStatus } from "../../../../types/application";
-import { updateApplication as updateApplicationApi } from "../../../../api/application";
 import { useNavigate } from "react-router-dom";
 
 interface Props {
@@ -182,8 +181,8 @@ export default function ApplicationRow({
               ...row,
               important: !row.important,
             };
-            await updateApplicationApi(row.id, updated);
-            updateApplication(row.id, () => updated);
+            await updateApplication(row.id, () => updated);
+            await onChange?.();
           }}
           className="flex h-[48px] w-full items-center justify-center"
         >
@@ -310,8 +309,7 @@ export default function ApplicationRow({
                             ...row,
                             status,
                           };
-                          await updateApplicationApi(row.id, updated);
-                          updateApplication(row.id, () => updated);
+                          await updateApplication(row.id, () => updated);
                           await onChange?.();
                           setStatusOpen(false);
                         }}

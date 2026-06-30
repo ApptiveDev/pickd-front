@@ -1276,6 +1276,10 @@ function TopFieldRow({
   onHide,
   onDelete,
 }: TopFieldRowProps) {
+  void rowTypeOpen;
+  void onToggleRowType;
+  void onSelectType;
+
   const handleDragOver = (event: DragEvent<HTMLDivElement>) => {
     event.preventDefault();
 

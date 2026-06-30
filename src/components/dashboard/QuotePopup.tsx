@@ -53,7 +53,7 @@ export const QuotePopup = () => {
 
       {/* 팝업 창 */}
       {isOpen && (
-        <div className="absolute top-14 right-[-8px] w-80 p-5 bg-white rounded-2xl shadow-2xl border border-gray-100 z-10 animate-fade-in">
+        <div className="absolute top-14 right-[-8px] w-80 p-5 bg-white rounded-2xl shadow-2xl border border-gray-100 z-[9999] animate-fade-in">
           <button
             onClick={() => setIsOpen(false)}
             className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 font-sans text-xl leading-none"
