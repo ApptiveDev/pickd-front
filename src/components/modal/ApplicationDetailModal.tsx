@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { Icon } from "@iconify/react";
 import { formatDate, getDDay } from "../../utils/date";
 import PostTodo from "./PostTodo";
+import PostSchedule from "./PostSchedule";
 import { useApplication } from "../../context/ApplicationContext";
 import { useClickOutside } from "../../hooks/useClickOutside";
 
@@ -304,6 +305,13 @@ export default function ApplicationDetailModal({
           </div>
         </div>
       </div>
+      {scheduleModalOpen && (
+        <PostSchedule
+          application={currentApplication}
+          onClose={() => setScheduleModalOpen(false)}
+        />
+      )}
+
       {todoModalOpen && (
         <PostTodo
           application={currentApplication}

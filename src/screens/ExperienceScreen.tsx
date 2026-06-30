@@ -10,7 +10,6 @@ import {
   Plus,
   Search,
   SlidersHorizontal,
-  Sparkles,
   Star,
   Clipboard,
   X,
@@ -25,6 +24,7 @@ import ExperienceTable, {
 } from "../components/experience/ExperienceTable";
 import ExperienceEntryModal from "../components/experience/modal/ExperienceEntryModal";
 import ExperienceDetailModal from "../components/experience/modal/ExperienceDetailModal";
+import ExperienceExtractWizardModal from "../components/experience/modal/ExperienceExtractWizardModal";
 import BasicInfoPanel from "../components/experience/BasicInfoPanel";
 import FilesPanel from "../components/experience/FilesPanel";
 import ExperiencePasteView from "../components/experience/ExperiencePasteView";
@@ -37,7 +37,15 @@ import {
   type ExperienceType,
 } from "../constants/experience/experiencePresets";
 
-import type { ExperienceItem } from "../types/experience";
+import type { ExperienceId, ExperienceItem } from "../types/experience";
+import {
+  createExperience as createExperienceApi,
+  deleteExperience as deleteExperienceApi,
+  getExistingItemIdsFromPendingBatches,
+  getExperiences as fetchExperiences,
+  getPendingDuplicateBatches,
+  updateExperience as updateExperienceApi,
+} from "../api/experience";
 
 const FILTERS = ["전체", "고정됨", ...EXPERIENCE_TYPES];
 const LS_EXPERIENCES = "pickd.experiences.items";
@@ -46,53 +54,6 @@ const LS_VISIBLE_COLUMNS = "pickd.experience.visibleColumns.v3";
 type ActiveTab = "db" | "basic-info" | "files";
 type ViewMode = "list" | "card" | "paste";
 
-const EXTRACT_MOCK_CANDIDATES: Array<{
-  id: string;
-  type: ExperienceType;
-  name: string;
-  summary: string;
-  values: Record<string, string>;
-  keywords: string[];
-}> = [
-  {
-    id: "ec1",
-    type: "프로젝트",
-    name: "캡스톤 디자인 프로젝트",
-    summary: "2024.09 ~ 2025.01 · PM / 기획",
-    values: {
-      period: "2024.09 ~ 2025.01",
-      role: "PM / 기획",
-      org: "학교 팀 프로젝트",
-    },
-    keywords: ["기획력", "문제해결"],
-  },
-  {
-    id: "ec2",
-    type: "인턴",
-    name: "여름 프론트엔드 인턴십",
-    summary: "2025.07 ~ 2025.08 · 프론트엔드",
-    values: {
-      company: "픽디랩",
-      dept: "서비스 개발팀",
-      position: "프론트엔드",
-      period: "2025.07 ~ 2025.08",
-    },
-    keywords: ["실행력", "협업"],
-  },
-  {
-    id: "ec3",
-    type: "대외활동",
-    name: "청년 창업 서포터즈",
-    summary: "2024.03 ~ 2024.06 · 콘텐츠 기획",
-    values: {
-      org: "청년 창업 재단",
-      period: "2024.03 ~ 2024.06",
-      role: "콘텐츠 기획",
-    },
-    keywords: ["소통", "기획력"],
-  },
-];
-
 export default function ExperienceScreen() {
   const [experiences, setExperiences] = useState<ExperienceItem[]>(() =>
     loadExperiences(),
@@ -100,11 +61,14 @@ export default function ExperienceScreen() {
   const [selectedItem, setSelectedItem] = useState<ExperienceItem | null>(null);
   const [entryOpen, setEntryOpen] = useState(false);
   const [extractOpen, setExtractOpen] = useState(false);
+  const [extractMode, setExtractMode] = useState<"extract" | "pending">("extract");
+  const [pendingFocusItemId, setPendingFocusItemId] = useState<ExperienceId | null>(null);
+  const [loadingExperiences, setLoadingExperiences] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState("전체");
   const [searchText, setSearchText] = useState("");
   const [activeTab, setActiveTab] = useState<ActiveTab>("db");
   const [viewMode, setViewMode] = useState<ViewMode>("list");
-  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [selectedIds, setSelectedIds] = useState<ExperienceId[]>([]);
   const [columnPanelOpen, setColumnPanelOpen] = useState(false);
   const [toastText, setToastText] = useState("");
   const [bulkDeleteConfirmOpen, setBulkDeleteConfirmOpen] = useState(false);
@@ -119,12 +83,54 @@ export default function ExperienceScreen() {
     dir: "asc" | "desc";
   } | null>(null);
   const columnPanelRef = useRef<HTMLDivElement | null>(null);
+  const updateTimerRef = useRef<number | null>(null);
 
   useClickOutside(
     [columnPanelRef],
     () => setColumnPanelOpen(false),
     columnPanelOpen,
   );
+
+  useEffect(() => {
+    void reloadExperiences();
+
+    return () => {
+      if (updateTimerRef.current) window.clearTimeout(updateTimerRef.current);
+    };
+  }, []);
+
+  async function reloadExperiences() {
+    setLoadingExperiences(true);
+    try {
+      const [items, pending] = await Promise.all([
+        fetchExperiences(),
+        getPendingDuplicateBatches(),
+      ]);
+      const nextItems = markPendingDuplicateExperiences(items, pending.batches);
+      setExperiences(nextItems);
+      setSelectedIds((prev) =>
+        prev.filter((id) => nextItems.some((item) => item.id === id)),
+      );
+      setSelectedItem((prev) =>
+        prev ? nextItems.find((item) => item.id === prev.id) ?? prev : prev,
+      );
+    } catch (error) {
+      showToast(`경험 목록을 불러오지 못했습니다. ${getErrorMessage(error)}`);
+    } finally {
+      setLoadingExperiences(false);
+    }
+  }
+
+  async function reloadPendingDuplicateState() {
+    try {
+      const pending = await getPendingDuplicateBatches();
+      setExperiences((prev) =>
+        markPendingDuplicateExperiences(prev, pending.batches),
+      );
+    } catch {
+      // 미처리 batch 조회 실패는 목록 사용을 막지 않습니다.
+    }
+  }
 
   useEffect(() => {
     try {
@@ -237,7 +243,7 @@ export default function ExperienceScreen() {
       : filter.values.length > 0;
   }).length;
 
-  const createNewExperience = (
+  const createNewExperience = async (
     type: ExperienceType = "프로젝트",
     patch?: Partial<ExperienceItem>,
   ) => {
@@ -250,8 +256,8 @@ export default function ExperienceScreen() {
       {},
     );
 
-    const newItem: ExperienceItem = {
-      id: Date.now() + Math.floor(Math.random() * 1000),
+    const draftItem: ExperienceItem = {
+      id: `local-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
       type,
       name: patch?.name ?? "새 경험",
       org: "",
@@ -277,11 +283,23 @@ export default function ExperienceScreen() {
       },
     };
 
-    setExperiences((prev) => [newItem, ...prev]);
-    setSelectedItem(newItem);
     setEntryOpen(false);
     setActiveTab("db");
-    return newItem;
+
+    try {
+      const createdId = await createExperienceApi(draftItem);
+      const createdItem = { ...draftItem, id: createdId };
+      setExperiences((prev) => [createdItem, ...prev]);
+      setSelectedItem(createdItem);
+      showToast("경험이 저장되었습니다.");
+      void reloadExperiences();
+      return createdItem;
+    } catch (error) {
+      setExperiences((prev) => [draftItem, ...prev]);
+      setSelectedItem(draftItem);
+      showToast(`백엔드 저장에 실패해 화면에만 임시 추가했습니다. ${getErrorMessage(error)}`);
+      return draftItem;
+    }
   };
 
   const updateExperience = (updatedItem: ExperienceItem) => {
@@ -296,9 +314,20 @@ export default function ExperienceScreen() {
         experience.id === normalizedItem.id ? normalizedItem : experience,
       ),
     );
+
+    if (String(normalizedItem.id).startsWith("local-")) return;
+
+    if (updateTimerRef.current) window.clearTimeout(updateTimerRef.current);
+    updateTimerRef.current = window.setTimeout(async () => {
+      try {
+        await updateExperienceApi(normalizedItem.id, normalizedItem);
+      } catch (error) {
+        showToast(`경험 수정 저장에 실패했습니다. ${getErrorMessage(error)}`);
+      }
+    }, 650);
   };
 
-  const toggleSelect = (id: number) => {
+  const toggleSelect = (id: ExperienceId) => {
     setSelectedIds((prev) =>
       prev.includes(id)
         ? prev.filter((itemId) => itemId !== id)
@@ -306,7 +335,7 @@ export default function ExperienceScreen() {
     );
   };
 
-  const toggleSelectAll = (ids: number[]) => {
+  const toggleSelectAll = (ids: ExperienceId[]) => {
     setSelectedIds((prev) => {
       const allChecked = ids.length > 0 && ids.every((id) => prev.includes(id));
       if (allChecked) return prev.filter((id) => !ids.includes(id));
@@ -314,7 +343,7 @@ export default function ExperienceScreen() {
     });
   };
 
-  const toggleImportant = (id: number) => {
+  const toggleImportant = (id: ExperienceId) => {
     setExperiences((prev) =>
       prev.map((item) => {
         if (item.id !== id) return item;
@@ -329,7 +358,7 @@ export default function ExperienceScreen() {
     );
   };
 
-  const togglePin = (id: number) => {
+  const togglePin = (id: ExperienceId) => {
     setExperiences((prev) =>
       prev.map((item) =>
         item.id === id
@@ -475,13 +504,55 @@ export default function ExperienceScreen() {
     );
   };
 
-  const confirmBulkDelete = () => {
+  const confirmBulkDelete = async () => {
+    const idsToDelete = [...selectedIds];
+
     setExperiences((prev) =>
-      prev.filter((item) => !selectedIds.includes(item.id)),
+      prev.filter((item) => !idsToDelete.includes(item.id)),
     );
     setSelectedIds([]);
     setBulkDeleteConfirmOpen(false);
-    showToast("선택 항목이 삭제되었습니다.");
+
+    try {
+      await Promise.all(
+        idsToDelete
+          .filter((id) => !String(id).startsWith("local-"))
+          .map((id) => deleteExperienceApi(id)),
+      );
+      showToast("선택 항목이 삭제되었습니다.");
+      void reloadExperiences();
+    } catch (error) {
+      showToast(`일부 항목 삭제에 실패했습니다. ${getErrorMessage(error)}`);
+      void reloadExperiences();
+    }
+  };
+
+  const deleteSingleExperience = async (id: ExperienceId) => {
+    setExperiences((prev) => prev.filter((item) => item.id !== id));
+    setSelectedItem(null);
+
+    try {
+      if (!String(id).startsWith("local-")) await deleteExperienceApi(id);
+      showToast("경험이 삭제되었습니다.");
+      void reloadExperiences();
+    } catch (error) {
+      showToast(`경험 삭제에 실패했습니다. ${getErrorMessage(error)}`);
+      void reloadExperiences();
+    }
+  };
+
+  const openPendingDuplicateResolver = (item?: ExperienceItem) => {
+    setExtractMode("pending");
+    setPendingFocusItemId(item?.id ?? null);
+    setExtractOpen(true);
+  };
+
+  const mergeCompletedItems = (items: ExperienceItem[]) => {
+    if (items.length === 0) return;
+
+    setExperiences((prev) => mergeExperienceItems(prev, items));
+    showToast(`${items.length}개의 경험이 반영되었습니다.`);
+    void reloadExperiences();
   };
 
   return (
@@ -494,6 +565,8 @@ export default function ExperienceScreen() {
           }}
           onExtract={() => {
             setActiveTab("db");
+            setExtractMode("extract");
+            setPendingFocusItemId(null);
             setExtractOpen(true);
           }}
           onExportExcel={exportExcel}
@@ -525,6 +598,12 @@ export default function ExperienceScreen() {
 
         {activeTab === "db" && (
           <>
+            {loadingExperiences && (
+              <div className="mt-[18px] rounded-[12px] border border-[#BFDBFE] bg-[#EFF6FF] px-4 py-3 text-[13px] font-[800] text-[#2563EB]">
+                백엔드 경험 목록을 불러오는 중입니다...
+              </div>
+            )}
+
             <div className="mt-[26px] flex items-center justify-between">
               <button
                 onClick={() => setEntryOpen(true)}
@@ -690,6 +769,7 @@ export default function ExperienceScreen() {
                 onToggleSelectAll={toggleSelectAll}
                 onToggleImportant={toggleImportant}
                 onTogglePin={togglePin}
+                onOpenPendingDuplicates={openPendingDuplicateResolver}
                 visibleColumns={visibleColumns}
                 columnFilters={columnFilters}
                 filterOptions={filterOptions}
@@ -724,37 +804,20 @@ export default function ExperienceScreen() {
         <ExperienceEntryModal
           open={entryOpen}
           onClose={() => setEntryOpen(false)}
-          onDirectInput={() => createNewExperience()}
+          onDirectInput={() => void createNewExperience()}
           onImport={() => {
             setEntryOpen(false);
             setExtractOpen(true);
           }}
         />
 
-        <ExtractExperienceModal
+        <ExperienceExtractWizardModal
           open={extractOpen}
+          mode={extractMode}
+          focusItemId={pendingFocusItemId}
           onClose={() => setExtractOpen(false)}
-          onCreate={(candidateIds) => {
-            candidateIds.forEach((id) => {
-              const candidate = EXTRACT_MOCK_CANDIDATES.find(
-                (item) => item.id === id,
-              );
-              if (!candidate) return;
-              createNewExperience(candidate.type, {
-                name: candidate.name,
-                keywords: candidate.keywords,
-                pinned: true,
-                status: "작성중",
-                hasUnansweredAiQuestion: true,
-                fields: {
-                  ...candidate.values,
-                  __body: `${candidate.name} 경험을 자소서에서 추출했습니다. 구체적인 역할, 과정, 결과를 이어서 정리해 주세요.`,
-                },
-              });
-            });
-            setExtractOpen(false);
-            showToast("자소서에서 경험 후보를 추가했습니다.");
-          }}
+          onCompleted={mergeCompletedItems}
+          onPendingChanged={() => void reloadPendingDuplicateState()}
         />
 
         <ExperienceDetailModal
@@ -762,6 +825,7 @@ export default function ExperienceScreen() {
           item={selectedItem}
           onClose={() => setSelectedItem(null)}
           onChange={updateExperience}
+          onDelete={deleteSingleExperience}
           onCopyToast={() => showToast("복사되었습니다.")}
         />
 
@@ -873,159 +937,6 @@ function ColumnPanel({
   );
 }
 
-function ExtractExperienceModal({
-  open,
-  onClose,
-  onCreate,
-}: {
-  open: boolean;
-  onClose: () => void;
-  onCreate: (candidateIds: string[]) => void;
-}) {
-  const [text, setText] = useState("");
-  const [checkedIds, setCheckedIds] = useState<string[]>(
-    EXTRACT_MOCK_CANDIDATES.map((item) => item.id),
-  );
-  const [done, setDone] = useState(false);
-
-  useEffect(() => {
-    if (open) {
-      setDone(false);
-      setCheckedIds(EXTRACT_MOCK_CANDIDATES.map((item) => item.id));
-    }
-  }, [open]);
-
-  if (!open) return null;
-
-  const toggle = (id: string) => {
-    setCheckedIds((prev) =>
-      prev.includes(id)
-        ? prev.filter((itemId) => itemId !== id)
-        : [...prev, id],
-    );
-  };
-
-  return (
-    <div
-      className="fixed inset-0 z-[70] flex items-center justify-center bg-black/45 px-4"
-      onClick={onClose}
-    >
-      <div
-        className="w-[760px] overflow-hidden rounded-[16px] border border-[#E2E8F0] bg-white shadow-[0_24px_70px_rgba(15,23,42,0.25)]"
-        onClick={(event) => event.stopPropagation()}
-      >
-        <div className="flex items-start justify-between border-b border-[#E2E8F0] px-5 py-4">
-          <div>
-            <h3 className="text-[18px] font-[800] text-[#0F172A]">
-              자소서에서 경험 추출
-            </h3>
-            <p className="mt-1 text-[13px] font-[500] text-[#64748B]">
-              두 번째 프로젝트처럼 자소서 텍스트에서 경험 후보를 골라 DB에
-              추가하는 흐름입니다.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-[#64748B] hover:bg-[#F8FAFC]"
-          >
-            <X size={18} />
-          </button>
-        </div>
-
-        <div className="grid grid-cols-[1fr_300px] gap-4 px-5 py-4">
-          <div>
-            <textarea
-              value={text}
-              onChange={(event) => setText(event.target.value)}
-              placeholder="자소서 문단을 붙여넣어 주세요. 지금은 목업 후보를 보여주고, 백엔드/AI 연결 시 실제 추출 결과로 교체하면 됩니다."
-              className="h-[300px] w-full resize-none rounded-[12px] border border-[#E2E8F0] bg-[#FBFCFE] p-3 text-[14px] font-[500] leading-7 text-[#0F172A] outline-none focus:border-[#2563EB]"
-            />
-            <button
-              type="button"
-              onClick={() => setDone(true)}
-              className="mt-3 inline-flex h-9 items-center gap-2 rounded-[8px] bg-[#2563EB] px-4 text-[13px] font-[800] text-white hover:bg-[#1D4ED8]"
-            >
-              <Sparkles size={15} />
-              후보 추출하기
-            </button>
-          </div>
-
-          <div className="rounded-[12px] border border-[#E2E8F0] bg-[#F8FAFC] p-3">
-            <p className="mb-3 text-[13px] font-[800] text-[#0F172A]">
-              추출 후보
-            </p>
-            <div className="space-y-2">
-              {EXTRACT_MOCK_CANDIDATES.map((candidate) => {
-                const checked = checkedIds.includes(candidate.id);
-                return (
-                  <label
-                    key={candidate.id}
-                    className="block cursor-pointer rounded-[10px] border border-[#E2E8F0] bg-white p-3 hover:border-[#BFDBFE]"
-                  >
-                    <div className="flex items-start gap-2">
-                      <span
-                        className={`mt-0.5 flex h-[16px] w-[16px] shrink-0 items-center justify-center rounded-[4px] border ${checked ? "border-[#2563EB] bg-[#2563EB]" : "border-[#CBD5E1] bg-white"}`}
-                      >
-                        {checked && (
-                          <Check
-                            size={11}
-                            strokeWidth={3}
-                            className="text-white"
-                          />
-                        )}
-                      </span>
-                      <input
-                        type="checkbox"
-                        checked={checked}
-                        onChange={() => toggle(candidate.id)}
-                        className="sr-only"
-                      />
-                      <div className="min-w-0">
-                        <p className="text-[13px] font-[800] text-[#0F172A]">
-                          {candidate.name}
-                        </p>
-                        <p className="mt-1 text-[11px] font-[700] text-[#2563EB]">
-                          {candidate.type}
-                        </p>
-                        <p className="mt-1 text-[12px] font-[600] text-[#64748B]">
-                          {candidate.summary}
-                        </p>
-                      </div>
-                    </div>
-                  </label>
-                );
-              })}
-            </div>
-            {done && (
-              <p className="mt-3 text-[12px] font-[700] text-[#2563EB]">
-                후보 {EXTRACT_MOCK_CANDIDATES.length}개를 찾았습니다.
-              </p>
-            )}
-          </div>
-        </div>
-
-        <div className="flex justify-end gap-2 border-t border-[#E2E8F0] px-5 py-3">
-          <button
-            type="button"
-            onClick={onClose}
-            className="h-9 rounded-[8px] border border-[#E2E8F0] px-4 text-[13px] font-[800] text-[#64748B] hover:bg-[#F8FAFC]"
-          >
-            취소
-          </button>
-          <button
-            type="button"
-            onClick={() => onCreate(checkedIds)}
-            className="h-9 rounded-[8px] bg-[#2563EB] px-4 text-[13px] font-[800] text-white hover:bg-[#1D4ED8]"
-          >
-            선택 항목 추가
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function ExperienceCardGrid({
   items,
   onOpen,
@@ -1034,8 +945,8 @@ function ExperienceCardGrid({
 }: {
   items: ExperienceItem[];
   onOpen: (item: ExperienceItem) => void;
-  onToggleImportant: (id: number) => void;
-  onTogglePin: (id: number) => void;
+  onToggleImportant: (id: ExperienceId) => void;
+  onTogglePin: (id: ExperienceId) => void;
 }) {
   if (items.length === 0) {
     return (
@@ -1185,6 +1096,46 @@ function DeleteConfirmModal({
       </div>
     </div>
   );
+}
+
+function mergeExperienceItems(
+  previous: ExperienceItem[],
+  incoming: ExperienceItem[],
+) {
+  const incomingIds = new Set(incoming.map((item) => item.id));
+  return [
+    ...incoming,
+    ...previous.filter((item) => !incomingIds.has(item.id)),
+  ];
+}
+
+function markPendingDuplicateExperiences(
+  items: ExperienceItem[],
+  batches: Parameters<typeof getExistingItemIdsFromPendingBatches>[0],
+) {
+  const pendingExistingIds = getExistingItemIdsFromPendingBatches(batches);
+
+  return items.map((item) => ({
+    ...item,
+    hasMergeCandidate: pendingExistingIds.has(String(item.id)),
+    status: pendingExistingIds.has(String(item.id)) ? "병합 필요" : item.status,
+  }));
+}
+
+function getErrorMessage(error: unknown) {
+  if (error instanceof Error) {
+    try {
+      const parsed = JSON.parse(error.message) as {
+        message?: string;
+        error?: string;
+      };
+      return parsed.message ?? parsed.error ?? error.message;
+    } catch {
+      return error.message;
+    }
+  }
+
+  return "요청 처리 중 오류가 발생했습니다.";
 }
 
 function loadExperiences() {

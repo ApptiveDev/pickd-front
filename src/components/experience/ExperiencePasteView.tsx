@@ -1,12 +1,12 @@
 import { Clipboard, Copy, ExternalLink, Pin } from "lucide-react";
-import type { ExperienceItem } from "../../types/experience";
+import type { ExperienceId, ExperienceItem } from "../../types/experience";
 import { EXPERIENCE_PRESETS } from "../../constants/experience/experiencePresets";
 
 interface Props {
   items: ExperienceItem[];
   onCopy: (text: string) => void;
   onOpenItem: (item: ExperienceItem) => void;
-  onTogglePin: (id: number) => void;
+  onTogglePin: (id: ExperienceId) => void;
 }
 
 export default function ExperiencePasteView({ items, onCopy, onOpenItem, onTogglePin }: Props) {
@@ -40,7 +40,7 @@ function PasteCard({
   item: ExperienceItem;
   onCopy: (text: string) => void;
   onOpenItem: (item: ExperienceItem) => void;
-  onTogglePin: (id: number) => void;
+  onTogglePin: (id: ExperienceId) => void;
 }) {
   const fields = getFilledFields(item);
   const documentText = item.fields.__body?.trim() ?? "";

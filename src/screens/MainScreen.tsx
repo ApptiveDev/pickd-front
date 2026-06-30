@@ -11,6 +11,7 @@ import DocumentSection from "../components/dashboard/main/document/DocumentSecti
 import ApplicationTable from "../components/dashboard/main/applicationTable/ApplicationTable";
 import CompletedSection from "../components/dashboard/main/CompleteSection";
 import { Icon } from "@iconify/react";
+import { getCalendarEvents } from "../api/calendar";
 
 export default function MainScreen() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -59,14 +60,8 @@ export default function MainScreen() {
 
   const loadCalendarEvents = async () => {
     try {
-      const res = await fetch("/api/calendar/events", {
-        credentials: "include",
-      });
-
-      if (!res.ok) throw new Error();
-
-      const data = await res.json();
-      setGoogleEvents(data);
+      const data = await getCalendarEvents();
+      setGoogleEvents(data ?? []);
     } catch (e) {
       console.error(e);
     }
@@ -133,13 +128,13 @@ export default function MainScreen() {
 
       {user && (
         <div
-          className={`fixed top-0 right-0 h-screen w-[350px] bg-white shadow-xl z-30 flex flex-col transform transition-transform duration-300 ease-in-out ${
+          className={`absolute top-0 right-0 h-full w-[350px] bg-white shadow-xl z-30 flex flex-col transform transition-transform duration-300 ease-in-out ${
             isSidebarOpen ? "translate-x-0" : "translate-x-full"
           }`}
         >
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="absolute top-1/2 left-0 -translate-x-full -translate-y-1/2 flex items-center justify-center w-6 h-16 bg-white border border-r-0 border-gray-200 rounded-l-xl shadow-md hover:bg-gray-50 text-gray-500 transition-all group z-40"
+            className="absolute top-1/3 left-0 -translate-x-full -translate-y-1/2 flex items-center justify-center w-6 h-16 bg-white border border-r-0 border-gray-200 rounded-l-xl shadow-md hover:bg-gray-50 text-gray-500 transition-all group z-40"
           >
             <Icon
               icon={
