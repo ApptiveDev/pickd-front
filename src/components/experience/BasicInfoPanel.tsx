@@ -151,6 +151,7 @@ export default function BasicInfoPanel() {
     lsGet<InfoKey[]>(LS_INFO_VISIBLE, DEFAULT_VISIBLE),
   );
   const [editMode, setEditMode] = useState(false);
+  const [snapshot, setSnapshot] = useState<Record<InfoKey, string> | null>(null);
   const [copiedKey, setCopiedKey] = useState<InfoKey | null>(null);
   const [maskedKeys, setMaskedKeys] = useState<Set<InfoKey>>(new Set());
 
@@ -289,7 +290,11 @@ export default function BasicInfoPanel() {
           <button
             type="button"
             onClick={() => {
-              if (editMode) void handleSave();
+              if (editMode) {
+                void handleSave();
+              } else {
+                setSnapshot(values);
+              }
               setEditMode((prev) => !prev);
             }}
             className="inline-flex h-9 items-center gap-2 rounded-[8px] border border-[#E2E8F0] bg-white px-3 text-[13px] font-[700] text-[#334155] hover:bg-[#F8FAFC]"
@@ -298,17 +303,19 @@ export default function BasicInfoPanel() {
             {editMode ? "저장" : "전체 편집"}
           </button>
 
-          <button
-            type="button"
-            onClick={() => {
-              setValues(INFO_DEFAULTS);
-              setVisibleKeys(DEFAULT_VISIBLE);
-            }}
-            className="inline-flex h-9 items-center gap-2 rounded-[8px] border border-[#E2E8F0] bg-white px-3 text-[13px] font-[700] text-[#64748B] hover:bg-[#F8FAFC]"
-          >
-            <RotateCcw size={15} />
-            초기화
-          </button>
+          {editMode && (
+            <button
+              type="button"
+              onClick={() => {
+                if (snapshot) setValues(snapshot);
+                setEditMode(false);
+              }}
+              className="inline-flex h-9 items-center gap-2 rounded-[8px] border border-[#E2E8F0] bg-white px-3 text-[13px] font-[700] text-[#64748B] hover:bg-[#F8FAFC]"
+            >
+              <RotateCcw size={15} />
+              취소
+            </button>
+          )}
         </div>
       </div>
 

@@ -21,6 +21,17 @@ export async function getOnboardingStatus(): Promise<OnboardingStatusResponse> {
   return res.json();
 }
 
+export async function resetOnboarding(): Promise<string> {
+  const res = await fetch("/api/onboarding/reset", {
+    method: "POST",
+    credentials: "include",
+  });
+
+  if (!res.ok) throw new Error("온보딩 초기화 실패");
+
+  return res.text();
+}
+
 export async function updateOnboarding(data: any) {
   const res = await fetch("/api/onboarding", {
     method: "POST",
