@@ -56,6 +56,12 @@ type FileItem = {
   url?: string;
 };
 
+const INITIAL_FILES: FileItem[] = [
+  { id: "f0", kind: "증명사진", name: "profile_photo.jpg", fileKind: "image" },
+  { id: "f1", kind: "성적증명서", name: "성적증명서_2025.pdf", fileKind: "pdf" },
+  { id: "f2", kind: "어학 성적표", name: "toeic_score.png", fileKind: "image" },
+];
+
 const LS_PHOTO_ID = "specs.basicPhoto.id";
 
 function lsGet<T>(key: string, fallback: T): T {
@@ -98,7 +104,9 @@ export default function FilesPanel() {
           url: item.fileUrl,
         }))
       );
-    }).catch(() => {});
+    }).catch(() => {
+      setFiles(INITIAL_FILES);
+    });
   }, []);
 
   useEffect(() => {
